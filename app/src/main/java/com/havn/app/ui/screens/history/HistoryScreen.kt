@@ -13,12 +13,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.havn.app.R
 import com.havn.app.domain.model.DoseLog
 import com.havn.app.domain.model.DoseStatus
 import com.havn.app.ui.theme.*
@@ -113,7 +115,12 @@ fun HistoryScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
-                Text(text = "\uD83C\uDF3F", fontSize = 40.sp)
+                Icon(
+                    painter = painterResource(R.drawable.ic_leaf),
+                    contentDescription = null,
+                    tint = SageLight,
+                    modifier = Modifier.size(40.dp),
+                )
                 Spacer(Modifier.height(16.dp))
                 Text(
                     text = "Tap a day to see your history.",

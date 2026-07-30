@@ -31,15 +31,16 @@ fun HavnBottomBar(
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
-        shadowElevation = 0.dp,
+        color = White.copy(alpha = 0.92f),
+        shadowElevation = 12.dp,
         tonalElevation = 0.dp,
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .navigationBarsPadding()
-                .padding(horizontal = 8.dp, vertical = 8.dp),
+                .padding(horizontal = 8.dp, vertical = 10.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -68,7 +69,7 @@ private fun HavnNavItem(
     onClick: () -> Unit,
 ) {
     val bgColor by animateColorAsState(
-        targetValue = if (isSelected) Sage.copy(alpha = 0.12f) else Color.Transparent,
+        targetValue = if (isSelected) SagePale.copy(alpha = 0.55f) else Color.Transparent,
         animationSpec = spring(stiffness = Spring.StiffnessMedium),
         label = "navBg"
     )

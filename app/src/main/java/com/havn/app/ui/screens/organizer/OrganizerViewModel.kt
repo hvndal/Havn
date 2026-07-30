@@ -6,6 +6,7 @@ import com.havn.app.audio.SoundManager
 import com.havn.app.data.prefs.UserPreferences
 import com.havn.app.data.repository.HavnRepository
 import com.havn.app.domain.model.Medication
+import com.havn.app.ui.components.OrganizerWeekMapper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
@@ -16,6 +17,7 @@ data class OrganizerUiState(
     val allMeds: List<Medication> = emptyList(),
     val selectedDayMeds: List<Medication> = emptyList(),
     val selectedDayIndex: Int = 0,
+    val weekDataJson: String = "[]",
 )
 
 @HiltViewModel
@@ -35,17 +37,12 @@ class OrganizerViewModel @Inject constructor(
                 repository.getMedicationsForUser(userId),
                 _selectedDay,
             ) { meds, dayIdx ->
-                val filtered = meds.filter { med ->
-                    when (med.repeatType) {
-                        com.havn.app.domain.model.RepeatType.DAILY -> true
-                        com.havn.app.domain.model.RepeatType.WEEKLY -> true
-                        com.havn.app.domain.model.RepeatType.AS_NEEDED -> false
-                    }
-                }
+                val filtered = OrganizerWeekMapper.medsForDay(meds, dayIdx)
                 OrganizerUiState(
                     allMeds = meds,
                     selectedDayMeds = filtered,
                     selectedDayIndex = dayIdx,
+                    weekDataJson = OrganizerWeekMapper.buildWeekDataJson(meds),
                 )
             }
         }

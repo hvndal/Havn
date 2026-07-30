@@ -1,8 +1,5 @@
 package com.havn.app.ui.screens.organizer
 
-import android.webkit.JavascriptInterface
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -11,8 +8,10 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,16 +19,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.havn.app.audio.SoundManager
-import com.havn.app.domain.model.*
+import com.havn.app.R
+import com.havn.app.domain.model.Medication
+import com.havn.app.ui.components.HavnOrganizerView
+import com.havn.app.ui.components.MedIcon
+import com.havn.app.ui.components.OrganizerWeekMapper
 import com.havn.app.ui.theme.*
 import java.time.LocalDate
 
@@ -39,24 +40,23 @@ fun OrganizerScreen(
     viewModel: OrganizerViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
-    var webView: WebView? by remember { mutableStateOf(null) }
 
-    // Smooth Slow 2.5s Luxury Fade-In Animation
     val fadeAnim = remember { Animatable(0f) }
     val scaleAnim = remember { Animatable(0.97f) }
 
     LaunchedEffect(Unit) {
-        fadeAnim.animateTo(
-            targetValue = 1f,
-            animationSpec = tween(durationMillis = 2500, easing = EaseOutCubic)
-        )
+        fadeAnim.animateTo(1f, animationSpec = tween(1200, easing = EaseOutCubic))
     }
     LaunchedEffect(Unit) {
-        scaleAnim.animateTo(
-            targetValue = 1f,
-            animationSpec = tween(durationMillis = 2000, easing = EaseOutQuart)
-        )
+        scaleAnim.animateTo(1f, animationSpec = tween(1000, easing = EaseOutQuart))
+    }
+
+    val days = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+    val todayDow = LocalDate.now().dayOfWeek.value - 1
+    var selectedDay by remember { mutableIntStateOf(uiState.selectedDayIndex) }
+
+    LaunchedEffect(uiState.selectedDayIndex) {
+        selectedDay = uiState.selectedDayIndex
     }
 
     Column(
@@ -66,8 +66,8 @@ fun OrganizerScreen(
             .systemBarsPadding()
             .alpha(fadeAnim.value)
             .scale(scaleAnim.value)
+            .verticalScroll(rememberScrollState()),
     ) {
-        // Header
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -85,7 +85,12 @@ fun OrganizerScreen(
                     },
                 contentAlignment = Alignment.Center,
             ) {
-                Text(text = "\u2190", color = CharcoalMid, fontSize = 16.sp)
+                Icon(
+                    painter = painterResource(R.drawable.ic_back),
+                    contentDescription = "Back",
+                    tint = CharcoalMid,
+                    modifier = Modifier.size(18.dp),
+                )
             }
             Spacer(Modifier.width(16.dp))
             Column {
@@ -95,52 +100,41 @@ fun OrganizerScreen(
                     color = Charcoal,
                 )
                 Text(
-                    text = "This week",
+                    text = "Your weekly ritual",
                     style = MaterialTheme.typography.labelSmall,
                     color = StoneGrey,
                 )
             }
         }
 
-        // 3D Organizer — full screen hero
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(320.dp)
+                .height(300.dp)
                 .padding(horizontal = 24.dp)
+                .shadow(
+                    elevation = 12.dp,
+                    shape = RoundedCornerShape(24.dp),
+                    ambientColor = Sage.copy(alpha = 0.10f),
+                    spotColor = Sage.copy(alpha = 0.08f),
+                )
                 .clip(RoundedCornerShape(24.dp))
                 .background(SurfaceLow)
                 .border(1.dp, SurfaceHighest, RoundedCornerShape(24.dp)),
         ) {
-            AndroidView(
+            HavnOrganizerView(
+                weekDataJson = uiState.weekDataJson,
+                selectedDay = selectedDay,
                 modifier = Modifier.fillMaxSize(),
-                factory = { ctx ->
-                    WebView(ctx).apply {
-                        settings.javaScriptEnabled = true
-                        settings.domStorageEnabled = true
-                        settings.allowFileAccessFromFileURLs = true
-                        settings.allowUniversalAccessFromFileURLs = true
-                        setBackgroundColor(android.graphics.Color.TRANSPARENT)
-                        webViewClient = WebViewClient()
-                        addJavascriptInterface(object {
-                            @JavascriptInterface
-                            fun onSlotTapped(slotIndex: Int, isOpen: Boolean) {
-                                viewModel.onSlotTapped(slotIndex)
-                            }
-                        }, "AndroidOrganizer")
-                        loadUrl("file:///android_asset/organizer/organizer.html")
-                        webView = this
-                    }
+                onSlotTapped = { slot ->
+                    selectedDay = slot
+                    viewModel.selectDay(slot)
+                    viewModel.onSlotTapped(slot)
                 },
             )
         }
 
-        Spacer(Modifier.height(24.dp))
-
-        // Day selector pills
-        val days = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
-        val todayDow = LocalDate.now().dayOfWeek.value - 1
-        var selectedDay by remember { mutableIntStateOf(todayDow) }
+        Spacer(Modifier.height(20.dp))
 
         LazyRow(
             contentPadding = PaddingValues(horizontal = 24.dp),
@@ -151,11 +145,11 @@ fun OrganizerScreen(
                     label = days[i],
                     isToday = i == todayDow,
                     isSelected = i == selectedDay,
+                    medCount = OrganizerWeekMapper.medsForDay(uiState.allMeds, i).size,
                     onClick = {
                         selectedDay = i
                         viewModel.selectDay(i)
                         viewModel.soundManager.playCeramicClick()
-                        webView?.evaluateJavascript("HavnOrganizer.toggleSlot($i)", null)
                     },
                 )
             }
@@ -163,7 +157,6 @@ fun OrganizerScreen(
 
         Spacer(Modifier.height(24.dp))
 
-        // Selected day medication list
         Text(
             text = "${days[selectedDay]}'s ritual",
             style = MaterialTheme.typography.labelMedium,
@@ -174,10 +167,19 @@ fun OrganizerScreen(
         Spacer(Modifier.height(12.dp))
 
         if (uiState.selectedDayMeds.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxWidth().padding(32.dp),
-                contentAlignment = Alignment.Center,
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_leaf),
+                    contentDescription = null,
+                    tint = SageLight,
+                    modifier = Modifier.size(40.dp),
+                )
+                Spacer(Modifier.height(12.dp))
                 Text(
                     text = "Nothing scheduled.",
                     style = MaterialTheme.typography.bodyMedium,
@@ -192,28 +194,36 @@ fun OrganizerScreen(
                 )
             }
         }
+
+        Spacer(Modifier.height(100.dp))
     }
 }
 
 @Composable
-private fun DayChip(label: String, isToday: Boolean, isSelected: Boolean, onClick: () -> Unit) {
+private fun DayChip(
+    label: String,
+    isToday: Boolean,
+    isSelected: Boolean,
+    medCount: Int,
+    onClick: () -> Unit,
+) {
     val bg = when {
         isSelected -> Sage
-        isToday    -> SagePale
-        else       -> SurfaceHigh
+        isToday -> SagePale
+        else -> SurfaceHigh
     }
     val text = when {
         isSelected -> White
-        isToday    -> SageDeep
-        else       -> CharcoalMid
+        isToday -> SageDeep
+        else -> CharcoalMid
     }
-    Box(
+    Column(
         modifier = Modifier
             .clip(RoundedCornerShape(20.dp))
             .background(bg)
             .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }, onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        contentAlignment = Alignment.Center,
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
             text = label,
@@ -221,14 +231,32 @@ private fun DayChip(label: String, isToday: Boolean, isSelected: Boolean, onClic
             color = text,
             fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
         )
+        if (medCount > 0) {
+            Text(
+                text = "$medCount",
+                style = MaterialTheme.typography.labelSmall,
+                color = text.copy(alpha = 0.75f),
+            )
+        }
     }
 }
 
 @Composable
 private fun OrganizerMedRow(med: Medication, modifier: Modifier = Modifier) {
+    val swatch = OrganizerWeekMapper.colorTagToHex(med.colorTag)
+    val swatchColor = runCatching {
+        androidx.compose.ui.graphics.Color(android.graphics.Color.parseColor(swatch))
+    }.getOrDefault(Sage)
+
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .shadow(
+                elevation = 6.dp,
+                shape = RoundedCornerShape(14.dp),
+                ambientColor = Sage.copy(alpha = 0.06f),
+                spotColor = Sage.copy(alpha = 0.04f),
+            )
             .clip(RoundedCornerShape(14.dp))
             .background(White)
             .border(1.dp, SurfaceHighest, RoundedCornerShape(14.dp))
@@ -237,15 +265,15 @@ private fun OrganizerMedRow(med: Medication, modifier: Modifier = Modifier) {
     ) {
         Box(
             modifier = Modifier
-                .size(36.dp)
+                .size(40.dp)
                 .clip(CircleShape)
-                .background(Sage.copy(alpha = 0.12f)),
+                .background(swatchColor.copy(alpha = 0.15f)),
             contentAlignment = Alignment.Center,
         ) {
-            Text(text = "💊", fontSize = 16.sp)
+            MedIcon(type = med.iconType, size = 22.dp, tint = swatchColor)
         }
         Spacer(Modifier.width(12.dp))
-        Column {
+        Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = med.name,
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
@@ -257,7 +285,6 @@ private fun OrganizerMedRow(med: Medication, modifier: Modifier = Modifier) {
                 color = StoneGrey,
             )
         }
-        Spacer(Modifier.weight(1f))
         Text(
             text = med.reminderTimes.firstOrNull() ?: "Any time",
             style = MaterialTheme.typography.labelMedium,

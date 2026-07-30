@@ -17,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -142,6 +143,12 @@ fun SettingsScreen(
                     viewModel.setTheme(next)
                 },
             )
+            Divider(color = SurfaceHighest, thickness = 0.5.dp)
+            SettingsRow(
+                label = "App icon",
+                value = "Default",
+                onClick = {},
+            )
         }
 
         Spacer(Modifier.height(28.dp))
@@ -150,13 +157,9 @@ fun SettingsScreen(
         SectionHeader("GENERAL")
         Spacer(Modifier.height(10.dp))
         SettingsCard {
-            SettingsRow(label = "About H\u00e4vn", value = "v1.0", onClick = {})
+            SettingsRow(label = "Backup (Local)", value = "", onClick = {})
             Divider(color = SurfaceHighest, thickness = 0.5.dp)
-            SettingsRow(
-                label = "Everything stays here",
-                value = "Local only",
-                onClick = {},
-            )
+            SettingsRow(label = "About H\u00e4vn", value = "v1.0", onClick = {})
         }
 
         Spacer(Modifier.height(48.dp))
@@ -288,6 +291,12 @@ private fun SettingsCard(content: @Composable ColumnScope.() -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .shadow(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(16.dp),
+                ambientColor = Sage.copy(alpha = 0.08f),
+                spotColor = Sage.copy(alpha = 0.05f),
+            )
             .clip(RoundedCornerShape(16.dp))
             .background(White)
             .border(1.dp, SurfaceHighest, RoundedCornerShape(16.dp)),

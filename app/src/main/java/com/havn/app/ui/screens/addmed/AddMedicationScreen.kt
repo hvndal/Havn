@@ -20,13 +20,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.havn.app.R
 import com.havn.app.domain.model.MedIconType
 import com.havn.app.domain.model.RepeatType
+import com.havn.app.ui.components.MedIcon
 import com.havn.app.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,7 +72,12 @@ fun AddMedicationScreen(
                     .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { onBack() },
                 contentAlignment = Alignment.Center,
             ) {
-                Text(text = "\u2190", color = CharcoalMid, fontSize = 16.sp)
+                Icon(
+                    painter = painterResource(R.drawable.ic_back),
+                    contentDescription = "Back",
+                    tint = CharcoalMid,
+                    modifier = Modifier.size(18.dp),
+                )
             }
             Spacer(Modifier.weight(1f))
             Text(
@@ -96,7 +104,12 @@ fun AddMedicationScreen(
                     },
                 contentAlignment = Alignment.Center,
             ) {
-                Text(text = "\u2713", color = if (name.isNotBlank()) White else StoneGrey, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                Icon(
+                    painter = painterResource(R.drawable.ic_check),
+                    contentDescription = "Save",
+                    tint = if (name.isNotBlank()) White else StoneGrey,
+                    modifier = Modifier.size(18.dp),
+                )
             }
         }
 
@@ -120,7 +133,7 @@ fun AddMedicationScreen(
                             .border(1.dp, SurfaceHighest, RoundedCornerShape(24.dp)),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Text(text = iconEmoji(iconType), fontSize = 40.sp)
+                        MedIcon(type = iconType, size = 48.dp)
                     }
                     Spacer(Modifier.height(8.dp))
                     Text(
@@ -147,7 +160,11 @@ fun AddMedicationScreen(
                             .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { iconType = t },
                         contentAlignment = Alignment.Center,
                     ) {
-                        Text(text = iconEmoji(t), fontSize = 18.sp)
+                        MedIcon(
+                            type = t,
+                            size = 20.dp,
+                            tint = if (t == iconType) Sage else StoneGrey,
+                        )
                     }
                 }
             }
@@ -321,14 +338,6 @@ private fun FormRow(
         Spacer(Modifier.width(12.dp))
         content()
     }
-}
-
-private fun iconEmoji(t: MedIconType) = when (t) {
-    MedIconType.CAPSULE -> "\uD83D\uDC8A"
-    MedIconType.TABLET -> "\u2B1C"
-    MedIconType.LIQUID -> "\uD83E\uDDEA"
-    MedIconType.POWDER -> "\uD83E\uDEB4"
-    MedIconType.INJECTION -> "\uD83D\uDC89"
 }
 
 private fun tagColor(tag: String) = when (tag) {

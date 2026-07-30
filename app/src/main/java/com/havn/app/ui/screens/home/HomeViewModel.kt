@@ -16,6 +16,7 @@ import javax.inject.Inject
 data class HomeUiState(
     val user: User? = null,
     val todayMeds: List<TodayMedication> = emptyList(),
+    val allMeds: List<Medication> = emptyList(),
     val isLoading: Boolean = true,
 )
 
@@ -47,6 +48,7 @@ class HomeViewModel @Inject constructor(
                 HomeUiState(
                     user = repository.getUserById(userId),
                     todayMeds = todayMeds,
+                    allMeds = meds.filter { it.isActive },
                     isLoading = false,
                 )
             }

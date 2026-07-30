@@ -4,8 +4,10 @@ import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.glance.*
 import androidx.glance.action.actionStartActivity
+import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.provideContent
@@ -37,7 +39,7 @@ private fun HavnWidgetContent() {
                 text = "H\u00e4vn",
                 style = TextStyle(
                     color = ColorProvider(Color(0xFF516351)),
-                    fontSize = androidx.glance.unit.sp(18),
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.Medium,
                 ),
             )
@@ -46,7 +48,7 @@ private fun HavnWidgetContent() {
                 text = "Tap to open",
                 style = TextStyle(
                     color = ColorProvider(Color(0xFF747872)),
-                    fontSize = androidx.glance.unit.sp(11),
+                    fontSize = 11.sp,
                 ),
             )
         }

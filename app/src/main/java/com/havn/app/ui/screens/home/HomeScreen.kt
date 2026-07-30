@@ -1,8 +1,5 @@
 package com.havn.app.ui.screens.home
 
-import android.webkit.JavascriptInterface
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
@@ -21,17 +18,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.havn.app.R
 import com.havn.app.audio.SoundManager
 import com.havn.app.domain.model.*
+import com.havn.app.ui.components.HavnOrganizerView
+import com.havn.app.ui.components.MedIcon
+import com.havn.app.ui.components.OrganizerWeekMapper
 import com.havn.app.ui.theme.*
 import java.time.LocalDate
 import java.time.LocalTime
@@ -90,8 +90,10 @@ fun HomeScreen(
 
             // ── 3D Organizer (WebView hero) ───────────────────────
             item {
+                val todayDow = LocalDate.now().dayOfWeek.value - 1
                 OrganizerHeroSection(
-                    medications = uiState.todayMeds,
+                    weekDataJson = OrganizerWeekMapper.buildWeekDataJson(uiState.allMeds),
+                    selectedDay = todayDow,
                     onTap = onOpenOrganizer,
                     soundManager = viewModel.soundManager,
                     modifier = Modifier.padding(horizontal = 24.dp),
@@ -192,12 +194,16 @@ private fun HomeTopBar(user: User?) {
 
         Box(
             modifier = Modifier
-                .size(36.dp)
-                .clip(CircleShape)
-                .background(SurfaceHigh.copy(alpha = 0.6f)),
+                .size(40.dp)
+                .clip(CircleShape),
             contentAlignment = Alignment.Center,
         ) {
-            Text(text = "🔔", fontSize = 14.sp)
+            Icon(
+                painter = painterResource(R.drawable.ic_notification),
+                contentDescription = "Notifications",
+                tint = CharcoalMid,
+                modifier = Modifier.size(22.dp),
+            )
         }
     }
 }
@@ -210,69 +216,54 @@ private fun GreetingSection(name: String, modifier: Modifier = Modifier) {
         hour < 17 -> "Good afternoon"
         else       -> "Good evening"
     }
-    val icon = if (hour in 6..18) "☀️" else "🌙"
-
     Column(modifier = modifier) {
         Text(
-            text = greeting + ",",
+            text = (greeting + ",").uppercase(),
             style = MaterialTheme.typography.labelSmall,
             color = StoneGrey,
-            letterSpacing = 0.08.sp,
+            letterSpacing = 1.2.sp,
         )
-        Spacer(Modifier.height(2.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = name.ifBlank { "there" },
-                style = MaterialTheme.typography.headlineMedium.copy(fontSize = 28.sp),
-                color = Charcoal,
-            )
-            Spacer(Modifier.width(8.dp))
-            Text(text = icon, fontSize = 22.sp)
-        }
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = name.ifBlank { "there" },
+            style = MaterialTheme.typography.headlineMedium.copy(fontSize = 28.sp),
+            color = Charcoal,
+        )
     }
 }
 
 @Composable
 private fun OrganizerHeroSection(
-    medications: List<TodayMedication>,
+    weekDataJson: String,
+    selectedDay: Int,
     onTap: () -> Unit,
     soundManager: SoundManager,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
-
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(220.dp)
-            .clip(RoundedCornerShape(24.dp))
+            .aspectRatio(4f / 3f)
+            .shadow(
+                elevation = 10.dp,
+                shape = RoundedCornerShape(16.dp),
+                ambientColor = Sage.copy(alpha = 0.10f),
+                spotColor = Sage.copy(alpha = 0.08f),
+            )
+            .clip(RoundedCornerShape(16.dp))
             .background(SurfaceLow)
-            .border(1.dp, SurfaceHighest, RoundedCornerShape(24.dp))
+            .border(1.dp, SurfaceHighest, RoundedCornerShape(16.dp))
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
                 onClick = onTap,
             ),
     ) {
-        AndroidView(
+        HavnOrganizerView(
+            weekDataJson = weekDataJson,
+            selectedDay = selectedDay,
             modifier = Modifier.fillMaxSize(),
-            factory = {
-                WebView(context).apply {
-                    settings.javaScriptEnabled = true
-                    settings.domStorageEnabled = true
-                    settings.allowFileAccessFromFileURLs = true
-                    settings.allowUniversalAccessFromFileURLs = true
-                    setBackgroundColor(android.graphics.Color.TRANSPARENT)
-                    webViewClient = WebViewClient()
-                    addJavascriptInterface(object {
-                        @JavascriptInterface
-                        fun onSlotTapped(slotIndex: Int, isOpen: Boolean) {
-                            soundManager.playCeramicClick()
-                        }
-                    }, "AndroidOrganizer")
-                    loadUrl("file:///android_asset/organizer/organizer.html")
-                }
-            },
+            onSlotTapped = { soundManager.playCeramicClick() },
         )
 
         Row(
@@ -285,7 +276,7 @@ private fun OrganizerHeroSection(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Text(
-                text = "Explore 3D",
+                text = "Weekly organizer",
                 style = MaterialTheme.typography.labelSmall,
                 color = StoneGrey,
             )
@@ -313,7 +304,12 @@ private fun AddMedButton(onClick: () -> Unit) {
             ) { onClick() },
         contentAlignment = Alignment.Center,
     ) {
-        Text(text = "+", color = White, fontSize = 24.sp, fontWeight = FontWeight.Light)
+        Icon(
+            painter = painterResource(R.drawable.ic_add),
+            contentDescription = "Add medication",
+            tint = White,
+            modifier = Modifier.size(20.dp),
+        )
     }
 }
 
@@ -343,6 +339,12 @@ private fun MedicationCard(
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .shadow(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(16.dp),
+                ambientColor = Sage.copy(alpha = 0.08f),
+                spotColor = Sage.copy(alpha = 0.06f),
+            )
             .clip(RoundedCornerShape(16.dp))
             .background(bgColor)
             .border(1.dp, SurfaceHighest, RoundedCornerShape(16.dp))
@@ -362,7 +364,11 @@ private fun MedicationCard(
                 .background(swatchColor.copy(alpha = 0.15f)),
             contentAlignment = Alignment.Center,
         ) {
-            Text(text = medIconEmoji(todayMed.medication.iconType), fontSize = 18.sp)
+            MedIcon(
+                type = todayMed.medication.iconType,
+                size = 22.dp,
+                tint = swatchColor,
+            )
         }
 
         Spacer(Modifier.width(14.dp))
@@ -370,10 +376,7 @@ private fun MedicationCard(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = todayMed.medication.name,
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    fontWeight = FontWeight.Medium,
-                    textDecoration = if (isTaken) TextDecoration.None else TextDecoration.None,
-                ),
+                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
                 color = Charcoal.copy(alpha = contentAlpha),
             )
             Spacer(Modifier.height(2.dp))
@@ -409,7 +412,12 @@ private fun MedicationCard(
                         .background(Sage),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(text = "✓", color = White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Icon(
+                        painter = painterResource(R.drawable.ic_check),
+                        contentDescription = null,
+                        tint = White,
+                        modifier = Modifier.size(14.dp),
+                    )
                 }
             }
         }
@@ -422,7 +430,12 @@ private fun EmptyTodayState(modifier: Modifier = Modifier) {
         modifier = modifier.padding(vertical = 48.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(text = "🌿", fontSize = 40.sp)
+        Icon(
+            painter = painterResource(R.drawable.ic_leaf),
+            contentDescription = null,
+            tint = SageLight,
+            modifier = Modifier.size(48.dp),
+        )
         Spacer(Modifier.height(16.dp))
         Text(
             text = "Nothing waiting today.",
@@ -436,14 +449,6 @@ private fun EmptyTodayState(modifier: Modifier = Modifier) {
             color = StoneGrey,
         )
     }
-}
-
-private fun medIconEmoji(type: MedIconType): String = when (type) {
-    MedIconType.CAPSULE   -> "💊"
-    MedIconType.TABLET    -> "⬜"
-    MedIconType.LIQUID    -> "🧪"
-    MedIconType.POWDER    -> "🫙"
-    MedIconType.INJECTION -> "💉"
 }
 
 private fun medIconColor(tag: String): Color = when (tag) {

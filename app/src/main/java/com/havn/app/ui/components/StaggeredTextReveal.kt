@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 /**
  * Editorial Staggered Letter Text Reveal Animation
@@ -34,7 +35,7 @@ fun StaggeredTextReveal(
     LaunchedEffect(text) {
         delay(initialDelayMs)
         anims.forEachIndexed { i, anim ->
-            kotlinx.coroutines.launch {
+            launch {
                 delay(i * letterDelayMs)
                 anim.animateTo(
                     targetValue = 1f,
