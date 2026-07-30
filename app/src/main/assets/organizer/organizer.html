@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 100%; height: 100%;
+    background: transparent;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+  canvas { display: block; }
+  #hint {
+    position: absolute;
+    bottom: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Hanken Grotesk', -apple-system, sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: rgba(81,99,81,0.55);
+    text-transform: uppercase;
+    pointer-events: none;
+    opacity: 1;
+    transition: opacity 1s ease;
+  }
+</style>
+</head>
+<body>
+<div id="hint">Tap a day · Drag to rotate</div>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ─────────────────────────────────────────────────────
+//  H Ä V N  —  3D  P I L L  O R G A N I Z E R
+//  Premium matte ceramic pill case with spring physics
+// ─────────────────────────────────────────────────────
+
+const DAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+// Palette from Warm Minimalism design system
+const C = {
+  ivory:      0xFBF9F5,
+  sand:       0xF0EDE8,
+  stone:      0xE4E2DE,
+  sageDeep:   0x516351,
+  sage:       0x8DA08C,
+  sagePale:   0xD4E8D2,
+  terracotta: 0xC07050,
+  butter:     0xE2C381,
+  charcoal:   0x2A2B28,
+  white:      0xFFFFFF,
+  amber:      0xDAA560,
+};
+
+const PILL_COLORS = [
+  0xA8BFA8,  // sage capsule
+  0xE8C4A0,  // cream tablet
+  0xC9A882,  // sand tablet
+  0xB5A89A,  // stone capsule
+  0xD4C4B0,  // ivory oval
+];
+
+// ─── Scene Setup ────────────────────────────────────
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xFBF9F5);
+
+const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 100);
+camera.position.set(0, 5.5, 7.5);
+camera.lookAt(0, 0, 0);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.1;
+document.body.appendChild(renderer.domElement);
+
+// ─── Lighting — warm matte studio ───────────────────
+// Soft ambient (ivory fill)
+const ambient = new THREE.AmbientLight(0xFFF8F0, 0.9);
+scene.add(ambient);
+
+// Key light — warm top-left
+const keyLight = new THREE.DirectionalLight(0xFFF5E8, 2.2);
+keyLight.position.set(-4, 8, 5);
+keyLight.castShadow = true;
+keyLight.shadow.mapSize.set(2048, 2048);
+keyLight.shadow.camera.near = 0.5;
+keyLight.shadow.camera.far = 30;
+keyLight.shadow.camera.left = -8;
+keyLight.shadow.camera.right = 8;
+keyLight.shadow.camera.top = 8;
+keyLight.shadow.camera.bottom = -8;
+keyLight.shadow.radius = 4;
+keyLight.shadow.blurSamples = 16;
+scene.add(keyLight);
+
+// Fill light — cool right
+const fillLight = new THREE.DirectionalLight(0xF0F4FF, 0.6);
+fillLight.position.set(5, 4, -3);
+scene.add(fillLight);
+
+// Rim light — top back
+const rimLight = new THREE.DirectionalLight(0xFFEEDD, 0.4);
+rimLight.position.set(0, 6, -6);
+scene.add(rimLight);
+
+// ─── Materials ───────────────────────────────────────
+function matteMaterial(color, roughness = 0.85, metalness = 0.0) {
+  return new THREE.MeshStandardMaterial({
+    color: new THREE.Color(color),
+    roughness,
+    metalness,
+  });
+}
+
+const caseMat      = matteMaterial(0xEDEBE6, 0.88, 0.0);  // warm ivory case body
+const caseEdgeMat  = matteMaterial(0xE0DED9, 0.9, 0.0);   // slightly darker edge
+const lidMat       = matteMaterial(0xF5F3EF, 0.82, 0.0);  // soft-touch lid
+const lidOpenMat   = matteMaterial(0xEAF0EA, 0.80, 0.0);  // lid when open (subtle sage tint)
+const slotMat      = matteMaterial(0xD8D6D0, 0.92, 0.0);  // slot interior (shadowed)
+const daytextMat   = matteMaterial(0x747872, 0.9, 0.0);   // day label — stone grey
+const shadowPlane  = matteMaterial(0xE8E6E2, 0.95, 0.0);
+
+// ─── Geometry Helpers ────────────────────────────────
+function roundedBox(w, h, d, r, segs = 3) {
+  // Use THREE.BoxGeometry as fallback — true rounded box via custom shape
+  const shape = new THREE.Shape();
+  const x = -w/2, y = -h/2;
+  shape.moveTo(x + r, y);
+  shape.lineTo(x + w - r, y);
+  shape.quadraticCurveTo(x + w, y, x + w, y + r);
+  shape.lineTo(x + w, y + h - r);
+  shape.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  shape.lineTo(x + r, y + h);
+  shape.quadraticCurveTo(x, y + h, x, y + h - r);
+  shape.lineTo(x, y + r);
+  shape.quadraticCurveTo(x, y, x + r, y);
+  const extSettings = { depth: d, bevelEnabled: true, bevelSize: r * 0.4, bevelThickness: r * 0.4, bevelSegments: segs };
+  return new THREE.ExtrudeGeometry(shape, extSettings);
+}
+
+// ─── Case Body ───────────────────────────────────────
+//  7 slots side by side in a premium rounded case
+const SLOT_W = 0.78;
+const SLOT_H = 1.6;
+const SLOT_D = 0.45;
+const SLOT_GAP = 0.12;
+const SLOTS = 7;
+const CASE_PAD_X = 0.3;
+const CASE_PAD_Y = 0.28;
+const CASE_W = SLOTS * SLOT_W + (SLOTS - 1) * SLOT_GAP + CASE_PAD_X * 2;
+const CASE_H = SLOT_H + CASE_PAD_Y * 2;
+const CASE_D = SLOT_D + 0.22;
+
+const caseGeom = roundedBox(CASE_W, CASE_H, CASE_D, 0.28, 4);
+const caseBody = new THREE.Mesh(caseGeom, caseMat);
+caseBody.castShadow = true;
+caseBody.receiveShadow = true;
+caseBody.position.set(0, 0, 0);
+scene.add(caseBody);
+
+// Bottom shadow plane
+const shadowPlaneGeom = new THREE.PlaneGeometry(CASE_W + 1.5, CASE_H + 1.5);
+const shadowPlaneMesh = new THREE.Mesh(shadowPlaneGeom, shadowPlane);
+shadowPlaneMesh.rotation.x = -Math.PI / 2;
+shadowPlaneMesh.position.set(0, -CASE_D / 2 - 0.02, 0);
+shadowPlaneMesh.receiveShadow = true;
+scene.add(shadowPlaneMesh);
+
+// ─── Slot Wells + Lids ───────────────────────────────
+const slotGroup = new THREE.Group();
+scene.add(slotGroup);
+
+const openStates  = Array(SLOTS).fill(false);
+const lidMeshes   = [];
+const lidPivots   = [];
+const slotCenters = [];
+
+// Spring animation state per lid
+const springState = Array.from({ length: SLOTS }, () => ({
+  angle: 0, velocity: 0, target: 0,
+}));
+
+const totalWidth = SLOTS * SLOT_W + (SLOTS - 1) * SLOT_GAP;
+const startX = -totalWidth / 2 + SLOT_W / 2;
+
+for (let i = 0; i < SLOTS; i++) {
+  const x = startX + i * (SLOT_W + SLOT_GAP);
+  slotCenters.push(new THREE.Vector3(x, 0, 0));
+
+  // Slot well (recessed area)
+  const wellGeom = new THREE.BoxGeometry(SLOT_W - 0.04, SLOT_H - 0.04, SLOT_D * 0.7);
+  const well = new THREE.Mesh(wellGeom, slotMat);
+  well.position.set(x, 0, 0.08);
+  well.receiveShadow = true;
+  slotGroup.add(well);
+
+  // Day label (extruded slightly above case surface — premium feel)
+  // We'll draw via canvas texture
+  const canvas = document.createElement('canvas');
+  canvas.width = 64; canvas.height = 64;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, 64, 64);
+  ctx.fillStyle = '#747872';
+  ctx.font = 'bold 28px -apple-system, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(DAYS[i], 32, 32);
+  const tex = new THREE.CanvasTexture(canvas);
+  const labelGeom = new THREE.PlaneGeometry(SLOT_W * 0.6, SLOT_W * 0.6);
+  const labelMat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, alphaTest: 0.01 });
+  const label = new THREE.Mesh(labelGeom, labelMat);
+  label.position.set(x, -SLOT_H / 2 + 0.0 - CASE_PAD_Y * 0.3, CASE_D / 2 + 0.001);
+  label.position.y = -(SLOT_H / 2) + 0.15;
+  slotGroup.add(label);
+
+  // Lid pivot group (pivots at top edge of slot)
+  const pivot = new THREE.Group();
+  pivot.position.set(x, SLOT_H / 2 - 0.04, CASE_D / 2);
+  slotGroup.add(pivot);
+  lidPivots.push(pivot);
+
+  // Lid mesh (attached to pivot)
+  const lidGeom = new THREE.BoxGeometry(SLOT_W - 0.04, SLOT_H - 0.08, 0.07);
+  const lid = new THREE.Mesh(lidGeom, lidMat.clone());
+  lid.position.set(0, -(SLOT_H / 2 - 0.04), 0);  // offset so it rotates from top
+  lid.castShadow = true;
+  lid.receiveShadow = true;
+  // Add a slight bevel illusion with edge loops — just darken slightly at edges via emissive
+  lid.material.emissive = new THREE.Color(0x000000);
+  lid.material.emissiveIntensity = 0;
+  lidMeshes.push(lid);
+  pivot.add(lid);
+}
+
+// ─── Pills inside slots ──────────────────────────────
+// Pre-populate some slots with pills
+const pillsInSlots = Array(SLOTS).fill(null);
+
+function createPill(color, slotIndex) {
+  const x = slotCenters[slotIndex].x;
+  const group = new THREE.Group();
+
+  // Capsule body — two halves + cylinder
+  const capGeom = new THREE.SphereGeometry(0.1, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2);
+  const cylGeom = new THREE.CylinderGeometry(0.1, 0.1, 0.26, 12);
+  const cap2Geom = new THREE.SphereGeometry(0.1, 12, 8, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
+
+  const c1 = new THREE.Color(color).multiplyScalar(1.05);
+  const c2 = new THREE.Color(color).multiplyScalar(0.92);
+
+  const m1 = new THREE.MeshStandardMaterial({ color: c1, roughness: 0.55, metalness: 0.05 });
+  const m2 = new THREE.MeshStandardMaterial({ color: c2, roughness: 0.55, metalness: 0.05 });
+
+  const capTop  = new THREE.Mesh(capGeom, m1);
+  const capMid  = new THREE.Mesh(cylGeom, m1);
+  const capBot  = new THREE.Mesh(cap2Geom, m2);
+
+  capTop.position.y = 0.13;
+  capBot.position.y = -0.13;
+  capTop.castShadow = true; capMid.castShadow = true; capBot.castShadow = true;
+
+  group.add(capTop, capMid, capBot);
+  group.rotation.z = Math.PI / 2;
+  group.position.set(x, 0.1, 0.04);
+  group.userData.baseY = 0.1;
+  group.userData.slotIndex = slotIndex;
+  return group;
+}
+
+// Add pills to first 4 slots (days with meds)
+[0, 1, 2, 3].forEach((i) => {
+  const pill = createPill(PILL_COLORS[i % PILL_COLORS.length], i);
+  pillsInSlots[i] = pill;
+  scene.add(pill);
+});
+
+// ─── Orbit Controls ──────────────────────────────────
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.minPolarAngle = Math.PI / 8;
+controls.maxPolarAngle = Math.PI / 2.2;
+controls.minAzimuthAngle = -Math.PI / 5;
+controls.maxAzimuthAngle = Math.PI / 5;
+controls.enablePan = false;
+controls.minDistance = 5;
+controls.maxDistance = 11;
+controls.target.set(0, 0, 0);
+
+// ─── Raycasting for tap/click ────────────────────────
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+let pointerDown = { x: 0, y: 0, time: 0 };
+let isDragging = false;
+
+function getSlotFromHit(point) {
+  const totalWidth = SLOTS * SLOT_W + (SLOTS - 1) * SLOT_GAP;
+  const startX = -totalWidth / 2;
+  for (let i = 0; i < SLOTS; i++) {
+    const cx = startX + i * (SLOT_W + SLOT_GAP) + SLOT_W / 2;
+    if (Math.abs(point.x - cx) < SLOT_W / 2 + 0.05) return i;
+  }
+  return -1;
+}
+
+renderer.domElement.addEventListener('pointerdown', (e) => {
+  pointerDown = { x: e.clientX, y: e.clientY, time: Date.now() };
+  isDragging = false;
+});
+
+renderer.domElement.addEventListener('pointermove', (e) => {
+  const dx = e.clientX - pointerDown.x;
+  const dy = e.clientY - pointerDown.y;
+  if (Math.sqrt(dx*dx + dy*dy) > 5) isDragging = true;
+});
+
+renderer.domElement.addEventListener('pointerup', (e) => {
+  if (isDragging) return;
+  const dt = Date.now() - pointerDown.time;
+  if (dt > 500) return;
+
+  const rect = renderer.domElement.getBoundingClientRect();
+  mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+  mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+
+  // Check lid intersections first
+  const lidObjects = lidMeshes;
+  const lidHits = raycaster.intersectObjects(lidObjects, false);
+  if (lidHits.length > 0) {
+    const hitLid = lidHits[0].object;
+    const idx = lidMeshes.indexOf(hitLid);
+    if (idx >= 0) { toggleSlot(idx); return; }
+  }
+
+  // Check case body
+  const caseHits = raycaster.intersectObject(caseBody, false);
+  if (caseHits.length > 0) {
+    const hit = caseHits[0].point;
+    const slotIdx = getSlotFromHit(hit);
+    if (slotIdx >= 0) toggleSlot(slotIdx);
+  }
+});
+
+function toggleSlot(i) {
+  openStates[i] = !openStates[i];
+  springState[i].target = openStates[i] ? -Math.PI * 0.72 : 0;
+
+  // Notify Android via JS interface
+  if (window.AndroidOrganizer) {
+    window.AndroidOrganizer.onSlotTapped(i, openStates[i]);
+  }
+
+  // Fade hint
+  const hint = document.getElementById('hint');
+  if (hint) { hint.style.opacity = '0'; }
+}
+
+// ─── Spring Physics ──────────────────────────────────
+const SPRING_K      = 180;   // stiffness
+const SPRING_DAMP   = 18;    // damping
+const SPRING_MASS   = 1.0;
+
+function stepSpring(state, dt) {
+  const err = state.target - state.angle;
+  const accel = (SPRING_K * err - SPRING_DAMP * state.velocity) / SPRING_MASS;
+  state.velocity += accel * dt;
+  state.angle    += state.velocity * dt;
+}
+
+// ─── Pill animation state ────────────────────────────
+const pillAnimState = Array.from({ length: SLOTS }, () => ({
+  dropping: false, t: 0, taken: false
+}));
+
+function takePill(slotIndex) {
+  if (!openStates[slotIndex]) return;
+  const anim = pillAnimState[slotIndex];
+  if (anim.taken) return;
+  anim.dropping = true;
+  anim.t = 0;
+  anim.taken = true;
+}
+
+// Expose to Android
+window.HavnOrganizer = {
+  openSlot: (i) => { if (!openStates[i]) toggleSlot(i); },
+  closeSlot: (i) => { if (openStates[i]) toggleSlot(i); },
+  markTaken: (i) => takePill(i),
+  setSlotHasMed: (i, has) => {
+    if (has && !pillsInSlots[i]) {
+      const pill = createPill(PILL_COLORS[i % PILL_COLORS.length], i);
+      pillsInSlots[i] = pill;
+      scene.add(pill);
+    }
+  },
+};
+
+// ─── Clock ticks ─────────────────────────────────────
+let lastTime = performance.now();
+let hintFadeTimer = 3.0;
+
+// ─── Render Loop ─────────────────────────────────────
+function animate(now) {
+  requestAnimationFrame(animate);
+  const dt = Math.min((now - lastTime) * 0.001, 0.05);
+  lastTime = now;
+
+  // Lid spring physics
+  for (let i = 0; i < SLOTS; i++) {
+    stepSpring(springState[i], dt);
+    lidPivots[i].rotation.x = springState[i].angle;
+
+    // Lid material tint when open
+    const t = Math.max(0, Math.min(1, -springState[i].angle / (Math.PI * 0.72)));
+    lidMeshes[i].material.color.lerpColors(
+      new THREE.Color(0xF5F3EF),
+      new THREE.Color(0xDCEADC),
+      t
+    );
+    lidMeshes[i].material.emissiveIntensity = t * 0.04;
+  }
+
+  // Pill drop animations
+  for (let i = 0; i < SLOTS; i++) {
+    const anim = pillAnimState[i];
+    const pill = pillsInSlots[i];
+    if (!pill) continue;
+    if (anim.dropping) {
+      anim.t += dt * 1.8;
+      const progress = Math.min(1, anim.t);
+      // Easing: ease-in drop
+      const eased = progress * progress;
+      pill.position.y = pill.userData.baseY - eased * 3.5;
+      pill.material?.opacity ?? null;
+      // Fade out
+      pill.traverse((m) => {
+        if (m.isMesh) {
+          m.material.transparent = true;
+          m.material.opacity = 1 - eased;
+        }
+      });
+      if (progress >= 1) {
+        anim.dropping = false;
+        scene.remove(pill);
+        pillsInSlots[i] = null;
+      }
+    }
+  }
+
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate(performance.now());
+
+// ─── Resize ──────────────────────────────────────────
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>

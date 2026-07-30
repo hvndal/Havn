@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base theme -->
+    <style name="Theme.Havn" parent="Theme.Material3.Light.NoActionBar">
+        <item name="android:windowBackground">@color/warm_ivory</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+    <!-- Splash theme -->
+    <style name="Theme.Havn.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/warm_ivory</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_logo</item>
+        <item name="postSplashScreenTheme">@style/Theme.Havn</item>
+    </style>
+</resources>
