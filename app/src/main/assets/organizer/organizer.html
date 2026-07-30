@@ -3,482 +3,361 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+<title>Hävn 3D Pill Organizer</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body {
     width: 100%; height: 100%;
-    background: transparent;
+    background: #FAF8F4;
     overflow: hidden;
+    touch-action: none;
+    user-select: none;
     -webkit-tap-highlight-color: transparent;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
-  canvas { display: block; }
-  #hint {
+  canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+  canvas:active { cursor: grabbing; }
+  #hud {
     position: absolute;
-    bottom: 14px;
+    bottom: 12px;
     left: 50%;
     transform: translateX(-50%);
-    font-family: 'Hanken Grotesk', -apple-system, sans-serif;
     font-size: 10px;
     font-weight: 600;
-    letter-spacing: 0.08em;
-    color: rgba(81,99,81,0.55);
+    letter-spacing: 0.12em;
+    color: rgba(81,99,81,0.65);
     text-transform: uppercase;
     pointer-events: none;
-    opacity: 1;
-    transition: opacity 1s ease;
+    background: rgba(255,255,255,0.7);
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid rgba(228,226,222,0.8);
+    backdrop-filter: blur(8px);
+    transition: opacity 1.5s ease;
   }
 </style>
 </head>
 <body>
-<div id="hint">Tap a day · Drag to rotate</div>
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"
-  }
-}
-</script>
-<script type="module">
-import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+<canvas id="c"></canvas>
+<div id="hud">Tap lid to open · Swipe to rotate</div>
 
-// ─────────────────────────────────────────────────────
-//  H Ä V N  —  3D  P I L L  O R G A N I Z E R
-//  Premium matte ceramic pill case with spring physics
-// ─────────────────────────────────────────────────────
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+//  H Ä V N  —  3D  P I L L  O R G A N I Z E R  (Standalone WebGL Engine)
+//  High-precision 3D ceramic pill case with spring physics & soft shadows
+// ─────────────────────────────────────────────────────────────────────────────
 
-const DAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
 
-// Palette from Warm Minimalism design system
-const C = {
-  ivory:      0xFBF9F5,
-  sand:       0xF0EDE8,
-  stone:      0xE4E2DE,
-  sageDeep:   0x516351,
-  sage:       0x8DA08C,
-  sagePale:   0xD4E8D2,
-  terracotta: 0xC07050,
-  butter:     0xE2C381,
-  charcoal:   0x2A2B28,
-  white:      0xFFFFFF,
-  amber:      0xDAA560,
-};
+let W = canvas.width = window.innerWidth * window.devicePixelRatio;
+let H = canvas.height = window.innerHeight * window.devicePixelRatio;
 
-const PILL_COLORS = [
-  0xA8BFA8,  // sage capsule
-  0xE8C4A0,  // cream tablet
-  0xC9A882,  // sand tablet
-  0xB5A89A,  // stone capsule
-  0xD4C4B0,  // ivory oval
-];
-
-// ─── Scene Setup ────────────────────────────────────
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xFBF9F5);
-
-const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 100);
-camera.position.set(0, 5.5, 7.5);
-camera.lookAt(0, 0, 0);
-
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.1;
-document.body.appendChild(renderer.domElement);
-
-// ─── Lighting — warm matte studio ───────────────────
-// Soft ambient (ivory fill)
-const ambient = new THREE.AmbientLight(0xFFF8F0, 0.9);
-scene.add(ambient);
-
-// Key light — warm top-left
-const keyLight = new THREE.DirectionalLight(0xFFF5E8, 2.2);
-keyLight.position.set(-4, 8, 5);
-keyLight.castShadow = true;
-keyLight.shadow.mapSize.set(2048, 2048);
-keyLight.shadow.camera.near = 0.5;
-keyLight.shadow.camera.far = 30;
-keyLight.shadow.camera.left = -8;
-keyLight.shadow.camera.right = 8;
-keyLight.shadow.camera.top = 8;
-keyLight.shadow.camera.bottom = -8;
-keyLight.shadow.radius = 4;
-keyLight.shadow.blurSamples = 16;
-scene.add(keyLight);
-
-// Fill light — cool right
-const fillLight = new THREE.DirectionalLight(0xF0F4FF, 0.6);
-fillLight.position.set(5, 4, -3);
-scene.add(fillLight);
-
-// Rim light — top back
-const rimLight = new THREE.DirectionalLight(0xFFEEDD, 0.4);
-rimLight.position.set(0, 6, -6);
-scene.add(rimLight);
-
-// ─── Materials ───────────────────────────────────────
-function matteMaterial(color, roughness = 0.85, metalness = 0.0) {
-  return new THREE.MeshStandardMaterial({
-    color: new THREE.Color(color),
-    roughness,
-    metalness,
-  });
-}
-
-const caseMat      = matteMaterial(0xEDEBE6, 0.88, 0.0);  // warm ivory case body
-const caseEdgeMat  = matteMaterial(0xE0DED9, 0.9, 0.0);   // slightly darker edge
-const lidMat       = matteMaterial(0xF5F3EF, 0.82, 0.0);  // soft-touch lid
-const lidOpenMat   = matteMaterial(0xEAF0EA, 0.80, 0.0);  // lid when open (subtle sage tint)
-const slotMat      = matteMaterial(0xD8D6D0, 0.92, 0.0);  // slot interior (shadowed)
-const daytextMat   = matteMaterial(0x747872, 0.9, 0.0);   // day label — stone grey
-const shadowPlane  = matteMaterial(0xE8E6E2, 0.95, 0.0);
-
-// ─── Geometry Helpers ────────────────────────────────
-function roundedBox(w, h, d, r, segs = 3) {
-  // Use THREE.BoxGeometry as fallback — true rounded box via custom shape
-  const shape = new THREE.Shape();
-  const x = -w/2, y = -h/2;
-  shape.moveTo(x + r, y);
-  shape.lineTo(x + w - r, y);
-  shape.quadraticCurveTo(x + w, y, x + w, y + r);
-  shape.lineTo(x + w, y + h - r);
-  shape.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  shape.lineTo(x + r, y + h);
-  shape.quadraticCurveTo(x, y + h, x, y + h - r);
-  shape.lineTo(x, y + r);
-  shape.quadraticCurveTo(x, y, x + r, y);
-  const extSettings = { depth: d, bevelEnabled: true, bevelSize: r * 0.4, bevelThickness: r * 0.4, bevelSegments: segs };
-  return new THREE.ExtrudeGeometry(shape, extSettings);
-}
-
-// ─── Case Body ───────────────────────────────────────
-//  7 slots side by side in a premium rounded case
-const SLOT_W = 0.78;
-const SLOT_H = 1.6;
-const SLOT_D = 0.45;
-const SLOT_GAP = 0.12;
+const DAYS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 const SLOTS = 7;
-const CASE_PAD_X = 0.3;
-const CASE_PAD_Y = 0.28;
-const CASE_W = SLOTS * SLOT_W + (SLOTS - 1) * SLOT_GAP + CASE_PAD_X * 2;
-const CASE_H = SLOT_H + CASE_PAD_Y * 2;
-const CASE_D = SLOT_D + 0.22;
 
-const caseGeom = roundedBox(CASE_W, CASE_H, CASE_D, 0.28, 4);
-const caseBody = new THREE.Mesh(caseGeom, caseMat);
-caseBody.castShadow = true;
-caseBody.receiveShadow = true;
-caseBody.position.set(0, 0, 0);
-scene.add(caseBody);
-
-// Bottom shadow plane
-const shadowPlaneGeom = new THREE.PlaneGeometry(CASE_W + 1.5, CASE_H + 1.5);
-const shadowPlaneMesh = new THREE.Mesh(shadowPlaneGeom, shadowPlane);
-shadowPlaneMesh.rotation.x = -Math.PI / 2;
-shadowPlaneMesh.position.set(0, -CASE_D / 2 - 0.02, 0);
-shadowPlaneMesh.receiveShadow = true;
-scene.add(shadowPlaneMesh);
-
-// ─── Slot Wells + Lids ───────────────────────────────
-const slotGroup = new THREE.Group();
-scene.add(slotGroup);
-
-const openStates  = Array(SLOTS).fill(false);
-const lidMeshes   = [];
-const lidPivots   = [];
-const slotCenters = [];
-
-// Spring animation state per lid
-const springState = Array.from({ length: SLOTS }, () => ({
-  angle: 0, velocity: 0, target: 0,
-}));
-
-const totalWidth = SLOTS * SLOT_W + (SLOTS - 1) * SLOT_GAP;
-const startX = -totalWidth / 2 + SLOT_W / 2;
-
-for (let i = 0; i < SLOTS; i++) {
-  const x = startX + i * (SLOT_W + SLOT_GAP);
-  slotCenters.push(new THREE.Vector3(x, 0, 0));
-
-  // Slot well (recessed area)
-  const wellGeom = new THREE.BoxGeometry(SLOT_W - 0.04, SLOT_H - 0.04, SLOT_D * 0.7);
-  const well = new THREE.Mesh(wellGeom, slotMat);
-  well.position.set(x, 0, 0.08);
-  well.receiveShadow = true;
-  slotGroup.add(well);
-
-  // Day label (extruded slightly above case surface — premium feel)
-  // We'll draw via canvas texture
-  const canvas = document.createElement('canvas');
-  canvas.width = 64; canvas.height = 64;
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, 64, 64);
-  ctx.fillStyle = '#747872';
-  ctx.font = 'bold 28px -apple-system, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(DAYS[i], 32, 32);
-  const tex = new THREE.CanvasTexture(canvas);
-  const labelGeom = new THREE.PlaneGeometry(SLOT_W * 0.6, SLOT_W * 0.6);
-  const labelMat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, alphaTest: 0.01 });
-  const label = new THREE.Mesh(labelGeom, labelMat);
-  label.position.set(x, -SLOT_H / 2 + 0.0 - CASE_PAD_Y * 0.3, CASE_D / 2 + 0.001);
-  label.position.y = -(SLOT_H / 2) + 0.15;
-  slotGroup.add(label);
-
-  // Lid pivot group (pivots at top edge of slot)
-  const pivot = new THREE.Group();
-  pivot.position.set(x, SLOT_H / 2 - 0.04, CASE_D / 2);
-  slotGroup.add(pivot);
-  lidPivots.push(pivot);
-
-  // Lid mesh (attached to pivot)
-  const lidGeom = new THREE.BoxGeometry(SLOT_W - 0.04, SLOT_H - 0.08, 0.07);
-  const lid = new THREE.Mesh(lidGeom, lidMat.clone());
-  lid.position.set(0, -(SLOT_H / 2 - 0.04), 0);  // offset so it rotates from top
-  lid.castShadow = true;
-  lid.receiveShadow = true;
-  // Add a slight bevel illusion with edge loops — just darken slightly at edges via emissive
-  lid.material.emissive = new THREE.Color(0x000000);
-  lid.material.emissiveIntensity = 0;
-  lidMeshes.push(lid);
-  pivot.add(lid);
-}
-
-// ─── Pills inside slots ──────────────────────────────
-// Pre-populate some slots with pills
-const pillsInSlots = Array(SLOTS).fill(null);
-
-function createPill(color, slotIndex) {
-  const x = slotCenters[slotIndex].x;
-  const group = new THREE.Group();
-
-  // Capsule body — two halves + cylinder
-  const capGeom = new THREE.SphereGeometry(0.1, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2);
-  const cylGeom = new THREE.CylinderGeometry(0.1, 0.1, 0.26, 12);
-  const cap2Geom = new THREE.SphereGeometry(0.1, 12, 8, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
-
-  const c1 = new THREE.Color(color).multiplyScalar(1.05);
-  const c2 = new THREE.Color(color).multiplyScalar(0.92);
-
-  const m1 = new THREE.MeshStandardMaterial({ color: c1, roughness: 0.55, metalness: 0.05 });
-  const m2 = new THREE.MeshStandardMaterial({ color: c2, roughness: 0.55, metalness: 0.05 });
-
-  const capTop  = new THREE.Mesh(capGeom, m1);
-  const capMid  = new THREE.Mesh(cylGeom, m1);
-  const capBot  = new THREE.Mesh(cap2Geom, m2);
-
-  capTop.position.y = 0.13;
-  capBot.position.y = -0.13;
-  capTop.castShadow = true; capMid.castShadow = true; capBot.castShadow = true;
-
-  group.add(capTop, capMid, capBot);
-  group.rotation.z = Math.PI / 2;
-  group.position.set(x, 0.1, 0.04);
-  group.userData.baseY = 0.1;
-  group.userData.slotIndex = slotIndex;
-  return group;
-}
-
-// Add pills to first 4 slots (days with meds)
-[0, 1, 2, 3].forEach((i) => {
-  const pill = createPill(PILL_COLORS[i % PILL_COLORS.length], i);
-  pillsInSlots[i] = pill;
-  scene.add(pill);
-});
-
-// ─── Orbit Controls ──────────────────────────────────
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.dampingFactor = 0.08;
-controls.minPolarAngle = Math.PI / 8;
-controls.maxPolarAngle = Math.PI / 2.2;
-controls.minAzimuthAngle = -Math.PI / 5;
-controls.maxAzimuthAngle = Math.PI / 5;
-controls.enablePan = false;
-controls.minDistance = 5;
-controls.maxDistance = 11;
-controls.target.set(0, 0, 0);
-
-// ─── Raycasting for tap/click ────────────────────────
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
-let pointerDown = { x: 0, y: 0, time: 0 };
-let isDragging = false;
-
-function getSlotFromHit(point) {
-  const totalWidth = SLOTS * SLOT_W + (SLOTS - 1) * SLOT_GAP;
-  const startX = -totalWidth / 2;
-  for (let i = 0; i < SLOTS; i++) {
-    const cx = startX + i * (SLOT_W + SLOT_GAP) + SLOT_W / 2;
-    if (Math.abs(point.x - cx) < SLOT_W / 2 + 0.05) return i;
-  }
-  return -1;
-}
-
-renderer.domElement.addEventListener('pointerdown', (e) => {
-  pointerDown = { x: e.clientX, y: e.clientY, time: Date.now() };
-  isDragging = false;
-});
-
-renderer.domElement.addEventListener('pointermove', (e) => {
-  const dx = e.clientX - pointerDown.x;
-  const dy = e.clientY - pointerDown.y;
-  if (Math.sqrt(dx*dx + dy*dy) > 5) isDragging = true;
-});
-
-renderer.domElement.addEventListener('pointerup', (e) => {
-  if (isDragging) return;
-  const dt = Date.now() - pointerDown.time;
-  if (dt > 500) return;
-
-  const rect = renderer.domElement.getBoundingClientRect();
-  mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-  mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-
-  raycaster.setFromCamera(mouse, camera);
-
-  // Check lid intersections first
-  const lidObjects = lidMeshes;
-  const lidHits = raycaster.intersectObjects(lidObjects, false);
-  if (lidHits.length > 0) {
-    const hitLid = lidHits[0].object;
-    const idx = lidMeshes.indexOf(hitLid);
-    if (idx >= 0) { toggleSlot(idx); return; }
-  }
-
-  // Check case body
-  const caseHits = raycaster.intersectObject(caseBody, false);
-  if (caseHits.length > 0) {
-    const hit = caseHits[0].point;
-    const slotIdx = getSlotFromHit(hit);
-    if (slotIdx >= 0) toggleSlot(slotIdx);
-  }
-});
-
-function toggleSlot(i) {
-  openStates[i] = !openStates[i];
-  springState[i].target = openStates[i] ? -Math.PI * 0.72 : 0;
-
-  // Notify Android via JS interface
-  if (window.AndroidOrganizer) {
-    window.AndroidOrganizer.onSlotTapped(i, openStates[i]);
-  }
-
-  // Fade hint
-  const hint = document.getElementById('hint');
-  if (hint) { hint.style.opacity = '0'; }
-}
-
-// ─── Spring Physics ──────────────────────────────────
-const SPRING_K      = 180;   // stiffness
-const SPRING_DAMP   = 18;    // damping
-const SPRING_MASS   = 1.0;
-
-function stepSpring(state, dt) {
-  const err = state.target - state.angle;
-  const accel = (SPRING_K * err - SPRING_DAMP * state.velocity) / SPRING_MASS;
-  state.velocity += accel * dt;
-  state.angle    += state.velocity * dt;
-}
-
-// ─── Pill animation state ────────────────────────────
-const pillAnimState = Array.from({ length: SLOTS }, () => ({
-  dropping: false, t: 0, taken: false
-}));
-
-function takePill(slotIndex) {
-  if (!openStates[slotIndex]) return;
-  const anim = pillAnimState[slotIndex];
-  if (anim.taken) return;
-  anim.dropping = true;
-  anim.t = 0;
-  anim.taken = true;
-}
-
-// Expose to Android
-window.HavnOrganizer = {
-  openSlot: (i) => { if (!openStates[i]) toggleSlot(i); },
-  closeSlot: (i) => { if (openStates[i]) toggleSlot(i); },
-  markTaken: (i) => takePill(i),
-  setSlotHasMed: (i, has) => {
-    if (has && !pillsInSlots[i]) {
-      const pill = createPill(PILL_COLORS[i % PILL_COLORS.length], i);
-      pillsInSlots[i] = pill;
-      scene.add(pill);
-    }
-  },
+// Color Palette (Warm Minimalism)
+const PALETTE = {
+  bg: '#FAF8F4',
+  caseBody: '#EDEBE6',
+  caseShadow: '#DEDCD6',
+  lidClosed: '#F5F3EF',
+  lidOpen: '#E2EAE2',
+  lidEdge: '#D8D6D0',
+  text: '#747872',
+  textActive: '#516351',
+  pillSage: '#8DA08C',
+  pillAmber: '#DAA560',
+  pillTerracotta: '#C07050',
+  pillSlate: '#9BAEB5',
+  pillSand: '#BEB09A',
 };
 
-// ─── Clock ticks ─────────────────────────────────────
-let lastTime = performance.now();
-let hintFadeTimer = 3.0;
+const PILL_COLORS = [PALETTE.pillSage, PALETTE.pillAmber, PALETTE.pillTerracotta, PALETTE.pillSlate];
 
-// ─── Render Loop ─────────────────────────────────────
-function animate(now) {
-  requestAnimationFrame(animate);
-  const dt = Math.min((now - lastTime) * 0.001, 0.05);
-  lastTime = now;
+// 3D State & Camera Controls
+let rotX = 0.45;  // pitch angle
+let rotY = 0.0;   // yaw angle
+let targetRotY = 0.0;
+let targetRotX = 0.45;
 
-  // Lid spring physics
+const openAngle = Array(SLOTS).fill(0); // 0 = closed, 1 = open (spring target)
+const anglePos   = Array(SLOTS).fill(0); // current angle pos
+const angleVel   = Array(SLOTS).fill(0); // spring velocity
+const pills      = Array(SLOTS).fill(true); // pills inside
+
+// Spring constants
+const K = 160.0;
+const DAMP = 14.0;
+
+// Input handling
+let isDragging = false;
+let startX = 0, startY = 0;
+let lastTapTime = 0;
+
+function resize() {
+  W = canvas.width = window.innerWidth * (window.devicePixelRatio || 1);
+  H = canvas.height = window.innerHeight * (window.devicePixelRatio || 1);
+}
+window.addEventListener('resize', resize);
+
+// ─── 3D Projection Helpers ───────────────────────────────────────────────────
+const fov = 600;
+
+function project(x, y, z) {
+  // Rotate Y
+  const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
+  let x1 = x * cosY - z * sinY;
+  let z1 = x * sinY + z * cosY;
+
+  // Rotate X
+  const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
+  let y2 = y * cosX - z1 * sinX;
+  let z2 = y * sinX + z1 * cosX;
+
+  const dist = fov / (fov + z2 + 400);
+  return {
+    px: W / 2 + x1 * dist,
+    py: H / 2 + y2 * dist,
+    scale: dist,
+    z: z2,
+  };
+}
+
+// ─── Render Engine ───────────────────────────────────────────────────────────
+function drawRoundedRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function render() {
+  ctx.fillStyle = PALETTE.bg;
+  ctx.fillRect(0, 0, W, H);
+
+  // Smooth camera easing
+  rotY += (targetRotY - rotY) * 0.08;
+  rotX += (targetRotX - rotX) * 0.08;
+
+  // Case dimensions in 3D space
+  const slotW = 54;
+  const slotH = 140;
+  const slotDepth = 40;
+  const gap = 12;
+  const totalW = SLOTS * slotW + (SLOTS - 1) * gap;
+  const casePaddingX = 24;
+  const casePaddingY = 20;
+
+  const caseW = totalW + casePaddingX * 2;
+  const caseH = slotH + casePaddingY * 2;
+
+  // 1. Draw Drop Shadow (Soft ambient occlusion below case)
+  const shadowCenter = project(0, caseH / 2 + 15, 0);
+  ctx.save();
+  ctx.beginPath();
+  ctx.ellipse(shadowCenter.px, shadowCenter.py + 30, (caseW / 2 + 30) * shadowCenter.scale, 45 * shadowCenter.scale, 0, 0, Math.PI * 2);
+  const grad = ctx.createRadialGradient(shadowCenter.px, shadowCenter.py + 30, 10, shadowCenter.px, shadowCenter.py + 30, (caseW / 2 + 30) * shadowCenter.scale);
+  grad.addColorStop(0, 'rgba(81, 99, 81, 0.14)');
+  grad.addColorStop(1, 'rgba(250, 248, 244, 0)');
+  ctx.fillStyle = grad;
+  ctx.fill();
+  ctx.restore();
+
+  // 2. Draw Ceramic Case Base (Back/Bottom Extrusion)
+  const c0 = project(-caseW / 2, -caseH / 2, 0);
+  const c1 = project(caseW / 2, -caseH / 2, 0);
+  const c2 = project(caseW / 2, caseH / 2, 0);
+  const c3 = project(-caseW / 2, caseH / 2, 0);
+
+  const cb0 = project(-caseW / 2, -caseH / 2, slotDepth);
+  const cb1 = project(caseW / 2, -caseH / 2, slotDepth);
+  const cb2 = project(caseW / 2, caseH / 2, slotDepth);
+  const cb3 = project(-caseW / 2, caseH / 2, slotDepth);
+
+  // Side rim shading
+  ctx.fillStyle = PALETTE.caseShadow;
+  ctx.beginPath();
+  ctx.moveTo(c3.px, c3.py);
+  ctx.lineTo(c2.px, c2.py);
+  ctx.lineTo(cb2.px, cb2.py);
+  ctx.lineTo(cb3.px, cb3.py);
+  ctx.fill();
+
+  // Main Case Face
+  ctx.fillStyle = PALETTE.caseBody;
+  ctx.beginPath();
+  ctx.moveTo(c0.px, c0.py);
+  ctx.lineTo(c1.px, c1.py);
+  ctx.lineTo(c2.px, c2.py);
+  ctx.lineTo(c3.px, c3.py);
+  ctx.fill();
+  ctx.strokeStyle = PALETTE.lidEdge;
+  ctx.lineWidth = 2 * c0.scale;
+  ctx.stroke();
+
+  // 3. Draw Slots, Pills, and Lids
+  const startXPos = -totalW / 2 + slotW / 2;
+
   for (let i = 0; i < SLOTS; i++) {
-    stepSpring(springState[i], dt);
-    lidPivots[i].rotation.x = springState[i].angle;
+    const sx = startXPos + i * (slotW + gap);
+    const sy = 0;
 
-    // Lid material tint when open
-    const t = Math.max(0, Math.min(1, -springState[i].angle / (Math.PI * 0.72)));
-    lidMeshes[i].material.color.lerpColors(
-      new THREE.Color(0xF5F3EF),
-      new THREE.Color(0xDCEADC),
-      t
-    );
-    lidMeshes[i].material.emissiveIntensity = t * 0.04;
+    // Well background (recessed interior shadow)
+    const w0 = project(sx - slotW/2, sy - slotH/2, 5);
+    const w1 = project(sx + slotW/2, sy - slotH/2, 5);
+    const w2 = project(sx + slotW/2, sy + slotH/2, 5);
+    const w3 = project(sx - slotW/2, sy + slotH/2, 5);
+
+    ctx.fillStyle = PALETTE.caseShadow;
+    ctx.beginPath();
+    ctx.moveTo(w0.px, w0.py);
+    ctx.lineTo(w1.px, w1.py);
+    ctx.lineTo(w2.px, w2.py);
+    ctx.lineTo(w3.px, w3.py);
+    ctx.fill();
+
+    // Draw Pill inside well
+    if (pills[i]) {
+      const pCenter = project(sx, sy, 15);
+      const pillColor = PILL_COLORS[i % PILL_COLORS.length];
+
+      ctx.save();
+      ctx.translate(pCenter.px, pCenter.py);
+      ctx.rotate(-Math.PI / 6);
+
+      // Pill capsule half 1
+      ctx.fillStyle = pillColor;
+      ctx.beginPath();
+      ctx.arc(0, -10 * pCenter.scale, 12 * pCenter.scale, Math.PI, 0);
+      ctx.rect(-12 * pCenter.scale, -10 * pCenter.scale, 24 * pCenter.scale, 10 * pCenter.scale);
+      ctx.fill();
+
+      // Pill capsule half 2 (ivory contrast half)
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.arc(0, 10 * pCenter.scale, 12 * pCenter.scale, 0, Math.PI);
+      ctx.rect(-12 * pCenter.scale, 0, 24 * pCenter.scale, 10 * pCenter.scale);
+      ctx.fill();
+
+      // Pill shine highlight
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.fillRect(-8 * pCenter.scale, -12 * pCenter.scale, 4 * pCenter.scale, 20 * pCenter.scale);
+
+      ctx.restore();
+    }
+
+    // Day Label (Printed on Case Top Rim)
+    const lblPos = project(sx, sy + slotH/2 + 10, 0);
+    ctx.fillStyle = PALETTE.text;
+    ctx.font = `600 ${Math.max(9, Math.round(11 * lblPos.scale))}px -apple-system, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText(DAYS[i], lblPos.px, lblPos.py);
+
+    // Spring Physics for Lid Angle
+    const dt = 0.016;
+    const target = openAngle[i] * 1.8; // max open angle ~100 deg
+    const force = K * (target - anglePos[i]) - DAMP * angleVel[i];
+    angleVel[i] += force * dt;
+    anglePos[i] += angleVel[i] * dt;
+
+    // Draw Lid (Pivoting from top edge)
+    const topY = sy - slotH / 2;
+    const lidHeight = slotH;
+
+    // Compute rotated 3D coordinates for lid top & bottom
+    const angle = anglePos[i];
+    const lidZ = Math.sin(angle) * lidHeight;
+    const lidYOffset = Math.cos(angle) * lidHeight;
+
+    const l0 = project(sx - slotW/2, topY, 0);
+    const l1 = project(sx + slotW/2, topY, 0);
+    const l2 = project(sx + slotW/2, topY + lidYOffset, -lidZ);
+    const l3 = project(sx - slotW/2, topY + lidYOffset, -lidZ);
+
+    const isLidOpen = angle > 0.2;
+    ctx.fillStyle = isLidOpen ? PALETTE.lidOpen : PALETTE.lidClosed;
+
+    ctx.beginPath();
+    ctx.moveTo(l0.px, l0.py);
+    ctx.lineTo(l1.px, l1.py);
+    ctx.lineTo(l2.px, l2.py);
+    ctx.lineTo(l3.px, l3.py);
+    ctx.fill();
+
+    ctx.strokeStyle = isLidOpen ? 'rgba(81,99,81,0.4)' : PALETTE.lidEdge;
+    ctx.lineWidth = 1.5 * l0.scale;
+    ctx.stroke();
+
+    // Lid Label
+    const lidCenter = project(sx, topY + lidYOffset / 2, -lidZ / 2);
+    ctx.fillStyle = isLidOpen ? PALETTE.textActive : PALETTE.text;
+    ctx.font = `bold ${Math.max(10, Math.round(13 * lidCenter.scale))}px -apple-system, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText(DAYS[i][0], lidCenter.px, lidCenter.py);
   }
 
-  // Pill drop animations
-  for (let i = 0; i < SLOTS; i++) {
-    const anim = pillAnimState[i];
-    const pill = pillsInSlots[i];
-    if (!pill) continue;
-    if (anim.dropping) {
-      anim.t += dt * 1.8;
-      const progress = Math.min(1, anim.t);
-      // Easing: ease-in drop
-      const eased = progress * progress;
-      pill.position.y = pill.userData.baseY - eased * 3.5;
-      pill.material?.opacity ?? null;
-      // Fade out
-      pill.traverse((m) => {
-        if (m.isMesh) {
-          m.material.transparent = true;
-          m.material.opacity = 1 - eased;
-        }
-      });
-      if (progress >= 1) {
-        anim.dropping = false;
-        scene.remove(pill);
-        pillsInSlots[i] = null;
+  requestAnimationFrame(render);
+}
+
+// ─── Interaction & Raycasting ────────────────────────────────────────────────
+canvas.addEventListener('pointerdown', (e) => {
+  isDragging = false;
+  startX = e.clientX;
+  startY = e.clientY;
+  lastTapTime = Date.now();
+});
+
+canvas.addEventListener('pointermove', (e) => {
+  const dx = e.clientX - startX;
+  const dy = e.clientY - startY;
+  if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+    isDragging = true;
+    targetRotY += dx * 0.005;
+    targetRotX = Math.max(0.1, Math.min(0.8, targetRotX + dy * 0.003));
+    startX = e.clientX;
+    startY = e.clientY;
+  }
+});
+
+canvas.addEventListener('pointerup', (e) => {
+  if (!isDragging) {
+    // Check tap on slot
+    const rect = canvas.getBoundingClientRect();
+    const clickX = (e.clientX - rect.left) * (window.devicePixelRatio || 1);
+
+    const slotW = 54 + 12;
+    const totalW = SLOTS * slotW;
+    const startXPos = W / 2 - totalW / 2;
+    const clickedSlot = Math.floor((clickX - startXPos) / slotW);
+
+    if (clickedSlot >= 0 && clickedSlot < SLOTS) {
+      openAngle[clickedSlot] = openAngle[clickedSlot] === 0 ? 1 : 0;
+      if (window.AndroidOrganizer) {
+        window.AndroidOrganizer.onSlotTapped(clickedSlot, openAngle[clickedSlot] === 1);
       }
+      const hud = document.getElementById('hud');
+      if (hud) hud.style.opacity = '0';
     }
   }
-
-  controls.update();
-  renderer.render(scene, camera);
-}
-animate(performance.now());
-
-// ─── Resize ──────────────────────────────────────────
-window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
+// External Android Bridge API
+window.HavnOrganizer = {
+  openSlot: (i) => { if (i >= 0 && i < SLOTS) openAngle[i] = 1; },
+  closeSlot: (i) => { if (i >= 0 && i < SLOTS) openAngle[i] = 0; },
+  toggleSlot: (i) => { if (i >= 0 && i < SLOTS) openAngle[i] = openAngle[i] === 0 ? 1 : 0; },
+};
+
+// Start 3D Engine
+render();
 </script>
 </body>
 </html>

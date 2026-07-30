@@ -2,13 +2,13 @@ package com.havn.app.ui.screens.organizer
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.havn.app.audio.SoundManager
 import com.havn.app.data.prefs.UserPreferences
 import com.havn.app.data.repository.HavnRepository
 import com.havn.app.domain.model.Medication
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -23,6 +23,7 @@ data class OrganizerUiState(
 class OrganizerViewModel @Inject constructor(
     private val repository: HavnRepository,
     private val prefs: UserPreferences,
+    val soundManager: SoundManager,
 ) : ViewModel() {
 
     private val _selectedDay = MutableStateFlow(LocalDate.now().dayOfWeek.value - 1)
@@ -55,6 +56,6 @@ class OrganizerViewModel @Inject constructor(
     }
 
     fun onSlotTapped(slotIndex: Int) {
-        // Log interaction, trigger haptic feedback via side-effect
+        soundManager.playCeramicClick()
     }
 }

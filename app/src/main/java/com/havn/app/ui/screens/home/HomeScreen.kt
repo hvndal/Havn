@@ -18,12 +18,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -31,7 +30,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.havn.app.R
+import com.havn.app.audio.SoundManager
 import com.havn.app.domain.model.*
 import com.havn.app.ui.theme.*
 import java.time.LocalDate
@@ -47,16 +46,37 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Box(modifier = Modifier.fillMaxSize().background(WarmIvory)) {
+    // Smooth Slow 2.5s Luxury Fade-In Animation
+    val fadeAnim = remember { Animatable(0f) }
+    val scaleAnim = remember { Animatable(0.97f) }
+
+    LaunchedEffect(Unit) {
+        fadeAnim.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(durationMillis = 2500, easing = EaseOutCubic)
+        )
+    }
+    LaunchedEffect(Unit) {
+        scaleAnim.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(durationMillis = 2000, easing = EaseOutQuart)
+        )
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(WarmIvory)
+            .alpha(fadeAnim.value)
+            .scale(scaleAnim.value)
+    ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(bottom = 120.dp),
         ) {
             // ── Top App Bar ──────────────────────────────────────
             item {
-                HomeTopBar(
-                    user = uiState.user,
-                )
+                HomeTopBar(user = uiState.user)
             }
 
             // ── Greeting ─────────────────────────────────────────
@@ -73,6 +93,7 @@ fun HomeScreen(
                 OrganizerHeroSection(
                     medications = uiState.todayMeds,
                     onTap = onOpenOrganizer,
+                    soundManager = viewModel.soundManager,
                     modifier = Modifier.padding(horizontal = 24.dp),
                 )
                 Spacer(Modifier.height(32.dp))
@@ -101,7 +122,6 @@ fun HomeScreen(
                             modifier = Modifier.padding(top = 2.dp),
                         )
                     }
-                    // Add FAB
                     AddMedButton(onClick = onAddMedication)
                 }
                 Spacer(Modifier.height(16.dp))
@@ -131,7 +151,6 @@ fun HomeScreen(
     }
 }
 
-// ─── Top App Bar ──────────────────────────────────────────────────────────────
 @Composable
 private fun HomeTopBar(user: User?) {
     Row(
@@ -142,7 +161,6 @@ private fun HomeTopBar(user: User?) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // Avatar chip
         val color = user?.avatarColor?.let {
             runCatching { Color(android.graphics.Color.parseColor(it)) }.getOrDefault(Sage)
         } ?: Sage
@@ -163,7 +181,6 @@ private fun HomeTopBar(user: User?) {
             )
         }
 
-        // Wordmark
         Text(
             text = "Hävn",
             style = MaterialTheme.typography.displayMedium.copy(
@@ -173,7 +190,6 @@ private fun HomeTopBar(user: User?) {
             color = Charcoal,
         )
 
-        // Bell icon placeholder
         Box(
             modifier = Modifier
                 .size(36.dp)
@@ -186,7 +202,6 @@ private fun HomeTopBar(user: User?) {
     }
 }
 
-// ─── Greeting ─────────────────────────────────────────────────────────────────
 @Composable
 private fun GreetingSection(name: String, modifier: Modifier = Modifier) {
     val hour = LocalTime.now().hour
@@ -217,11 +232,11 @@ private fun GreetingSection(name: String, modifier: Modifier = Modifier) {
     }
 }
 
-// ─── 3D Organizer Hero ───────────────────────────────────────────────────────
 @Composable
 private fun OrganizerHeroSection(
     medications: List<TodayMedication>,
     onTap: () -> Unit,
+    soundManager: SoundManager,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -239,7 +254,6 @@ private fun OrganizerHeroSection(
                 onClick = onTap,
             ),
     ) {
-        // Three.js WebView
         AndroidView(
             modifier = Modifier.fillMaxSize(),
             factory = {
@@ -248,13 +262,12 @@ private fun OrganizerHeroSection(
                     settings.domStorageEnabled = true
                     settings.allowFileAccessFromFileURLs = true
                     settings.allowUniversalAccessFromFileURLs = true
-                    settings.setBackgroundColor(android.graphics.Color.TRANSPARENT)
                     setBackgroundColor(android.graphics.Color.TRANSPARENT)
                     webViewClient = WebViewClient()
                     addJavascriptInterface(object {
                         @JavascriptInterface
                         fun onSlotTapped(slotIndex: Int, isOpen: Boolean) {
-                            // Callback from 3D organizer — can trigger haptics etc.
+                            soundManager.playCeramicClick()
                         }
                     }, "AndroidOrganizer")
                     loadUrl("file:///android_asset/organizer/organizer.html")
@@ -262,18 +275,17 @@ private fun OrganizerHeroSection(
             },
         )
 
-        // "Tap to explore" label (bottom-right overlay)
         Row(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(12.dp)
-                .background(White.copy(alpha = 0.8f), RoundedCornerShape(20.dp))
+                .background(White.copy(alpha = 0.85f), RoundedCornerShape(20.dp))
                 .padding(horizontal = 10.dp, vertical = 5.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Text(
-                text = "Explore",
+                text = "Explore 3D",
                 style = MaterialTheme.typography.labelSmall,
                 color = StoneGrey,
             )
@@ -281,7 +293,6 @@ private fun OrganizerHeroSection(
     }
 }
 
-// ─── Add Medication Button ────────────────────────────────────────────────────
 @Composable
 private fun AddMedButton(onClick: () -> Unit) {
     val pressed = remember { mutableStateOf(false) }
@@ -306,7 +317,6 @@ private fun AddMedButton(onClick: () -> Unit) {
     }
 }
 
-// ─── Medication Card ──────────────────────────────────────────────────────────
 @Composable
 private fun MedicationCard(
     todayMed: TodayMedication,
@@ -344,7 +354,6 @@ private fun MedicationCard(
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // Icon swatch
         val swatchColor = medIconColor(todayMed.medication.colorTag)
         Box(
             modifier = Modifier
@@ -358,7 +367,6 @@ private fun MedicationCard(
 
         Spacer(Modifier.width(14.dp))
 
-        // Name + dosage
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = todayMed.medication.name,
@@ -376,7 +384,6 @@ private fun MedicationCard(
             )
         }
 
-        // Time + check
         Column(horizontalAlignment = Alignment.End) {
             Text(
                 text = formatTime(todayMed.scheduledTime),
@@ -384,19 +391,16 @@ private fun MedicationCard(
                 color = CharcoalMid.copy(alpha = contentAlpha),
             )
             Spacer(Modifier.height(6.dp))
-            // Check circle
             Box(
                 modifier = Modifier.size(24.dp),
                 contentAlignment = Alignment.Center,
             ) {
-                // Empty ring
                 Box(
                     modifier = Modifier
                         .size(24.dp)
                         .clip(CircleShape)
                         .border(1.5.dp, StoneLight, CircleShape)
                 )
-                // Filled check (animated)
                 Box(
                     modifier = Modifier
                         .size(24.dp)
@@ -412,7 +416,6 @@ private fun MedicationCard(
     }
 }
 
-// ─── Empty State ──────────────────────────────────────────────────────────────
 @Composable
 private fun EmptyTodayState(modifier: Modifier = Modifier) {
     Column(
@@ -435,7 +438,6 @@ private fun EmptyTodayState(modifier: Modifier = Modifier) {
     }
 }
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
 private fun medIconEmoji(type: MedIconType): String = when (type) {
     MedIconType.CAPSULE   -> "💊"
     MedIconType.TABLET    -> "⬜"

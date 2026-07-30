@@ -2,6 +2,7 @@ package com.havn.app.ui.screens.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.havn.app.audio.SoundManager
 import com.havn.app.data.prefs.UserPreferences
 import com.havn.app.data.repository.HavnRepository
 import com.havn.app.domain.model.*
@@ -10,8 +11,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 data class HomeUiState(
@@ -25,6 +24,7 @@ data class HomeUiState(
 class HomeViewModel @Inject constructor(
     private val repository: HavnRepository,
     private val prefs: UserPreferences,
+    val soundManager: SoundManager,
 ) : ViewModel() {
 
     val uiState: StateFlow<HomeUiState> = prefs.activeUserId
@@ -34,7 +34,6 @@ class HomeViewModel @Inject constructor(
                 repository.getMedicationsForUser(userId),
                 repository.getDoseLogsForDay(userId, LocalDate.now()),
             ) { meds, logs ->
-                val today = LocalDate.now()
                 val logMap = logs.associateBy { it.medicationId }
                 val todayMeds = meds.mapNotNull { med ->
                     if (med.reminderTimes.isEmpty() && med.repeatType == RepeatType.DAILY) {
@@ -60,8 +59,10 @@ class HomeViewModel @Inject constructor(
             val log = uiState.value.todayMeds.find { it.medication.id == med.id }?.doseLog
             if (log?.status == DoseStatus.TAKEN) {
                 repository.markDoseUntaken(med, today)
+                soundManager.playSoftTap()
             } else {
                 repository.markDoseTaken(med, today)
+                soundManager.playSoftChime()
             }
         }
     }

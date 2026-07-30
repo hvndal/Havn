@@ -17,7 +17,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -26,11 +28,10 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.havn.app.audio.SoundManager
 import com.havn.app.domain.model.*
 import com.havn.app.ui.theme.*
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 @Composable
 fun OrganizerScreen(
@@ -41,11 +42,30 @@ fun OrganizerScreen(
     val context = LocalContext.current
     var webView: WebView? by remember { mutableStateOf(null) }
 
+    // Smooth Slow 2.5s Luxury Fade-In Animation
+    val fadeAnim = remember { Animatable(0f) }
+    val scaleAnim = remember { Animatable(0.97f) }
+
+    LaunchedEffect(Unit) {
+        fadeAnim.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(durationMillis = 2500, easing = EaseOutCubic)
+        )
+    }
+    LaunchedEffect(Unit) {
+        scaleAnim.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(durationMillis = 2000, easing = EaseOutQuart)
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(WarmIvory)
             .systemBarsPadding()
+            .alpha(fadeAnim.value)
+            .scale(scaleAnim.value)
     ) {
         // Header
         Row(
@@ -59,7 +79,10 @@ fun OrganizerScreen(
                     .size(36.dp)
                     .clip(CircleShape)
                     .background(SurfaceHigh)
-                    .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { onBack() },
+                    .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
+                        viewModel.soundManager.playSoftTap()
+                        onBack()
+                    },
                 contentAlignment = Alignment.Center,
             ) {
                 Text(text = "\u2190", color = CharcoalMid, fontSize = 16.sp)
@@ -83,7 +106,7 @@ fun OrganizerScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(300.dp)
+                .height(320.dp)
                 .padding(horizontal = 24.dp)
                 .clip(RoundedCornerShape(24.dp))
                 .background(SurfaceLow)
@@ -116,7 +139,7 @@ fun OrganizerScreen(
 
         // Day selector pills
         val days = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
-        val todayDow = LocalDate.now().dayOfWeek.value - 1 // 0=Mon
+        val todayDow = LocalDate.now().dayOfWeek.value - 1
         var selectedDay by remember { mutableIntStateOf(todayDow) }
 
         LazyRow(
@@ -131,7 +154,8 @@ fun OrganizerScreen(
                     onClick = {
                         selectedDay = i
                         viewModel.selectDay(i)
-                        webView?.evaluateJavascript("HavnOrganizer.openSlot($i)", null)
+                        viewModel.soundManager.playCeramicClick()
+                        webView?.evaluateJavascript("HavnOrganizer.toggleSlot($i)", null)
                     },
                 )
             }
