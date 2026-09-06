@@ -21,7 +21,25 @@ data class Medication(
     val iconType: MedIconType = MedIconType.CAPSULE,
     val isActive: Boolean = true,
     val notes: String = "",
-)
+    // Visual properties
+    val shape: MedShape = MedShape.CAPSULE,
+    val secondaryColorTag: String? = null,
+    val size: MedSize = MedSize.MEDIUM,
+    val scoreLine: MedScoreLine = MedScoreLine.NONE,
+    val imprint: String = "",
+    val coating: MedCoating = MedCoating.SATIN,
+) {
+    val visualSpec: MedicationVisualSpec
+        get() = MedicationVisualSpec(
+            shape = shape,
+            primaryColorTag = colorTag,
+            secondaryColorTag = secondaryColorTag,
+            size = size,
+            scoreLine = scoreLine,
+            imprint = imprint,
+            coating = coating,
+        )
+}
 
 data class DoseLog(
     val id: Long = 0,

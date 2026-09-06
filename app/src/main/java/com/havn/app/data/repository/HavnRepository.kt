@@ -111,6 +111,12 @@ class HavnRepository @Inject constructor(
         iconType = MedIconType.valueOf(iconType),
         isActive = isActive,
         notes = notes,
+        shape = runCatching { MedShape.valueOf(shape) }.getOrDefault(MedShape.CAPSULE),
+        secondaryColorTag = secondaryColorTag,
+        size = runCatching { MedSize.valueOf(size) }.getOrDefault(MedSize.MEDIUM),
+        scoreLine = runCatching { MedScoreLine.valueOf(scoreLine) }.getOrDefault(MedScoreLine.NONE),
+        imprint = imprint,
+        coating = runCatching { MedCoating.valueOf(coating) }.getOrDefault(MedCoating.SATIN),
     )
 
     private fun Medication.toEntity() = MedicationEntity(
@@ -124,6 +130,12 @@ class HavnRepository @Inject constructor(
         iconType = iconType.name,
         isActive = isActive,
         notes = notes,
+        shape = shape.name,
+        secondaryColorTag = secondaryColorTag,
+        size = size.name,
+        scoreLine = scoreLine.name,
+        imprint = imprint,
+        coating = coating.name,
     )
 
     private fun DoseLogEntity.toDomain() = DoseLog(

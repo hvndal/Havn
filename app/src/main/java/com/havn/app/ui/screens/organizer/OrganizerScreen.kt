@@ -270,7 +270,7 @@ private fun OrganizerMedRow(med: Medication, modifier: Modifier = Modifier) {
                 .background(swatchColor.copy(alpha = 0.15f)),
             contentAlignment = Alignment.Center,
         ) {
-            MedIcon(type = med.iconType, size = 22.dp, tint = swatchColor)
+            MedIcon(visualSpec = med.visualSpec, type = med.iconType, size = 22.dp, tint = swatchColor)
         }
         Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {

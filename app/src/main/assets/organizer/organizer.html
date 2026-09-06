@@ -319,28 +319,74 @@ function render(timestamp) {
     ctx.fill();
 
     if (slotHasPills(i)) {
+      const slotItemData = (weekData[i] && weekData[i].items) || [];
       const colors = slotColors(i);
-      const pillCount = Math.min(colors.length, 3);
+      const pillCount = Math.min(Math.max(colors.length, slotItemData.length), 3);
       for (let p = 0; p < pillCount; p++) {
-        const offsetX = (p - (pillCount - 1) / 2) * 10;
+        const offsetX = (p - (pillCount - 1) / 2) * 12;
         const pCenter = project(sx + offsetX, sy + (p * 3), 14 + p * 2);
-        const pillColor = colors[p] || PILL_COLORS[i % PILL_COLORS.length];
+        const itemInfo = slotItemData[p] || {};
+        const primaryCol = itemInfo.primaryColor || colors[p] || PILL_COLORS[i % PILL_COLORS.length];
+        const secondaryCol = itemInfo.secondaryColor || primaryCol;
+        const shape = itemInfo.shape || (p % 2 === 0 ? 'CAPSULE' : 'ROUND_TABLET');
 
         ctx.save();
         ctx.translate(pCenter.px, pCenter.py);
         ctx.rotate(-Math.PI / 6);
 
-        ctx.fillStyle = pillColor;
-        ctx.beginPath();
-        ctx.arc(0, -8 * pCenter.scale, 9 * pCenter.scale, Math.PI, 0);
-        ctx.rect(-9 * pCenter.scale, -8 * pCenter.scale, 18 * pCenter.scale, 8 * pCenter.scale);
-        ctx.fill();
+        const sc = pCenter.scale;
 
-        ctx.fillStyle = 'rgba(255,255,255,0.85)';
-        ctx.beginPath();
-        ctx.arc(0, 8 * pCenter.scale, 9 * pCenter.scale, 0, Math.PI);
-        ctx.rect(-9 * pCenter.scale, 0, 18 * pCenter.scale, 8 * pCenter.scale);
-        ctx.fill();
+        if (shape === 'ROUND_TABLET' || shape === 'SMALL_TABLET' || shape === 'LARGE_TABLET' || shape === 'SCORED_TABLET') {
+          const r = (shape === 'SMALL_TABLET' ? 7 : (shape === 'LARGE_TABLET' ? 11 : 9)) * sc;
+          ctx.fillStyle = primaryCol;
+          ctx.beginPath();
+          ctx.arc(0, 0, r, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = 'rgba(255,255,255,0.25)';
+          ctx.beginPath();
+          ctx.arc(-r * 0.2, -r * 0.2, r * 0.5, 0, Math.PI * 2);
+          ctx.fill();
+
+          if (shape === 'SCORED_TABLET' || itemInfo.scoreLine === 'SINGLE' || itemInfo.scoreLine === 'CROSS') {
+            ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+            ctx.lineWidth = 1.2 * sc;
+            ctx.beginPath();
+            ctx.moveTo(0, -r * 0.7);
+            ctx.lineTo(0, r * 0.7);
+            ctx.stroke();
+          }
+        } else if (shape === 'OVAL_TABLET') {
+          ctx.fillStyle = primaryCol;
+          ctx.beginPath();
+          ctx.ellipse(0, 0, 11 * sc, 6 * sc, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = 'rgba(255,255,255,0.25)';
+          ctx.beginPath();
+          ctx.ellipse(-2 * sc, -2 * sc, 6 * sc, 3 * sc, 0, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          // CAPSULE
+          ctx.fillStyle = primaryCol;
+          ctx.beginPath();
+          ctx.arc(0, -7 * sc, 8 * sc, Math.PI, 0);
+          ctx.rect(-8 * sc, -7 * sc, 16 * sc, 7 * sc);
+          ctx.fill();
+
+          ctx.fillStyle = secondaryCol;
+          ctx.beginPath();
+          ctx.arc(0, 7 * sc, 8 * sc, 0, Math.PI);
+          ctx.rect(-8 * sc, 0, 16 * sc, 7 * sc);
+          ctx.fill();
+
+          ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+          ctx.lineWidth = 1 * sc;
+          ctx.beginPath();
+          ctx.moveTo(-8 * sc, 0);
+          ctx.lineTo(8 * sc, 0);
+          ctx.stroke();
+        }
 
         ctx.restore();
       }

@@ -24,6 +24,12 @@ data class MedicationEntity(
     val iconType: String = "CAPSULE",
     val isActive: Boolean = true,
     val notes: String = "",
+    val shape: String = "CAPSULE",
+    val secondaryColorTag: String? = null,
+    val size: String = "MEDIUM",
+    val scoreLine: String = "NONE",
+    val imprint: String = "",
+    val coating: String = "SATIN",
 )
 
 @Entity(tableName = "dose_logs")

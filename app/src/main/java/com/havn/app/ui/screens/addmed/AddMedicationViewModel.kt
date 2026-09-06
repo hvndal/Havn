@@ -26,6 +26,12 @@ class AddMedicationViewModel @Inject constructor(
         iconType: MedIconType,
         colorTag: String,
         notes: String,
+        shape: MedShape = MedShape.CAPSULE,
+        secondaryColorTag: String? = null,
+        size: MedSize = MedSize.MEDIUM,
+        scoreLine: MedScoreLine = MedScoreLine.NONE,
+        imprint: String = "",
+        coating: MedCoating = MedCoating.SATIN,
         onComplete: () -> Unit,
     ) {
         viewModelScope.launch {
@@ -39,6 +45,12 @@ class AddMedicationViewModel @Inject constructor(
                 colorTag = colorTag,
                 iconType = iconType,
                 notes = notes.trim(),
+                shape = shape,
+                secondaryColorTag = secondaryColorTag,
+                size = size,
+                scoreLine = scoreLine,
+                imprint = imprint,
+                coating = coating,
             )
             val id = repository.saveMedication(med)
             // Schedule reminders

@@ -364,7 +364,7 @@ private fun MedicationCard(
                 .background(swatchColor.copy(alpha = 0.15f)),
             contentAlignment = Alignment.Center,
         ) {
-            MedIcon(
+            MedIcon(visualSpec = todayMed.medication.visualSpec,
                 type = todayMed.medication.iconType,
                 size = 22.dp,
                 tint = swatchColor,
