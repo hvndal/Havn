@@ -1,6 +1,7 @@
 package com.havn.app.ui.screens.addmed
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -18,7 +19,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -30,7 +33,11 @@ import com.havn.app.R
 import com.havn.app.domain.model.MedIconType
 import com.havn.app.domain.model.RepeatType
 import com.havn.app.ui.components.MedIcon
+import com.havn.app.ui.components.animatedFocusBorder
+import com.havn.app.ui.components.pressScale
 import com.havn.app.ui.theme.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,10 +53,26 @@ fun AddMedicationScreen(
     var colorTag by remember { mutableStateOf("sage") }
     var notes by remember { mutableStateOf("") }
 
+    var isSaving by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+
     val iconTypes = MedIconType.values().toList()
     val colorTags = listOf("sage", "terracotta", "butter", "slate", "sand")
     val repeatOptions = listOf(RepeatType.DAILY, RepeatType.WEEKLY, RepeatType.AS_NEEDED)
     val repeatLabels = listOf("Daily", "Weekly", "As needed")
+
+    val handleSave = {
+        if (name.isNotBlank() && !isSaving) {
+            isSaving = true
+            coroutineScope.launch {
+                viewModel.saveMedication(
+                    name, dosage, time, repeat, iconType, colorTag, notes
+                ) {
+                    onBack()
+                }
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -64,12 +87,14 @@ fun AddMedicationScreen(
                 .padding(horizontal = 24.dp, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            val backInteraction = remember { MutableInteractionSource() }
             Box(
                 modifier = Modifier
                     .size(36.dp)
+                    .pressScale(targetScale = 0.90f, interactionSource = backInteraction)
                     .clip(CircleShape)
                     .background(SurfaceHigh)
-                    .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { onBack() },
+                    .clickable(indication = null, interactionSource = backInteraction) { onBack() },
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
@@ -87,21 +112,17 @@ fun AddMedicationScreen(
             )
             Spacer(Modifier.weight(1f))
             // Confirm
+            val checkInteraction = remember { MutableInteractionSource() }
             Box(
                 modifier = Modifier
                     .size(36.dp)
+                    .pressScale(targetScale = 0.90f, interactionSource = checkInteraction)
                     .clip(CircleShape)
                     .background(if (name.isNotBlank()) Sage else SurfaceHigh)
                     .clickable(
                         indication = null,
-                        interactionSource = remember { MutableInteractionSource() },
-                    ) {
-                        if (name.isNotBlank()) {
-                            viewModel.saveMedication(
-                                name, dosage, time, repeat, iconType, colorTag, notes
-                            ) { onBack() }
-                        }
-                    },
+                        interactionSource = checkInteraction,
+                    ) { handleSave() },
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
@@ -151,19 +172,34 @@ fun AddMedicationScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
             ) {
                 iconTypes.forEach { t ->
+                    val isSelected = t == iconType
+                    val scale by animateFloatAsState(
+                        targetValue = if (isSelected) 1.12f else 1.0f,
+                        animationSpec = spring(stiffness = Spring.StiffnessMedium, dampingRatio = Spring.DampingRatioMediumBouncy),
+                        label = "iconScale"
+                    )
+                    val bg by animateColorAsState(
+                        targetValue = if (isSelected) Sage.copy(alpha = 0.18f) else SurfaceHigh,
+                        animationSpec = spring(stiffness = Spring.StiffnessMedium),
+                        label = "iconBg"
+                    )
+
+                    val itemInteraction = remember { MutableInteractionSource() }
                     Box(
                         modifier = Modifier
+                            .scale(scale)
+                            .pressScale(targetScale = 0.92f, interactionSource = itemInteraction)
                             .size(40.dp)
                             .clip(CircleShape)
-                            .background(if (t == iconType) Sage.copy(alpha = 0.15f) else SurfaceHigh)
-                            .border(1.dp, if (t == iconType) Sage else Color.Transparent, CircleShape)
-                            .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { iconType = t },
+                            .background(bg)
+                            .border(1.dp, if (isSelected) Sage else Color.Transparent, CircleShape)
+                            .clickable(indication = null, interactionSource = itemInteraction) { iconType = t },
                         contentAlignment = Alignment.Center,
                     ) {
                         MedIcon(
                             type = t,
                             size = 20.dp,
-                            tint = if (t == iconType) Sage else StoneGrey,
+                            tint = if (isSelected) Sage else StoneGrey,
                         )
                     }
                 }
@@ -179,13 +215,18 @@ fun AddMedicationScreen(
                     .background(White)
                     .border(1.dp, SurfaceHighest, RoundedCornerShape(16.dp)),
             ) {
-                FormRow(label = "Name") {
+                val nameInteraction = remember { MutableInteractionSource() }
+                FormRow(
+                    label = "Name",
+                    modifier = Modifier.animatedFocusBorder(nameInteraction, shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                ) {
                     BasicTextField(
                         value = name,
                         onValueChange = { name = it },
                         textStyle = MaterialTheme.typography.bodyMedium.copy(color = Charcoal),
                         cursorBrush = SolidColor(Sage),
                         singleLine = true,
+                        interactionSource = nameInteraction,
                         modifier = Modifier.fillMaxWidth(),
                         decorationBox = { inner ->
                             if (name.isEmpty()) Text("e.g. Vitamin D3", style = MaterialTheme.typography.bodyMedium.copy(color = StoneLight))
@@ -193,14 +234,19 @@ fun AddMedicationScreen(
                         }
                     )
                 }
-                Divider(color = SurfaceHighest, thickness = 0.5.dp)
-                FormRow(label = "Dosage") {
+                HorizontalDivider(color = SurfaceHighest, thickness = 0.5.dp)
+                val dosageInteraction = remember { MutableInteractionSource() }
+                FormRow(
+                    label = "Dosage",
+                    modifier = Modifier.animatedFocusBorder(dosageInteraction, shape = RectangleShape)
+                ) {
                     BasicTextField(
                         value = dosage,
                         onValueChange = { dosage = it },
                         textStyle = MaterialTheme.typography.bodyMedium.copy(color = Charcoal),
                         cursorBrush = SolidColor(Sage),
                         singleLine = true,
+                        interactionSource = dosageInteraction,
                         modifier = Modifier.fillMaxWidth(),
                         decorationBox = { inner ->
                             if (dosage.isEmpty()) Text("e.g. 1000 mg", style = MaterialTheme.typography.bodyMedium.copy(color = StoneLight))
@@ -208,34 +254,53 @@ fun AddMedicationScreen(
                         }
                     )
                 }
-                Divider(color = SurfaceHighest, thickness = 0.5.dp)
-                FormRow(label = "Time") {
+                HorizontalDivider(color = SurfaceHighest, thickness = 0.5.dp)
+                val timeInteraction = remember { MutableInteractionSource() }
+                FormRow(
+                    label = "Time",
+                    modifier = Modifier.animatedFocusBorder(timeInteraction, shape = RectangleShape)
+                ) {
                     BasicTextField(
                         value = time,
                         onValueChange = { time = it },
                         textStyle = MaterialTheme.typography.bodyMedium.copy(color = Charcoal),
                         cursorBrush = SolidColor(Sage),
                         singleLine = true,
+                        interactionSource = timeInteraction,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
-                Divider(color = SurfaceHighest, thickness = 0.5.dp)
+                HorizontalDivider(color = SurfaceHighest, thickness = 0.5.dp)
                 // Repeat selector
                 FormRow(label = "Repeat") {
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         repeatOptions.forEachIndexed { i, r ->
+                            val isSelected = r == repeat
+                            val bg by animateColorAsState(
+                                targetValue = if (isSelected) Sage else SurfaceHigh,
+                                animationSpec = spring(stiffness = Spring.StiffnessMedium),
+                                label = "repeatBg"
+                            )
+                            val textColor by animateColorAsState(
+                                targetValue = if (isSelected) White else CharcoalMid,
+                                animationSpec = spring(stiffness = Spring.StiffnessMedium),
+                                label = "repeatText"
+                            )
+
+                            val repeatInteraction = remember { MutableInteractionSource() }
                             Box(
                                 modifier = Modifier
+                                    .pressScale(targetScale = 0.92f, interactionSource = repeatInteraction)
                                     .clip(RoundedCornerShape(12.dp))
-                                    .background(if (r == repeat) Sage else SurfaceHigh)
-                                    .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { repeat = r }
+                                    .background(bg)
+                                    .clickable(indication = null, interactionSource = repeatInteraction) { repeat = r }
                                     .padding(horizontal = 10.dp, vertical = 5.dp),
                             ) {
                                 Text(
                                     text = repeatLabels[i],
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = if (r == repeat) White else CharcoalMid,
+                                    color = textColor,
                                 )
                             }
                         }
@@ -256,13 +321,23 @@ fun AddMedicationScreen(
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 colorTags.forEach { tag ->
                     val c = tagColor(tag)
+                    val isSelected = tag == colorTag
+                    val scale by animateFloatAsState(
+                        targetValue = if (isSelected) 1.15f else 1.0f,
+                        animationSpec = spring(stiffness = Spring.StiffnessMedium, dampingRatio = Spring.DampingRatioMediumBouncy),
+                        label = "colorScale"
+                    )
+
+                    val colorInteraction = remember { MutableInteractionSource() }
                     Box(
                         modifier = Modifier
-                            .size(if (tag == colorTag) 36.dp else 28.dp)
+                            .scale(scale)
+                            .pressScale(targetScale = 0.90f, interactionSource = colorInteraction)
+                            .size(32.dp)
                             .clip(CircleShape)
                             .background(c)
-                            .border(if (tag == colorTag) 2.dp else 0.dp, Charcoal.copy(alpha = 0.3f), CircleShape)
-                            .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { colorTag = tag },
+                            .border(if (isSelected) 2.dp else 0.dp, Charcoal.copy(alpha = 0.35f), CircleShape)
+                            .clickable(indication = null, interactionSource = colorInteraction) { colorTag = tag },
                     )
                 }
             }
@@ -270,9 +345,11 @@ fun AddMedicationScreen(
             Spacer(Modifier.height(28.dp))
 
             // Notes (optional)
+            val notesInteraction = remember { MutableInteractionSource() }
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .animatedFocusBorder(notesInteraction, shape = RoundedCornerShape(16.dp))
                     .clip(RoundedCornerShape(16.dp))
                     .background(White)
                     .border(1.dp, SurfaceHighest, RoundedCornerShape(16.dp))
@@ -285,6 +362,7 @@ fun AddMedicationScreen(
                     onValueChange = { notes = it },
                     textStyle = MaterialTheme.typography.bodyMedium.copy(color = Charcoal),
                     cursorBrush = SolidColor(Sage),
+                    interactionSource = notesInteraction,
                     modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp),
                     decorationBox = { inner ->
                         if (notes.isEmpty()) Text("Optional notes", style = MaterialTheme.typography.bodyMedium.copy(color = StoneLight))
@@ -296,22 +374,31 @@ fun AddMedicationScreen(
             Spacer(Modifier.height(32.dp))
 
             // Save button
+            val btnInteraction = remember { MutableInteractionSource() }
             Button(
-                onClick = {
-                    if (name.isNotBlank()) {
-                        viewModel.saveMedication(name, dosage, time, repeat, iconType, colorTag, notes) { onBack() }
-                    }
-                },
-                enabled = name.isNotBlank(),
-                modifier = Modifier.fillMaxWidth().height(56.dp),
+                onClick = handleSave,
+                enabled = name.isNotBlank() && !isSaving,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .pressScale(targetScale = 0.95f, interactionSource = btnInteraction),
                 shape = RoundedCornerShape(28.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Sage, contentColor = White,
                     disabledContainerColor = SurfaceHigh, disabledContentColor = StoneGrey,
                 ),
                 elevation = ButtonDefaults.buttonElevation(0.dp),
+                interactionSource = btnInteraction,
             ) {
-                Text("Save", style = MaterialTheme.typography.labelLarge)
+                if (isSaving) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = White,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text("Save", style = MaterialTheme.typography.labelLarge)
+                }
             }
             Spacer(Modifier.height(24.dp))
         }
@@ -321,10 +408,11 @@ fun AddMedicationScreen(
 @Composable
 private fun FormRow(
     label: String,
+    modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,

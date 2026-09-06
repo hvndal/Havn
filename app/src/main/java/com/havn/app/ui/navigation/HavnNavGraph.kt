@@ -1,6 +1,7 @@
 package com.havn.app.ui.navigation
 
 import androidx.compose.animation.*
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -103,10 +104,15 @@ fun HavnNavGraph() {
             composable(
                 route = Screen.Home.route,
                 enterTransition = {
-                    fadeIn(animationSpec = spring(stiffness = 400f)) +
-                    slideInHorizontally(animationSpec = spring(stiffness = 400f)) { it / 8 }
+                    fadeIn(animationSpec = spring(stiffness = Spring.StiffnessMedium)) +
+                    slideInHorizontally(animationSpec = spring(stiffness = Spring.StiffnessMedium)) { it / 8 }
                 },
-                exitTransition = { fadeOut() },
+                exitTransition = { fadeOut(animationSpec = spring(stiffness = Spring.StiffnessMedium)) },
+                popEnterTransition = {
+                    fadeIn(animationSpec = spring(stiffness = Spring.StiffnessMedium)) +
+                    slideInHorizontally(animationSpec = spring(stiffness = Spring.StiffnessMedium)) { -it / 8 }
+                },
+                popExitTransition = { fadeOut(animationSpec = spring(stiffness = Spring.StiffnessMedium)) },
             ) {
                 HomeScreen(
                     onAddMedication = { navController.navigate(Screen.AddMed.route) },
@@ -115,8 +121,19 @@ fun HavnNavGraph() {
             }
             composable(
                 route = Screen.Organizer.route,
-                enterTransition = { fadeIn(animationSpec = spring(stiffness = 400f)) },
-                exitTransition = { fadeOut() },
+                enterTransition = {
+                    fadeIn(animationSpec = spring(stiffness = Spring.StiffnessMedium)) +
+                    slideInHorizontally(animationSpec = spring(stiffness = Spring.StiffnessMedium)) { it / 6 }
+                },
+                exitTransition = { fadeOut(animationSpec = spring(stiffness = Spring.StiffnessMedium)) },
+                popEnterTransition = {
+                    fadeIn(animationSpec = spring(stiffness = Spring.StiffnessMedium)) +
+                    slideInHorizontally(animationSpec = spring(stiffness = Spring.StiffnessMedium)) { -it / 6 }
+                },
+                popExitTransition = {
+                    fadeOut(animationSpec = spring(stiffness = Spring.StiffnessMedium)) +
+                    slideOutHorizontally(animationSpec = spring(stiffness = Spring.StiffnessMedium)) { it / 6 }
+                },
             ) {
                 OrganizerScreen(
                     onBack = { navController.popBackStack() }
@@ -124,15 +141,19 @@ fun HavnNavGraph() {
             }
             composable(
                 route = Screen.History.route,
-                enterTransition = { fadeIn(animationSpec = spring(stiffness = 400f)) },
-                exitTransition = { fadeOut() },
+                enterTransition = { fadeIn(animationSpec = spring(stiffness = Spring.StiffnessMedium)) },
+                exitTransition = { fadeOut(animationSpec = spring(stiffness = Spring.StiffnessMedium)) },
+                popEnterTransition = { fadeIn(animationSpec = spring(stiffness = Spring.StiffnessMedium)) },
+                popExitTransition = { fadeOut(animationSpec = spring(stiffness = Spring.StiffnessMedium)) },
             ) {
                 HistoryScreen()
             }
             composable(
                 route = Screen.Settings.route,
-                enterTransition = { fadeIn(animationSpec = spring(stiffness = 400f)) },
-                exitTransition = { fadeOut() },
+                enterTransition = { fadeIn(animationSpec = spring(stiffness = Spring.StiffnessMedium)) },
+                exitTransition = { fadeOut(animationSpec = spring(stiffness = Spring.StiffnessMedium)) },
+                popEnterTransition = { fadeIn(animationSpec = spring(stiffness = Spring.StiffnessMedium)) },
+                popExitTransition = { fadeOut(animationSpec = spring(stiffness = Spring.StiffnessMedium)) },
             ) {
                 SettingsScreen(
                     onNavigateToOnboarding = {
@@ -145,10 +166,19 @@ fun HavnNavGraph() {
             composable(
                 route = Screen.AddMed.route,
                 enterTransition = {
-                    fadeIn() + slideInVertically(initialOffsetY = { it / 3 })
+                    fadeIn(animationSpec = spring(stiffness = Spring.StiffnessMedium)) +
+                    slideInVertically(animationSpec = spring(stiffness = Spring.StiffnessMedium, dampingRatio = Spring.DampingRatioLowBouncy)) { it / 3 }
                 },
                 exitTransition = {
-                    fadeOut() + slideOutVertically(targetOffsetY = { it / 3 })
+                    fadeOut(animationSpec = spring(stiffness = Spring.StiffnessMedium)) +
+                    slideOutVertically(animationSpec = spring(stiffness = Spring.StiffnessMedium)) { it / 3 }
+                },
+                popEnterTransition = {
+                    fadeIn(animationSpec = spring(stiffness = Spring.StiffnessMedium))
+                },
+                popExitTransition = {
+                    fadeOut(animationSpec = spring(stiffness = Spring.StiffnessMedium)) +
+                    slideOutVertically(animationSpec = spring(stiffness = Spring.StiffnessMedium)) { it / 3 }
                 },
             ) {
                 AddMedicationScreen(

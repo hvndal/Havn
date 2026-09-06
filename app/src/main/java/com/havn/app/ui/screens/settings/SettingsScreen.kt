@@ -1,6 +1,7 @@
 package com.havn.app.ui.screens.settings
 
 import androidx.compose.animation.animateColorAsState
+import com.havn.app.ui.components.pressScale
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
@@ -117,7 +118,7 @@ fun SettingsScreen(
                     viewModel.setReminderSound(next)
                 },
             )
-            Divider(color = SurfaceHighest, thickness = 0.5.dp)
+            HorizontalDivider(color = SurfaceHighest, thickness = 0.5.dp)
             SettingsToggle(
                 label = "Vibration",
                 checked = uiState.reminderVibration,
@@ -143,7 +144,7 @@ fun SettingsScreen(
                     viewModel.setTheme(next)
                 },
             )
-            Divider(color = SurfaceHighest, thickness = 0.5.dp)
+            HorizontalDivider(color = SurfaceHighest, thickness = 0.5.dp)
             SettingsRow(
                 label = "App icon",
                 value = "Default",
@@ -158,7 +159,7 @@ fun SettingsScreen(
         Spacer(Modifier.height(10.dp))
         SettingsCard {
             SettingsRow(label = "Backup (Local)", value = "", onClick = {})
-            Divider(color = SurfaceHighest, thickness = 0.5.dp)
+            HorizontalDivider(color = SurfaceHighest, thickness = 0.5.dp)
             SettingsRow(label = "About H\u00e4vn", value = "v1.0", onClick = {})
         }
 
@@ -200,20 +201,27 @@ fun SettingsScreen(
 
 @Composable
 private fun UserProfileCard(user: User, isActive: Boolean, onSelect: () -> Unit, onDelete: () -> Unit) {
+    val cardInteraction = remember { MutableInteractionSource() }
     val borderColor by animateColorAsState(
         targetValue = if (isActive) Sage else SurfaceHighest,
         animationSpec = spring(stiffness = Spring.StiffnessMedium),
         label = "border",
+    )
+    val cardBg by animateColorAsState(
+        targetValue = if (isActive) SagePale.copy(alpha = 0.25f) else White,
+        animationSpec = spring(stiffness = Spring.StiffnessMedium),
+        label = "cardBg",
     )
     val color = runCatching { Color(android.graphics.Color.parseColor(user.avatarColor)) }.getOrDefault(Sage)
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .pressScale(targetScale = 0.98f, interactionSource = cardInteraction)
             .clip(RoundedCornerShape(14.dp))
-            .background(White)
+            .background(cardBg)
             .border(1.5.dp, borderColor, RoundedCornerShape(14.dp))
-            .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }, onClick = onSelect)
+            .clickable(indication = null, interactionSource = cardInteraction, onClick = onSelect)
             .padding(14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -306,10 +314,12 @@ private fun SettingsCard(content: @Composable ColumnScope.() -> Unit) {
 
 @Composable
 private fun SettingsRow(label: String, value: String, onClick: () -> Unit) {
+    val rowInteraction = remember { MutableInteractionSource() }
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }, onClick = onClick)
+            .pressScale(targetScale = 0.98f, interactionSource = rowInteraction)
+            .clickable(indication = null, interactionSource = rowInteraction, onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,

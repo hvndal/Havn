@@ -2,7 +2,7 @@ package com.havn.app.ui.navigation
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -22,6 +23,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import com.havn.app.ui.components.pressScale
 import com.havn.app.ui.theme.*
 
 @Composable
@@ -68,6 +70,7 @@ private fun HavnNavItem(
     isSelected: Boolean,
     onClick: () -> Unit,
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
     val bgColor by animateColorAsState(
         targetValue = if (isSelected) SagePale.copy(alpha = 0.55f) else Color.Transparent,
         animationSpec = spring(stiffness = Spring.StiffnessMedium),
@@ -78,13 +81,19 @@ private fun HavnNavItem(
         animationSpec = spring(stiffness = Spring.StiffnessMedium),
         label = "navText"
     )
+    val iconScale by animateFloatAsState(
+        targetValue = if (isSelected) 1.08f else 1.0f,
+        animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioMediumBouncy),
+        label = "iconScale"
+    )
 
     Column(
         modifier = Modifier
+            .pressScale(targetScale = 0.94f, interactionSource = interactionSource)
             .clip(RoundedCornerShape(14.dp))
             .background(bgColor)
             .clickable(
-                interactionSource = remember { MutableInteractionSource() },
+                interactionSource = interactionSource,
                 indication = null,
                 onClick = onClick,
             )
@@ -98,7 +107,9 @@ private fun HavnNavItem(
             ),
             contentDescription = item.label,
             tint = textColor,
-            modifier = Modifier.size(22.dp),
+            modifier = Modifier
+                .size(22.dp)
+                .scale(iconScale),
         )
         Spacer(Modifier.height(3.dp))
         Text(

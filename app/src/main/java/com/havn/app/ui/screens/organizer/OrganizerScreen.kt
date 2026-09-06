@@ -1,5 +1,6 @@
 package com.havn.app.ui.screens.organizer
 
+import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -29,8 +30,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.havn.app.R
 import com.havn.app.domain.model.Medication
 import com.havn.app.ui.components.HavnOrganizerView
+import com.havn.app.ui.components.HavnSkeletonBox
 import com.havn.app.ui.components.MedIcon
 import com.havn.app.ui.components.OrganizerWeekMapper
+import com.havn.app.ui.components.pressScale
 import com.havn.app.ui.theme.*
 import java.time.LocalDate
 
@@ -54,6 +57,7 @@ fun OrganizerScreen(
     val days = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
     val todayDow = LocalDate.now().dayOfWeek.value - 1
     var selectedDay by remember { mutableIntStateOf(uiState.selectedDayIndex) }
+    var isLoaded by remember { mutableStateOf(false) }
 
     LaunchedEffect(uiState.selectedDayIndex) {
         selectedDay = uiState.selectedDayIndex
@@ -74,12 +78,14 @@ fun OrganizerScreen(
                 .padding(horizontal = 24.dp, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            val backInteraction = remember { MutableInteractionSource() }
             Box(
                 modifier = Modifier
                     .size(36.dp)
+                    .pressScale(targetScale = 0.90f, interactionSource = backInteraction)
                     .clip(CircleShape)
                     .background(SurfaceHigh)
-                    .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
+                    .clickable(indication = null, interactionSource = backInteraction) {
                         viewModel.soundManager.playSoftTap()
                         onBack()
                     },
@@ -122,6 +128,13 @@ fun OrganizerScreen(
                 .background(SurfaceLow)
                 .border(1.dp, SurfaceHighest, RoundedCornerShape(24.dp)),
         ) {
+            if (!isLoaded) {
+                HavnSkeletonBox(
+                    modifier = Modifier.fillMaxSize(),
+                    shape = RoundedCornerShape(24.dp)
+                )
+            }
+
             HavnOrganizerView(
                 weekDataJson = uiState.weekDataJson,
                 selectedDay = selectedDay,
@@ -131,6 +144,7 @@ fun OrganizerScreen(
                     viewModel.selectDay(slot)
                     viewModel.onSlotTapped(slot)
                 },
+                onPageLoaded = { isLoaded = true }
             )
         }
 
@@ -166,32 +180,46 @@ fun OrganizerScreen(
         )
         Spacer(Modifier.height(12.dp))
 
-        if (uiState.selectedDayMeds.isEmpty()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 32.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_leaf),
-                    contentDescription = null,
-                    tint = SageLight,
-                    modifier = Modifier.size(40.dp),
-                )
-                Spacer(Modifier.height(12.dp))
-                Text(
-                    text = "Nothing scheduled.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = StoneGrey,
-                )
-            }
-        } else {
-            uiState.selectedDayMeds.forEach { med ->
-                OrganizerMedRow(
-                    med = med,
-                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp),
-                )
+        AnimatedContent(
+            targetState = selectedDay,
+            transitionSpec = {
+                (fadeIn(animationSpec = spring(stiffness = Spring.StiffnessMedium)) +
+                 slideInHorizontally(animationSpec = spring(stiffness = Spring.StiffnessMedium)) { if (targetState > initialState) it / 6 else -it / 6 }) togetherWith
+                (fadeOut(animationSpec = spring(stiffness = Spring.StiffnessMedium)) +
+                 slideOutHorizontally(animationSpec = spring(stiffness = Spring.StiffnessMedium)) { if (targetState > initialState) -it / 6 else it / 6 })
+            },
+            label = "dayRitualList"
+        ) { dayIdx ->
+            val dayMeds = OrganizerWeekMapper.medsForDay(uiState.allMeds, dayIdx)
+            Column {
+                if (dayMeds.isEmpty()) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp, vertical = 32.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_leaf),
+                            contentDescription = null,
+                            tint = SageLight,
+                            modifier = Modifier.size(40.dp),
+                        )
+                        Spacer(Modifier.height(12.dp))
+                        Text(
+                            text = "Nothing scheduled.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = StoneGrey,
+                        )
+                    }
+                } else {
+                    dayMeds.forEach { med ->
+                        OrganizerMedRow(
+                            med = med,
+                            modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp),
+                        )
+                    }
+                }
             }
         }
 
@@ -207,21 +235,38 @@ private fun DayChip(
     medCount: Int,
     onClick: () -> Unit,
 ) {
-    val bg = when {
-        isSelected -> Sage
-        isToday -> SagePale
-        else -> SurfaceHigh
-    }
-    val text = when {
-        isSelected -> White
-        isToday -> SageDeep
-        else -> CharcoalMid
-    }
+    val chipInteraction = remember { MutableInteractionSource() }
+    val bg by animateColorAsState(
+        targetValue = when {
+            isSelected -> Sage
+            isToday -> SagePale
+            else -> SurfaceHigh
+        },
+        animationSpec = spring(stiffness = Spring.StiffnessMedium),
+        label = "chipBg"
+    )
+    val text by animateColorAsState(
+        targetValue = when {
+            isSelected -> White
+            isToday -> SageDeep
+            else -> CharcoalMid
+        },
+        animationSpec = spring(stiffness = Spring.StiffnessMedium),
+        label = "chipText"
+    )
+    val chipScale by animateFloatAsState(
+        targetValue = if (isSelected) 1.05f else 1.0f,
+        animationSpec = spring(stiffness = Spring.StiffnessMedium, dampingRatio = Spring.DampingRatioMediumBouncy),
+        label = "chipScale"
+    )
+
     Column(
         modifier = Modifier
+            .scale(chipScale)
+            .pressScale(targetScale = 0.92f, interactionSource = chipInteraction)
             .clip(RoundedCornerShape(20.dp))
             .background(bg)
-            .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }, onClick = onClick)
+            .clickable(indication = null, interactionSource = chipInteraction, onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -233,7 +278,7 @@ private fun DayChip(
         )
         if (medCount > 0) {
             Text(
-                text = "$medCount",
+                text = "${medCount}",
                 style = MaterialTheme.typography.labelSmall,
                 color = text.copy(alpha = 0.75f),
             )
@@ -247,10 +292,12 @@ private fun OrganizerMedRow(med: Medication, modifier: Modifier = Modifier) {
     val swatchColor = runCatching {
         androidx.compose.ui.graphics.Color(android.graphics.Color.parseColor(swatch))
     }.getOrDefault(Sage)
+    val rowInteraction = remember { MutableInteractionSource() }
 
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .pressScale(targetScale = 0.98f, interactionSource = rowInteraction)
             .shadow(
                 elevation = 6.dp,
                 shape = RoundedCornerShape(14.dp),
