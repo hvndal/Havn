@@ -1,5 +1,7 @@
 package com.havn.app.ui.screens.history
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -12,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -23,6 +26,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.havn.app.R
 import com.havn.app.domain.model.DoseLog
 import com.havn.app.domain.model.DoseStatus
+import com.havn.app.ui.components.pressScale
 import com.havn.app.ui.theme.*
 import java.time.LocalDate
 import java.time.YearMonth
@@ -50,13 +54,25 @@ fun HistoryScreen(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Text(
-                text = uiState.currentMonth.format(
-                    DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH)
-                ),
-                style = MaterialTheme.typography.headlineMedium,
-                color = Charcoal,
-            )
+            AnimatedContent(
+                targetState = uiState.currentMonth,
+                transitionSpec = {
+                    (fadeIn(animationSpec = spring(stiffness = Spring.StiffnessMedium)) +
+                     slideInVertically(animationSpec = spring(stiffness = Spring.StiffnessMedium)) { if (targetState > initialState) it / 2 else -it / 2 }) togetherWith
+                    (fadeOut(animationSpec = spring(stiffness = Spring.StiffnessMedium)) +
+                     slideOutVertically(animationSpec = spring(stiffness = Spring.StiffnessMedium)) { if (targetState > initialState) -it / 2 else it / 2 })
+                },
+                label = "monthTitle"
+            ) { month ->
+                Text(
+                    text = month.format(
+                        DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH)
+                    ),
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = Charcoal,
+                )
+            }
+
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 ChevronButton("<") { viewModel.previousMonth() }
                 ChevronButton(">") { viewModel.nextMonth() }
@@ -66,68 +82,91 @@ fun HistoryScreen(
         Spacer(Modifier.height(24.dp))
 
         // Calendar
-        HavnCalendar(
-            yearMonth = uiState.currentMonth,
-            doseLogs = uiState.monthLogs,
-            selectedDate = uiState.selectedDate,
-            onDateSelected = { viewModel.selectDate(it) },
-        )
+        AnimatedContent(
+            targetState = uiState.currentMonth,
+            transitionSpec = {
+                (fadeIn(animationSpec = spring(stiffness = Spring.StiffnessMedium)) +
+                 slideInHorizontally(animationSpec = spring(stiffness = Spring.StiffnessMedium)) { if (targetState > initialState) it / 4 else -it / 4 }) togetherWith
+                (fadeOut(animationSpec = spring(stiffness = Spring.StiffnessMedium)) +
+                 slideOutHorizontally(animationSpec = spring(stiffness = Spring.StiffnessMedium)) { if (targetState > initialState) -it / 4 else it / 4 })
+            },
+            label = "calendarGrid"
+        ) { month ->
+            HavnCalendar(
+                yearMonth = month,
+                doseLogs = uiState.monthLogs,
+                selectedDate = uiState.selectedDate,
+                onDateSelected = { viewModel.selectDate(it) },
+            )
+        }
 
         Spacer(Modifier.height(24.dp))
 
         // Selected day dose log
-        if (uiState.selectedDate != null) {
-            val dayLogs = uiState.monthLogs.filter { log ->
-                val date = java.time.Instant.ofEpochMilli(log.scheduledTime)
-                    .atZone(java.time.ZoneId.systemDefault()).toLocalDate()
-                date == uiState.selectedDate
-            }
-            Text(
-                text = uiState.selectedDate!!.format(
-                    DateTimeFormatter.ofPattern("EEEE, d MMM", Locale.ENGLISH)
-                ),
-                style = MaterialTheme.typography.labelMedium,
-                color = StoneGrey,
-                letterSpacing = 0.06.sp,
-            )
-            Spacer(Modifier.height(10.dp))
-            if (dayLogs.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxWidth().padding(32.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
+        AnimatedContent(
+            targetState = uiState.selectedDate,
+            transitionSpec = {
+                (fadeIn(animationSpec = spring(stiffness = Spring.StiffnessMedium)) +
+                 slideInVertically(animationSpec = spring(stiffness = Spring.StiffnessMedium)) { it / 6 }) togetherWith
+                fadeOut(animationSpec = spring(stiffness = Spring.StiffnessMedium))
+            },
+            label = "dayLogs"
+        ) { selectedDate ->
+            if (selectedDate != null) {
+                val dayLogs = uiState.monthLogs.filter { log ->
+                    val date = java.time.Instant.ofEpochMilli(log.scheduledTime)
+                        .atZone(java.time.ZoneId.systemDefault()).toLocalDate()
+                    date == selectedDate
+                }
+                Column {
                     Text(
-                        text = "No records for this day.",
-                        style = MaterialTheme.typography.bodyMedium,
+                        text = selectedDate.format(
+                            DateTimeFormatter.ofPattern("EEEE, d MMM", Locale.ENGLISH)
+                        ),
+                        style = MaterialTheme.typography.labelMedium,
                         color = StoneGrey,
+                        letterSpacing = 0.06.sp,
                     )
+                    Spacer(Modifier.height(10.dp))
+                    if (dayLogs.isEmpty()) {
+                        Box(
+                            modifier = Modifier.fillMaxWidth().padding(32.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                text = "No records for this day.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = StoneGrey,
+                            )
+                        }
+                    } else {
+                        dayLogs.forEach { log ->
+                            DoseLogRow(log = log)
+                            Spacer(Modifier.height(8.dp))
+                        }
+                    }
                 }
             } else {
-                dayLogs.forEach { log ->
-                    DoseLogRow(log = log)
-                    Spacer(Modifier.height(8.dp))
+                // Empty state
+                Column(
+                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_leaf),
+                        contentDescription = null,
+                        tint = SageLight,
+                        modifier = Modifier.size(40.dp),
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    Text(
+                        text = "Tap a day to see your history.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = StoneGrey,
+                        textAlign = TextAlign.Center,
+                    )
                 }
-            }
-        } else {
-            // Empty state
-            Column(
-                modifier = Modifier.fillMaxWidth().weight(1f),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_leaf),
-                    contentDescription = null,
-                    tint = SageLight,
-                    modifier = Modifier.size(40.dp),
-                )
-                Spacer(Modifier.height(16.dp))
-                Text(
-                    text = "Tap a day to see your history.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = StoneGrey,
-                    textAlign = TextAlign.Center,
-                )
             }
         }
     }
@@ -209,16 +248,31 @@ private fun CalendarDay(
     totalCount: Int,
     onClick: () -> Unit,
 ) {
-    val bg = when {
-        isSelected -> Sage
-        isToday    -> SagePale
-        else       -> Color.Transparent
-    }
-    val text = when {
-        isSelected -> White
-        isToday    -> SageDeep
-        else       -> Charcoal
-    }
+    val dayInteraction = remember { MutableInteractionSource() }
+    val bg by animateColorAsState(
+        targetValue = when {
+            isSelected -> Sage
+            isToday    -> SagePale
+            else       -> Color.Transparent
+        },
+        animationSpec = spring(stiffness = Spring.StiffnessMedium),
+        label = "dayBg"
+    )
+    val text by animateColorAsState(
+        targetValue = when {
+            isSelected -> White
+            isToday    -> SageDeep
+            else       -> Charcoal
+        },
+        animationSpec = spring(stiffness = Spring.StiffnessMedium),
+        label = "dayText"
+    )
+    val dayScale by animateFloatAsState(
+        targetValue = if (isSelected) 1.08f else 1.0f,
+        animationSpec = spring(stiffness = Spring.StiffnessMedium, dampingRatio = Spring.DampingRatioMediumBouncy),
+        label = "dayScale"
+    )
+
     // Adherence dot color
     val dotColor = when {
         totalCount == 0 -> Color.Transparent
@@ -229,12 +283,14 @@ private fun CalendarDay(
 
     Column(
         modifier = Modifier
+            .scale(dayScale)
+            .pressScale(targetScale = 0.90f, interactionSource = dayInteraction)
             .size(36.dp)
             .clip(CircleShape)
             .background(bg)
             .clickable(
                 indication = null,
-                interactionSource = remember { MutableInteractionSource() },
+                interactionSource = dayInteraction,
                 onClick = onClick,
             ),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -250,7 +306,7 @@ private fun CalendarDay(
         if (dotColor != Color.Transparent) {
             Spacer(Modifier.height(1.dp))
             Box(
-                modifier = Modifier.size(4.dp).clip(CircleShape).background(dotColor)
+                modifier = Modifier.size(4.dp).clip(CircleShape).background(if (isSelected) White else dotColor)
             )
         }
     }
@@ -258,9 +314,11 @@ private fun CalendarDay(
 
 @Composable
 private fun DoseLogRow(log: DoseLog) {
+    val rowInteraction = remember { MutableInteractionSource() }
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .pressScale(targetScale = 0.98f, interactionSource = rowInteraction)
             .clip(RoundedCornerShape(12.dp))
             .background(White)
             .border(1.dp, SurfaceHighest, RoundedCornerShape(12.dp))
@@ -303,12 +361,14 @@ private fun DoseLogRow(log: DoseLog) {
 
 @Composable
 private fun ChevronButton(label: String, onClick: () -> Unit) {
+    val chevronInteraction = remember { MutableInteractionSource() }
     Box(
         modifier = Modifier
             .size(32.dp)
+            .pressScale(targetScale = 0.88f, interactionSource = chevronInteraction)
             .clip(CircleShape)
             .background(SurfaceHigh)
-            .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }, onClick = onClick),
+            .clickable(indication = null, interactionSource = chevronInteraction, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Text(text = label, color = CharcoalMid, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)

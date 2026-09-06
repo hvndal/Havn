@@ -15,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -28,6 +29,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.havn.app.domain.model.User
 import com.havn.app.ui.components.StaggeredTextReveal
+import com.havn.app.ui.components.animatedFocusBorder
+import com.havn.app.ui.components.pressScale
 import com.havn.app.ui.screens.splash.HavnShaderBackground
 import com.havn.app.ui.theme.*
 
@@ -185,9 +188,11 @@ private fun OnboardingPage1(
         }
 
         // Name input
+        val nameInteraction = remember { MutableInteractionSource() }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .animatedFocusBorder(nameInteraction, shape = RoundedCornerShape(16.dp))
                 .background(White, RoundedCornerShape(16.dp))
                 .border(1.dp, SurfaceHighest, RoundedCornerShape(16.dp))
                 .padding(horizontal = 20.dp, vertical = 16.dp),
@@ -195,6 +200,7 @@ private fun OnboardingPage1(
             BasicTextField(
                 value = name,
                 onValueChange = onNameChange,
+                interactionSource = nameInteraction,
                 modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
                 textStyle = MaterialTheme.typography.titleMedium.copy(color = Charcoal, fontSize = 18.sp),
                 cursorBrush = SolidColor(Sage),
@@ -209,9 +215,11 @@ private fun OnboardingPage1(
         Spacer(Modifier.height(12.dp))
 
         // Age input
+        val ageInteraction = remember { MutableInteractionSource() }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .animatedFocusBorder(ageInteraction, shape = RoundedCornerShape(16.dp))
                 .background(White, RoundedCornerShape(16.dp))
                 .border(1.dp, SurfaceHighest, RoundedCornerShape(16.dp))
                 .padding(horizontal = 20.dp, vertical = 16.dp),
@@ -219,6 +227,7 @@ private fun OnboardingPage1(
             BasicTextField(
                 value = age,
                 onValueChange = { if (it.length <= 3) onAgeChange(it) },
+                interactionSource = ageInteraction,
                 modifier = Modifier.fillMaxWidth(),
                 textStyle = MaterialTheme.typography.titleMedium.copy(color = Charcoal, fontSize = 18.sp),
                 cursorBrush = SolidColor(Sage),
@@ -278,13 +287,22 @@ private fun OnboardingPage2(
             AVATAR_COLORS.forEach { hex ->
                 val color = Color(android.graphics.Color.parseColor(hex))
                 val isSelected = hex == selectedColor
+                val colorScale by animateFloatAsState(
+                    targetValue = if (isSelected) 1.15f else 1.0f,
+                    animationSpec = spring(stiffness = Spring.StiffnessMedium, dampingRatio = Spring.DampingRatioMediumBouncy),
+                    label = "avatarColorScale"
+                )
+                val colorInteraction = remember { MutableInteractionSource() }
+
                 Box(
                     modifier = Modifier
-                        .size(if (isSelected) 44.dp else 36.dp)
+                        .scale(colorScale)
+                        .pressScale(targetScale = 0.90f, interactionSource = colorInteraction)
+                        .size(36.dp)
                         .clip(CircleShape)
                         .background(color)
-                        .border(if (isSelected) 2.dp else 0.dp, Charcoal.copy(alpha = 0.4f), CircleShape)
-                        .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { onColorSelect(hex) },
+                        .border(if (isSelected) 2.dp else 0.dp, Charcoal.copy(alpha = 0.45f), CircleShape)
+                        .clickable(indication = null, interactionSource = colorInteraction) { onColorSelect(hex) },
                 )
             }
         }
@@ -310,6 +328,7 @@ fun HavnButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
 ) {
+    val btnInteraction = remember { MutableInteractionSource() }
     val scale by animateFloatAsState(
         targetValue = if (enabled) 1f else 0.96f,
         animationSpec = spring(stiffness = Spring.StiffnessMedium),
@@ -318,13 +337,18 @@ fun HavnButton(
     Button(
         onClick = onClick,
         enabled = enabled,
-        modifier = modifier.fillMaxWidth().height(56.dp).graphicsLayer { scaleX = scale; scaleY = scale },
+        modifier = modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .pressScale(targetScale = 0.96f, interactionSource = btnInteraction)
+            .graphicsLayer { scaleX = scale; scaleY = scale },
         shape = RoundedCornerShape(28.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = Sage, contentColor = White,
             disabledContainerColor = SurfaceHigh, disabledContentColor = StoneGrey,
         ),
         elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp, 0.dp),
+        interactionSource = btnInteraction,
     ) {
         Text(text = text, style = MaterialTheme.typography.labelLarge.copy(letterSpacing = 0.04.sp))
     }

@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -30,8 +31,10 @@ import com.havn.app.R
 import com.havn.app.audio.SoundManager
 import com.havn.app.domain.model.*
 import com.havn.app.ui.components.HavnOrganizerView
+import com.havn.app.ui.components.HavnSkeletonBox
 import com.havn.app.ui.components.MedIcon
 import com.havn.app.ui.components.OrganizerWeekMapper
+import com.havn.app.ui.components.pressScale
 import com.havn.app.ui.theme.*
 import java.time.LocalDate
 import java.time.LocalTime
@@ -85,7 +88,23 @@ fun HomeScreen(
                     name = uiState.user?.name ?: "",
                     modifier = Modifier.padding(horizontal = 24.dp),
                 )
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(16.dp))
+            }
+
+            // ── Ritual Progress Indicator ─────────────────────────
+            val totalMeds = uiState.todayMeds.size
+            val takenMeds = uiState.todayMeds.count { it.doseLog?.status == DoseStatus.TAKEN }
+            if (totalMeds > 0) {
+                item {
+                    DailyProgressSection(
+                        takenCount = takenMeds,
+                        totalCount = totalMeds,
+                        modifier = Modifier.padding(horizontal = 24.dp),
+                    )
+                    Spacer(Modifier.height(20.dp))
+                }
+            } else {
+                item { Spacer(Modifier.height(4.dp)) }
             }
 
             // ── 3D Organizer (WebView hero) ───────────────────────
@@ -116,9 +135,8 @@ fun HomeScreen(
                             style = MaterialTheme.typography.titleMedium,
                             color = Charcoal,
                         )
-                        val count = uiState.todayMeds.size
                         Text(
-                            text = if (count == 0) "Nothing waiting today." else "$count medication${if (count > 1) "s" else ""}",
+                            text = if (totalMeds == 0) "Nothing waiting today." else " of  completed",
                             style = MaterialTheme.typography.labelMedium,
                             color = StoneGrey,
                             modifier = Modifier.padding(top = 2.dp),
@@ -129,13 +147,30 @@ fun HomeScreen(
                 Spacer(Modifier.height(16.dp))
             }
 
-            // ── Medication List ───────────────────────────────────
-            if (uiState.todayMeds.isEmpty()) {
+            // ── Medication List / Completed Banner ────────────────
+            if (totalMeds == 0) {
                 item {
                     EmptyTodayState(
                         modifier = Modifier
                             .padding(horizontal = 24.dp)
                             .fillMaxWidth(),
+                    )
+                }
+            } else if (takenMeds == totalMeds) {
+                item {
+                    AllMedsCompletedCard(
+                        modifier = Modifier
+                            .padding(horizontal = 24.dp)
+                            .padding(bottom = 16.dp),
+                    )
+                }
+                items(uiState.todayMeds, key = { it.medication.id }) { todayMed ->
+                    MedicationCard(
+                        todayMed = todayMed,
+                        onToggle = { viewModel.toggleMedication(todayMed.medication) },
+                        modifier = Modifier
+                            .padding(horizontal = 24.dp)
+                            .padding(bottom = 10.dp),
                     )
                 }
             } else {
@@ -154,6 +189,103 @@ fun HomeScreen(
 }
 
 @Composable
+private fun DailyProgressSection(
+    takenCount: Int,
+    totalCount: Int,
+    modifier: Modifier = Modifier,
+) {
+    val progress = if (totalCount > 0) takenCount.toFloat() / totalCount else 0f
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress,
+        animationSpec = spring(stiffness = Spring.StiffnessLow, dampingRatio = Spring.DampingRatioNoBouncy),
+        label = "ritualProgress"
+    )
+
+    Column(modifier = modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "RITUAL PROGRESS",
+                style = MaterialTheme.typography.labelSmall,
+                color = StoneGrey,
+                letterSpacing = 1.1.sp,
+            )
+            Text(
+                text = " / ",
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                color = SageDeep,
+            )
+        }
+        Spacer(Modifier.height(6.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(6.dp)
+                .clip(CircleShape)
+                .background(SurfaceMid)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(animatedProgress)
+                    .clip(CircleShape)
+                    .background(Sage)
+            )
+        }
+    }
+}
+
+@Composable
+private fun AllMedsCompletedCard(modifier: Modifier = Modifier) {
+    val scaleAnim = remember { Animatable(0.95f) }
+    LaunchedEffect(Unit) {
+        scaleAnim.animateTo(1f, spring(stiffness = Spring.StiffnessMedium, dampingRatio = Spring.DampingRatioMediumBouncy))
+    }
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .scale(scaleAnim.value)
+            .clip(RoundedCornerShape(16.dp))
+            .background(SagePale.copy(alpha = 0.5f))
+            .border(1.dp, SageLight.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(38.dp)
+                .clip(CircleShape)
+                .background(Sage),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_check),
+                contentDescription = null,
+                tint = White,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+        Column {
+            Text(
+                text = "Daily Ritual Complete",
+                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
+                color = SageDeep
+            )
+            Text(
+                text = "All scheduled doses taken for today.",
+                style = MaterialTheme.typography.labelMedium,
+                color = SageDeep.copy(alpha = 0.75f)
+            )
+        }
+    }
+}
+
+@Composable
 private fun HomeTopBar(user: User?) {
     Row(
         modifier = Modifier
@@ -167,12 +299,15 @@ private fun HomeTopBar(user: User?) {
             runCatching { Color(android.graphics.Color.parseColor(it)) }.getOrDefault(Sage)
         } ?: Sage
 
+        val profileInteraction = remember { MutableInteractionSource() }
         Box(
             modifier = Modifier
+                .pressScale(targetScale = 0.92f, interactionSource = profileInteraction)
                 .size(36.dp)
                 .clip(CircleShape)
                 .background(color.copy(alpha = 0.25f))
-                .border(1.dp, color.copy(alpha = 0.4f), CircleShape),
+                .border(1.dp, color.copy(alpha = 0.4f), CircleShape)
+                .clickable(interactionSource = profileInteraction, indication = null) { },
             contentAlignment = Alignment.Center,
         ) {
             Text(
@@ -192,10 +327,13 @@ private fun HomeTopBar(user: User?) {
             color = Charcoal,
         )
 
+        val notifInteraction = remember { MutableInteractionSource() }
         Box(
             modifier = Modifier
+                .pressScale(targetScale = 0.92f, interactionSource = notifInteraction)
                 .size(40.dp)
-                .clip(CircleShape),
+                .clip(CircleShape)
+                .clickable(interactionSource = notifInteraction, indication = null) { },
             contentAlignment = Alignment.Center,
         ) {
             Icon(
@@ -240,10 +378,14 @@ private fun OrganizerHeroSection(
     soundManager: SoundManager,
     modifier: Modifier = Modifier,
 ) {
+    var isLoaded by remember { mutableStateOf(false) }
+    val heroInteraction = remember { MutableInteractionSource() }
+
     Box(
         modifier = modifier
             .fillMaxWidth()
             .aspectRatio(4f / 3f)
+            .pressScale(targetScale = 0.98f, interactionSource = heroInteraction)
             .shadow(
                 elevation = 10.dp,
                 shape = RoundedCornerShape(16.dp),
@@ -254,16 +396,24 @@ private fun OrganizerHeroSection(
             .background(SurfaceLow)
             .border(1.dp, SurfaceHighest, RoundedCornerShape(16.dp))
             .clickable(
-                interactionSource = remember { MutableInteractionSource() },
+                interactionSource = heroInteraction,
                 indication = null,
                 onClick = onTap,
             ),
     ) {
+        if (!isLoaded) {
+            HavnSkeletonBox(
+                modifier = Modifier.fillMaxSize(),
+                shape = RoundedCornerShape(16.dp)
+            )
+        }
+
         HavnOrganizerView(
             weekDataJson = weekDataJson,
             selectedDay = selectedDay,
             modifier = Modifier.fillMaxSize(),
             onSlotTapped = { soundManager.playCeramicClick() },
+            onPageLoaded = { isLoaded = true }
         )
 
         Row(
@@ -286,22 +436,18 @@ private fun OrganizerHeroSection(
 
 @Composable
 private fun AddMedButton(onClick: () -> Unit) {
-    val pressed = remember { mutableStateOf(false) }
-    val scale by animateFloatAsState(
-        targetValue = if (pressed.value) 0.93f else 1f,
-        animationSpec = spring(dampingRatio = 0.4f, stiffness = 500f),
-        label = "addBtnScale",
-    )
+    val interactionSource = remember { MutableInteractionSource() }
     Box(
         modifier = Modifier
             .size(44.dp)
-            .scale(scale)
+            .pressScale(targetScale = 0.90f, interactionSource = interactionSource)
             .clip(CircleShape)
             .background(Sage)
             .clickable(
-                interactionSource = remember { MutableInteractionSource() },
+                interactionSource = interactionSource,
                 indication = null,
-            ) { onClick() },
+                onClick = onClick,
+            ),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
@@ -320,6 +466,8 @@ private fun MedicationCard(
     modifier: Modifier = Modifier,
 ) {
     val isTaken = todayMed.doseLog?.status == DoseStatus.TAKEN
+    val cardInteraction = remember { MutableInteractionSource() }
+
     val bgColor by animateColorAsState(
         targetValue = if (isTaken) SagePale.copy(alpha = 0.4f) else White,
         animationSpec = spring(stiffness = Spring.StiffnessMedium),
@@ -332,13 +480,19 @@ private fun MedicationCard(
     )
     val checkScale by animateFloatAsState(
         targetValue = if (isTaken) 1f else 0f,
-        animationSpec = spring(dampingRatio = 0.5f, stiffness = 500f),
+        animationSpec = spring(dampingRatio = 0.45f, stiffness = Spring.StiffnessMediumLow),
         label = "checkScale",
+    )
+    val checkRotation by animateFloatAsState(
+        targetValue = if (isTaken) 0f else -25f,
+        animationSpec = spring(dampingRatio = 0.5f, stiffness = Spring.StiffnessMediumLow),
+        label = "checkRotation",
     )
 
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .pressScale(targetScale = 0.97f, interactionSource = cardInteraction)
             .shadow(
                 elevation = 8.dp,
                 shape = RoundedCornerShape(16.dp),
@@ -349,7 +503,7 @@ private fun MedicationCard(
             .background(bgColor)
             .border(1.dp, SurfaceHighest, RoundedCornerShape(16.dp))
             .clickable(
-                interactionSource = remember { MutableInteractionSource() },
+                interactionSource = cardInteraction,
                 indication = null,
                 onClick = onToggle,
             )
@@ -408,6 +562,7 @@ private fun MedicationCard(
                     modifier = Modifier
                         .size(24.dp)
                         .scale(checkScale)
+                        .rotate(checkRotation)
                         .clip(CircleShape)
                         .background(Sage),
                     contentAlignment = Alignment.Center,
@@ -426,6 +581,17 @@ private fun MedicationCard(
 
 @Composable
 private fun EmptyTodayState(modifier: Modifier = Modifier) {
+    val infiniteTransition = rememberInfiniteTransition(label = "idleBreathing")
+    val leafScale by infiniteTransition.animateFloat(
+        initialValue = 0.96f,
+        targetValue = 1.04f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2400, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "leafScale"
+    )
+
     Column(
         modifier = modifier.padding(vertical = 48.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -434,7 +600,9 @@ private fun EmptyTodayState(modifier: Modifier = Modifier) {
             painter = painterResource(R.drawable.ic_leaf),
             contentDescription = null,
             tint = SageLight,
-            modifier = Modifier.size(48.dp),
+            modifier = Modifier
+                .size(48.dp)
+                .scale(leafScale),
         )
         Spacer(Modifier.height(16.dp))
         Text(

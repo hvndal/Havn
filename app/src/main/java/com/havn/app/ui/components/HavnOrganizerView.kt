@@ -20,6 +20,7 @@ fun HavnOrganizerView(
     modifier: Modifier = Modifier,
     onSlotTapped: (Int) -> Unit = {},
     onWebViewReady: (WebView) -> Unit = {},
+    onPageLoaded: () -> Unit = {},
 ) {
     val context = LocalContext.current
     var webView by remember { mutableStateOf<WebView?>(null) }
@@ -43,6 +44,7 @@ fun HavnOrganizerView(
                 webViewClient = object : WebViewClient() {
                     override fun onPageFinished(view: WebView?, url: String?) {
                         pageReady = true
+                        onPageLoaded()
                         view?.evaluateJavascript(
                             "HavnOrganizer.setWeekData($weekDataJson); HavnOrganizer.selectDay($selectedDay);",
                             null,
