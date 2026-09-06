@@ -3,6 +3,7 @@ package com.havn.app.ui.components
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import org.json.JSONObject
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -27,8 +28,9 @@ fun HavnOrganizerView(
 
     LaunchedEffect(weekDataJson, selectedDay, pageReady) {
         if (!pageReady) return@LaunchedEffect
+        val quotedJson = JSONObject.quote(weekDataJson)
         webView?.evaluateJavascript(
-            "HavnOrganizer.setWeekData($weekDataJson); HavnOrganizer.selectDay($selectedDay);",
+            "HavnOrganizer.setWeekData(JSON.parse($quotedJson)); HavnOrganizer.selectDay($selectedDay);",
             null,
         )
     }
@@ -39,12 +41,15 @@ fun HavnOrganizerView(
             WebView(ctx).apply {
                 settings.javaScriptEnabled = true
                 settings.domStorageEnabled = true
+                settings.allowFileAccess = true
+                settings.allowContentAccess = false
                 setBackgroundColor(android.graphics.Color.TRANSPARENT)
                 webViewClient = object : WebViewClient() {
                     override fun onPageFinished(view: WebView?, url: String?) {
                         pageReady = true
+                        val quotedJson = JSONObject.quote(weekDataJson)
                         view?.evaluateJavascript(
-                            "HavnOrganizer.setWeekData($weekDataJson); HavnOrganizer.selectDay($selectedDay);",
+                            "HavnOrganizer.setWeekData(JSON.parse($quotedJson)); HavnOrganizer.selectDay($selectedDay);",
                             null,
                         )
                     }

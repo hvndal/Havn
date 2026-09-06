@@ -26,8 +26,8 @@ interface MedicationDao {
     @Query("SELECT * FROM medications WHERE userId = :userId AND isActive = 1 ORDER BY id ASC")
     fun getMedicationsForUser(userId: Long): Flow<List<MedicationEntity>>
 
-    @Query("SELECT * FROM medications WHERE id = :id")
-    suspend fun getMedicationById(id: Long): MedicationEntity?
+    @Query("SELECT * FROM medications WHERE id = :id AND userId = :userId")
+    suspend fun getMedicationById(id: Long, userId: Long): MedicationEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMedication(med: MedicationEntity): Long
@@ -47,8 +47,8 @@ interface DoseLogDao {
     @Query("SELECT * FROM dose_logs WHERE userId = :userId AND scheduledTime >= :monthStart AND scheduledTime < :monthEnd ORDER BY scheduledTime ASC")
     fun getDoseLogsForMonth(userId: Long, monthStart: Long, monthEnd: Long): Flow<List<DoseLogEntity>>
 
-    @Query("SELECT * FROM dose_logs WHERE medicationId = :medicationId AND scheduledTime >= :dayStart AND scheduledTime < :dayEnd LIMIT 1")
-    suspend fun getDoseLogForMedToday(medicationId: Long, dayStart: Long, dayEnd: Long): DoseLogEntity?
+    @Query("SELECT * FROM dose_logs WHERE medicationId = :medicationId AND userId = :userId AND scheduledTime >= :dayStart AND scheduledTime < :dayEnd LIMIT 1")
+    suspend fun getDoseLogForMedToday(medicationId: Long, userId: Long, dayStart: Long, dayEnd: Long): DoseLogEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertDoseLog(log: DoseLogEntity): Long

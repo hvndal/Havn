@@ -25,6 +25,9 @@ class HavnRepository @Inject constructor(
 
     suspend fun getUserById(id: Long): User? = userDao.getUserById(id)?.toDomain()
 
+    suspend fun getMedicationById(id: Long, userId: Long): Medication? =
+        medicationDao.getMedicationById(id, userId)?.toDomain()
+
     suspend fun createUser(user: User): Long =
         userDao.insertUser(user.toEntity())
 
@@ -69,7 +72,7 @@ class HavnRepository @Inject constructor(
         val zone = ZoneId.systemDefault()
         val start = date.atStartOfDay(zone).toInstant().toEpochMilli()
         val end = date.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli()
-        val existing = doseLogDao.getDoseLogForMedToday(medication.id, start, end)
+        val existing = doseLogDao.getDoseLogForMedToday(medication.id, medication.userId, start, end)
         val takenNow = System.currentTimeMillis()
         if (existing != null) {
             doseLogDao.updateDoseLog(existing.copy(status = "TAKEN", takenAt = takenNow))
@@ -90,7 +93,7 @@ class HavnRepository @Inject constructor(
         val zone = ZoneId.systemDefault()
         val start = date.atStartOfDay(zone).toInstant().toEpochMilli()
         val end = date.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli()
-        val existing = doseLogDao.getDoseLogForMedToday(medication.id, start, end)
+        val existing = doseLogDao.getDoseLogForMedToday(medication.id, medication.userId, start, end)
         if (existing != null) {
             doseLogDao.updateDoseLog(existing.copy(status = "PENDING", takenAt = null))
         }
