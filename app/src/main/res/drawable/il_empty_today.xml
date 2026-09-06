@@ -1,0 +1,32 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="160dp"
+    android:height="140dp"
+    android:viewportWidth="160"
+    android:viewportHeight="140">
+    <!-- Soft warm backdrop shape -->
+    <path
+        android:fillColor="#F5F3EF"
+        android:pathData="M80,15 C115,15 140,35 140,70 C140,105 115,125 80,125 C45,125 20,105 20,70 C20,35 45,15 80,15 Z" />
+    <!-- Minimal tea cup / ceramic vessel -->
+    <path
+        android:fillColor="#EAE8E4"
+        android:strokeColor="#C3C8C0"
+        android:strokeWidth="1.5"
+        android:pathData="M55,60 C55,95 105,95 105,60 Z" />
+    <!-- Steam / aroma swirl 1 -->
+    <path
+        android:strokeColor="#8DA08C"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"
+        android:pathData="M72,50 C70,44 76,40 74,34" />
+    <!-- Steam / aroma swirl 2 -->
+    <path
+        android:strokeColor="#8DA08C"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"
+        android:pathData="M88,52 C86,46 92,42 90,36" />
+    <!-- Small resting leaf on saucer -->
+    <path
+        android:fillColor="#516351"
+        android:pathData="M112,82 C120,76 124,78 122,86 C118,88 114,86 112,82 Z" />
+</vector>

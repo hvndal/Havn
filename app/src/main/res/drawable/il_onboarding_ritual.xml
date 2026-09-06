@@ -1,0 +1,41 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+    <!-- Soft warm background disc -->
+    <path
+        android:fillColor="#F5F3EF"
+        android:pathData="M100,100m-80,0a80,80 0,1 1,160 0a80,80 0,1 1,-160 0" />
+    <!-- Outer delicate ring -->
+    <path
+        android:strokeColor="#C3C8C0"
+        android:strokeWidth="1.5"
+        android:pathData="M100,100m-70,0a70,70 0,1 1,140 0a70,70 0,1 1,-140 0" />
+    <!-- Minimalist ceramic bowl/dish -->
+    <path
+        android:fillColor="#8DA08C"
+        android:pathData="M60,125 C60,150 140,150 140,125 L132,125 C132,143 68,143 68,125 Z" />
+    <!-- Botanical stem inside dish -->
+    <path
+        android:strokeColor="#516351"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="M100,135 Q100,90 120,60" />
+    <!-- Leaf 1 -->
+    <path
+        android:fillColor="#516351"
+        android:pathData="M100,110 C90,100 85,88 100,95 C102,102 101,108 100,110 Z" />
+    <!-- Leaf 2 -->
+    <path
+        android:fillColor="#8DA08C"
+        android:pathData="M107,90 C118,80 125,72 110,80 C106,84 106,88 107,90 Z" />
+    <!-- Leaf 3 top -->
+    <path
+        android:fillColor="#D4E8D2"
+        android:pathData="M120,60 C128,50 135,48 126,56 C122,58 120,59 120,60 Z" />
+    <!-- Sun accent dot -->
+    <path
+        android:fillColor="#FEB28F"
+        android:pathData="M72,75m-8,0a8,8 0,1 1,16 0a8,8 0,1 1,-16 0" />
+</vector>

@@ -22,6 +22,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import com.havn.app.ui.components.havnPressFeedback
 import com.havn.app.ui.theme.*
 
 @Composable
@@ -83,11 +84,7 @@ private fun HavnNavItem(
         modifier = Modifier
             .clip(RoundedCornerShape(14.dp))
             .background(bgColor)
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = onClick,
-            )
+            .havnPressFeedback(pressedScale = 0.94f, onClick = onClick)
             .padding(horizontal = 18.dp, vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,

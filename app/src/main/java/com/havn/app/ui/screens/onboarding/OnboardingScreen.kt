@@ -29,6 +29,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.havn.app.domain.model.User
 import com.havn.app.ui.components.StaggeredTextReveal
 import com.havn.app.ui.screens.splash.HavnShaderBackground
+import androidx.compose.ui.res.painterResource
+import com.havn.app.R
+import com.havn.app.ui.components.StaggeredFadeIn
+import com.havn.app.ui.components.havnPressFeedback
 import com.havn.app.ui.theme.*
 
 val AVATAR_COLORS = listOf(
@@ -110,6 +114,23 @@ private fun OnboardingPage1(
             .systemBarsPadding(),
         verticalArrangement = Arrangement.Center,
     ) {
+        // Onboarding Visual Illustration
+        StaggeredFadeIn(index = 0) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 24.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.il_onboarding_ritual),
+                    contentDescription = null,
+                    tint = Color.Unspecified,
+                    modifier = Modifier.size(130.dp),
+                )
+            }
+        }
+
         // Text Reveal Animation for Brand / Welcome Title
         StaggeredTextReveal(
             text = "Welcome.",
@@ -250,6 +271,22 @@ private fun OnboardingPage2(
             .systemBarsPadding(),
         verticalArrangement = Arrangement.Center,
     ) {
+        StaggeredFadeIn(index = 0) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 24.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.il_onboarding_mindful),
+                    contentDescription = null,
+                    tint = Color.Unspecified,
+                    modifier = Modifier.size(130.dp),
+                )
+            }
+        }
+
         StaggeredTextReveal(
             text = "Hello, $name.",
             style = MaterialTheme.typography.displayLarge.copy(fontSize = 48.sp),
