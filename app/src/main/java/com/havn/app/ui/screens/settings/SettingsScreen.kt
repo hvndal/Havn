@@ -117,7 +117,7 @@ fun SettingsScreen(
                     viewModel.setReminderSound(next)
                 },
             )
-            Divider(color = SurfaceHighest, thickness = 0.5.dp)
+            HorizontalDivider(color = SurfaceHighest, thickness = 0.5.dp)
             SettingsToggle(
                 label = "Vibration",
                 checked = uiState.reminderVibration,
@@ -143,7 +143,7 @@ fun SettingsScreen(
                     viewModel.setTheme(next)
                 },
             )
-            Divider(color = SurfaceHighest, thickness = 0.5.dp)
+            HorizontalDivider(color = SurfaceHighest, thickness = 0.5.dp)
             SettingsRow(
                 label = "App icon",
                 value = "Default",
@@ -158,7 +158,7 @@ fun SettingsScreen(
         Spacer(Modifier.height(10.dp))
         SettingsCard {
             SettingsRow(label = "Backup (Local)", value = "", onClick = {})
-            Divider(color = SurfaceHighest, thickness = 0.5.dp)
+            HorizontalDivider(color = SurfaceHighest, thickness = 0.5.dp)
             SettingsRow(label = "About H\u00e4vn", value = "v1.0", onClick = {})
         }
 

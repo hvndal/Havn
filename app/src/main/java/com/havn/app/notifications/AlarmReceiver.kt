@@ -31,6 +31,7 @@ class AlarmReceiver : BroadcastReceiver() {
             .setContentTitle(notifTitle)
             .setContentText(notifText)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
             .setAutoCancel(true)
             .setVibrate(longArrayOf(0, 80, 0))
             .build()

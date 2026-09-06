@@ -193,7 +193,7 @@ fun AddMedicationScreen(
                         }
                     )
                 }
-                Divider(color = SurfaceHighest, thickness = 0.5.dp)
+                HorizontalDivider(color = SurfaceHighest, thickness = 0.5.dp)
                 FormRow(label = "Dosage") {
                     BasicTextField(
                         value = dosage,
@@ -208,7 +208,7 @@ fun AddMedicationScreen(
                         }
                     )
                 }
-                Divider(color = SurfaceHighest, thickness = 0.5.dp)
+                HorizontalDivider(color = SurfaceHighest, thickness = 0.5.dp)
                 FormRow(label = "Time") {
                     BasicTextField(
                         value = time,
@@ -220,7 +220,7 @@ fun AddMedicationScreen(
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
-                Divider(color = SurfaceHighest, thickness = 0.5.dp)
+                HorizontalDivider(color = SurfaceHighest, thickness = 0.5.dp)
                 // Repeat selector
                 FormRow(label = "Repeat") {
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
