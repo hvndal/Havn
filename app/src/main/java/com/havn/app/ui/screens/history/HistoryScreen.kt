@@ -23,6 +23,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.havn.app.R
 import com.havn.app.domain.model.DoseLog
 import com.havn.app.domain.model.DoseStatus
+import com.havn.app.ui.components.StaggeredFadeIn
+import com.havn.app.ui.components.havnPressFeedback
 import com.havn.app.ui.theme.*
 import java.time.LocalDate
 import java.time.YearMonth
@@ -110,24 +112,32 @@ fun HistoryScreen(
             }
         } else {
             // Empty state
-            Column(
-                modifier = Modifier.fillMaxWidth().weight(1f),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_leaf),
-                    contentDescription = null,
-                    tint = SageLight,
-                    modifier = Modifier.size(40.dp),
-                )
-                Spacer(Modifier.height(16.dp))
-                Text(
-                    text = "Tap a day to see your history.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = StoneGrey,
-                    textAlign = TextAlign.Center,
-                )
+            StaggeredFadeIn(index = 2) {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(top = 40.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.il_empty_history),
+                        contentDescription = null,
+                        tint = Color.Unspecified,
+                        modifier = Modifier.size(140.dp, 120.dp),
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    Text(
+                        text = "Tap a day to view records",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Charcoal,
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = "Your daily adherence log will appear here.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = StoneGrey,
+                        textAlign = TextAlign.Center,
+                    )
+                }
             }
         }
     }
@@ -308,7 +318,7 @@ private fun ChevronButton(label: String, onClick: () -> Unit) {
             .size(32.dp)
             .clip(CircleShape)
             .background(SurfaceHigh)
-            .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }, onClick = onClick),
+            .havnPressFeedback(pressedScale = 0.90f, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Text(text = label, color = CharcoalMid, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)

@@ -32,6 +32,9 @@ import com.havn.app.domain.model.*
 import com.havn.app.ui.components.HavnOrganizerView
 import com.havn.app.ui.components.MedIcon
 import com.havn.app.ui.components.OrganizerWeekMapper
+import com.havn.app.ui.components.StaggeredFadeIn
+import com.havn.app.ui.components.havnPressFeedback
+import com.havn.app.ui.components.shimmerLoading
 import com.havn.app.ui.theme.*
 import java.time.LocalDate
 import java.time.LocalTime
@@ -253,11 +256,7 @@ private fun OrganizerHeroSection(
             .clip(RoundedCornerShape(16.dp))
             .background(SurfaceLow)
             .border(1.dp, SurfaceHighest, RoundedCornerShape(16.dp))
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = onTap,
-            ),
+            .havnPressFeedback(pressedScale = 0.98f, onClick = onTap),
     ) {
         HavnOrganizerView(
             weekDataJson = weekDataJson,
@@ -298,10 +297,7 @@ private fun AddMedButton(onClick: () -> Unit) {
             .scale(scale)
             .clip(CircleShape)
             .background(Sage)
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-            ) { onClick() },
+            .havnPressFeedback(pressedScale = 0.92f, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
@@ -348,11 +344,7 @@ private fun MedicationCard(
             .clip(RoundedCornerShape(16.dp))
             .background(bgColor)
             .border(1.dp, SurfaceHighest, RoundedCornerShape(16.dp))
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = onToggle,
-            )
+            .havnPressFeedback(pressedScale = 0.97f, onClick = onToggle)
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -427,24 +419,26 @@ private fun MedicationCard(
 @Composable
 private fun EmptyTodayState(modifier: Modifier = Modifier) {
     Column(
-        modifier = modifier.padding(vertical = 48.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 36.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Icon(
-            painter = painterResource(R.drawable.ic_leaf),
+            painter = painterResource(R.drawable.il_empty_today),
             contentDescription = null,
-            tint = SageLight,
-            modifier = Modifier.size(48.dp),
+            tint = Color.Unspecified,
+            modifier = Modifier.size(140.dp, 120.dp),
         )
         Spacer(Modifier.height(16.dp))
         Text(
-            text = "Nothing waiting today.",
+            text = "Nothing waiting today",
             style = MaterialTheme.typography.titleMedium,
             color = Charcoal,
         )
-        Spacer(Modifier.height(6.dp))
+        Spacer(Modifier.height(4.dp))
         Text(
-            text = "Enjoy your morning.",
+            text = "Enjoy your peaceful morning ritual.",
             style = MaterialTheme.typography.bodyMedium,
             color = StoneGrey,
         )
@@ -465,4 +459,92 @@ private fun formatTime(t: String): String {
         val parsed = java.time.LocalTime.parse(t, DateTimeFormatter.ofPattern("HH:mm"))
         parsed.format(DateTimeFormatter.ofPattern("h:mm a", Locale.ENGLISH)).lowercase()
     } catch (e: Exception) { t }
+}
+
+
+@Composable
+private fun HomeSkeletonLoader() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .systemBarsPadding()
+            .padding(horizontal = 24.dp, vertical = 12.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .shimmerLoading()
+            )
+            Box(
+                modifier = Modifier
+                    .width(80.dp)
+                    .height(32.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .shimmerLoading()
+            )
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .shimmerLoading()
+            )
+        }
+
+        Spacer(Modifier.height(20.dp))
+
+        Box(
+            modifier = Modifier
+                .width(100.dp)
+                .height(14.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .shimmerLoading()
+        )
+        Spacer(Modifier.height(8.dp))
+        Box(
+            modifier = Modifier
+                .width(160.dp)
+                .height(28.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .shimmerLoading()
+        )
+
+        Spacer(Modifier.height(24.dp))
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(4f / 3f)
+                .clip(RoundedCornerShape(16.dp))
+                .shimmerLoading()
+        )
+
+        Spacer(Modifier.height(28.dp))
+
+        Box(
+            modifier = Modifier
+                .width(140.dp)
+                .height(20.dp)
+                .clip(RoundedCornerShape(6.dp))
+                .shimmerLoading()
+        )
+
+        Spacer(Modifier.height(16.dp))
+
+        repeat(2) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(72.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .shimmerLoading()
+            )
+            Spacer(Modifier.height(12.dp))
+        }
+    }
 }

@@ -1,0 +1,43 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+    <!-- Soft warm background disc -->
+    <path
+        android:fillColor="#F5F3EF"
+        android:pathData="M100,100m-80,0a80,80 0,1 1,160 0a80,80 0,1 1,-160 0" />
+    <!-- Organizer Tray Base -->
+    <path
+        android:fillColor="#EAE8E4"
+        android:strokeColor="#C3C8C0"
+        android:strokeWidth="1.5"
+        android:pathData="M45,70 L155,70 C160,70 164,74 164,79 L164,121 C164,126 160,130 155,130 L45,130 C40,130 36,126 36,121 L36,79 C36,74 40,70 45,70 Z" />
+    <!-- Tray slots dividers -->
+    <path
+        android:strokeColor="#C3C8C0"
+        android:strokeWidth="1.5"
+        android:pathData="M68,70 L68,130 M100,70 L100,130 M132,70 L132,130" />
+    <!-- Pill capsule in slot 1 -->
+    <path
+        android:fillColor="#516351"
+        android:pathData="M52,85 C52,80 58,80 58,85 L58,110 C58,115 52,115 52,110 Z" />
+    <path
+        android:fillColor="#8DA08C"
+        android:pathData="M52,98 L58,98 L58,110 C58,115 52,115 52,110 Z" />
+    <!-- Round tablet in slot 2 -->
+    <path
+        android:fillColor="#FEB28F"
+        android:pathData="M116,100m-10,0a10,10 0,1 1,20 0a10,10 0,1 1,-20 0" />
+    <path
+        android:strokeColor="#8A4F33"
+        android:strokeWidth="1.2"
+        android:pathData="M116,92 L116,108" />
+    <!-- Checkmark above completed slot 3 -->
+    <path
+        android:strokeColor="#516351"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M142,97 L147,103 L156,92" />
+</vector>

@@ -1,0 +1,37 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="160dp"
+    android:height="140dp"
+    android:viewportWidth="160"
+    android:viewportHeight="140">
+    <!-- Soft backdrop -->
+    <path
+        android:fillColor="#F5F3EF"
+        android:pathData="M80,15 C115,15 140,35 140,70 C140,105 115,125 80,125 C45,125 20,105 20,70 C20,35 45,15 80,15 Z" />
+    <!-- Open journal / calendar card -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:strokeColor="#C3C8C0"
+        android:strokeWidth="1.5"
+        android:pathData="M48,45 L112,45 C116,45 119,48 119,52 L119,98 C119,102 116,105 112,105 L48,105 C44,105 41,102 41,98 L41,52 C41,48 44,45 48,45 Z" />
+    <!-- Journal header line -->
+    <path
+        android:strokeColor="#D4E8D2"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:pathData="M52,58 L85,58" />
+    <!-- Journal text lines -->
+    <path
+        android:strokeColor="#E4E2DE"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"
+        android:pathData="M52,68 L108,68 M52,78 L100,78 M52,88 L90,88" />
+    <!-- Botanical stem marker resting across book -->
+    <path
+        android:strokeColor="#516351"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:pathData="M102,40 Q106,70 125,95" />
+    <path
+        android:fillColor="#8DA08C"
+        android:pathData="M110,58 C118,52 122,54 118,62 C114,64 111,62 110,58 Z" />
+</vector>
