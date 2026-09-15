@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Only the exports folder is shared. Scoping the provider this narrowly means
+  a malicious app that manages to query it still cannot reach the Room
+  database or preferences — just the one backup file the user asked to share.
+-->
+<paths>
+    <cache-path name="exports" path="exports/" />
+</paths>

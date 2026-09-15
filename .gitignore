@@ -1,12 +1,23 @@
-*.iml
-.gradle
-/local.properties
-/.idea
-.DS_Store
+# Build output
 /build
-app/build
+/app/build
+.gradle/
 /captures
 .externalNativeBuild
 .cxx
+
+# Local machine config — contains the absolute SDK path
 local.properties
-stitch_design_temp/
+
+# Signing material. debug.keystore is only a debug key, but a keystore is a
+# signing credential and does not belong in version control.
+*.keystore
+*.jks
+
+# IDE
+.idea/
+*.iml
+.DS_Store
+
+# Local scratch archive (never tracked upstream)
+/havn.zip

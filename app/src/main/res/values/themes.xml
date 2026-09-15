@@ -1,15 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Base theme -->
+    <!--
+      The launch window, before Compose draws its first frame.
+
+      A values-night copy of this file swaps the parent to the dark Material
+      theme, and colors.xml is night-qualified too. The previous theme
+      inherited from Material.Light unconditionally with a hard-coded ivory
+      windowBackground, so a dark-mode user got a flash of white on every cold
+      start. (DayNight itself would need appcompat, which this app does not
+      depend on — hence the resource-qualified override.)
+    -->
     <style name="Theme.Havn" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:windowBackground">@color/warm_ivory</item>
+        <item name="android:windowBackground">@color/window_background</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
     </style>
-    <!-- Splash theme -->
+
     <style name="Theme.Havn.Splash" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/warm_ivory</item>
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_logo</item>
         <item name="postSplashScreenTheme">@style/Theme.Havn</item>
     </style>

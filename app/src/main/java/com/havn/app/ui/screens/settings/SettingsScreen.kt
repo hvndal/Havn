@@ -1,347 +1,617 @@
 package com.havn.app.ui.screens.settings
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.delay
+import android.net.Uri
+import com.havn.app.data.backup.BackupManager
 import com.havn.app.domain.model.User
-import com.havn.app.ui.theme.*
+import com.havn.app.ui.components.HavnBrandLogo
+import com.havn.app.ui.components.HavnButton
+import com.havn.app.ui.components.HavnButtonSize
+import com.havn.app.ui.components.HavnButtonTone
+import com.havn.app.ui.components.HavnConfirmDialog
+import com.havn.app.ui.components.HavnDivider
+import com.havn.app.ui.components.HavnListRow
+import com.havn.app.ui.components.HavnPulseDots
+import com.havn.app.ui.components.HavnSegmented
+import com.havn.app.ui.components.HavnSwitchRow
+import com.havn.app.ui.components.HavnTextField
+import com.havn.app.ui.components.havnPress
+import com.havn.app.ui.screens.onboarding.AVATAR_COLORS
+import com.havn.app.ui.theme.HavnMotion
+import com.havn.app.ui.theme.HavnTheme
+import com.havn.app.ui.theme.HavnType
+import com.havn.app.ui.theme.ThemeMode
 
 @Composable
 fun SettingsScreen(
-    onNavigateToOnboarding: () -> Unit,
+    contentPadding: PaddingValues,
+    onManageMedications: () -> Unit,
+    onOpenReminders: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    var showAddUserSheet by remember { mutableStateOf(false) }
-    var showDeleteConfirm by remember { mutableStateOf<User?>(null) }
+    val colors = HavnTheme.colors
+    val gutter = HavnTheme.spacing.gutter
+    val uriHandler = LocalUriHandler.current
 
-    Column(
+    var showAddProfile by remember { mutableStateOf(false) }
+    var pendingDelete by remember { mutableStateOf<User?>(null) }
+    var confirmSignOut by remember { mutableStateOf(false) }
+    var confirmClearHistory by remember { mutableStateOf(false) }
+    var pendingRestore by remember { mutableStateOf<Uri?>(null) }
+    var banner by remember { mutableStateOf<BackupEvent.Message?>(null) }
+
+    val context = LocalContext.current
+    val busy by viewModel.busy.collectAsStateWithLifecycle()
+
+    // CreateDocument lets the user place the file themselves — Drive, Downloads,
+    // an SD card — without Hävn needing any storage permission.
+    val saveLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument(BackupManager.MIME_TYPE)
+    ) { uri -> uri?.let(viewModel::saveBackupTo) }
+
+    val openLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri -> uri?.let { pendingRestore = it } }
+
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is BackupEvent.Share -> runCatching { context.startActivity(event.intent) }
+                    .onFailure {
+                        banner = BackupEvent.Message("No app available to receive the file.", true)
+                    }
+                is BackupEvent.Message -> banner = event
+            }
+        }
+    }
+
+    // The banner clears itself; a result the user has read should not need
+    // dismissing, and a stale "Restored 3 profiles" sitting there forever
+    // reads as a bug.
+    LaunchedEffect(banner) {
+        if (banner != null) {
+            delay(5000)
+            banner = null
+        }
+    }
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(WarmIvory)
-            .systemBarsPadding()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp),
+            .background(colors.canvas)
     ) {
-        Spacer(Modifier.height(16.dp))
-        Text(
-            text = "Settings",
-            style = MaterialTheme.typography.headlineMedium,
-            color = Charcoal,
-        )
-        Spacer(Modifier.height(32.dp))
-
-        // ── PROFILES ────────────────────────────────────────────
-        SectionHeader("PROFILES")
-        Spacer(Modifier.height(10.dp))
-
-        uiState.users.forEach { user ->
-            val isActive = user.id == uiState.activeUserId
-            UserProfileCard(
-                user = user,
-                isActive = isActive,
-                onSelect = { viewModel.switchUser(user.id) },
-                onDelete = { showDeleteConfirm = user },
-            )
-            Spacer(Modifier.height(8.dp))
-        }
-
-        // Add user
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
-                .background(White)
-                .border(1.dp, SurfaceHighest, RoundedCornerShape(14.dp))
-                .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
-                    onNavigateToOnboarding()
-                }
-                .padding(16.dp),
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(
+                bottom = contentPadding.calculateBottomPadding() + HavnTheme.spacing.xxl,
+            ),
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
+            item(key = "header") {
+                Column(
                     modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(SagePale)
-                        .border(1.dp, Sage.copy(alpha = 0.3f), CircleShape),
-                    contentAlignment = Alignment.Center,
+                        .statusBarsPadding()
+                        .padding(horizontal = gutter)
+                        .padding(top = HavnTheme.spacing.xl),
                 ) {
-                    Text("+", color = Sage, fontSize = 18.sp, fontWeight = FontWeight.Light)
+                    Text(
+                        text = uiState.activeUser?.name?.uppercase() ?: "PROFILE",
+                        style = HavnType.Eyebrow,
+                        color = colors.textTertiary,
+                    )
+                    Spacer(Modifier.height(HavnTheme.spacing.sm))
+                    Text(
+                        text = "Settings",
+                        style = MaterialTheme.typography.displaySmall,
+                        color = colors.textPrimary,
+                    )
                 }
-                Spacer(Modifier.width(14.dp))
-                Text(
-                    text = "Add profile",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = CharcoalMid,
+                Spacer(Modifier.height(HavnTheme.spacing.section))
+            }
+
+            // ── Appearance ───────────────────────────────────────────────────
+            item(key = "appearance") {
+                Column(Modifier.padding(horizontal = gutter)) {
+                    Text("APPEARANCE", style = HavnType.Eyebrow, color = colors.textTertiary)
+                    Spacer(Modifier.height(HavnTheme.spacing.lg))
+                    // A three-way control rather than a row that cycles through
+                    // Light → Dark → System on tap. Cycling hid two of the three
+                    // options and gave no sense of what came next.
+                    HavnSegmented(
+                        options = listOf("Light", "Dark", "System"),
+                        selectedIndex = when (uiState.theme) {
+                            ThemeMode.LIGHT -> 0
+                            ThemeMode.DARK -> 1
+                            ThemeMode.SYSTEM -> 2
+                        },
+                        onSelect = { index ->
+                            viewModel.setTheme(
+                                when (index) {
+                                    0 -> ThemeMode.LIGHT
+                                    1 -> ThemeMode.DARK
+                                    else -> ThemeMode.SYSTEM
+                                }
+                            )
+                        },
+                    )
+                    Spacer(Modifier.height(HavnTheme.spacing.md))
+                    HavnSwitchRow(
+                        title = "Interface sounds",
+                        subtitle = "Soft feedback when you log a dose",
+                        checked = uiState.interfaceSound,
+                        onCheckedChange = viewModel::setInterfaceSound,
+                    )
+                }
+                Spacer(Modifier.height(HavnTheme.spacing.section))
+            }
+
+            // ── Medications & reminders ──────────────────────────────────────
+            item(key = "meds") {
+                Column(Modifier.padding(horizontal = gutter)) {
+                    Text("YOUR ROUTINE", style = HavnType.Eyebrow, color = colors.textTertiary)
+                    Spacer(Modifier.height(HavnTheme.spacing.sm))
+                    HavnListRow(
+                        title = "Medications",
+                        subtitle = "Add, edit, pause or remove",
+                        onClick = onManageMedications,
+                    )
+                    HavnDivider()
+                    HavnListRow(
+                        title = "Reminders",
+                        subtitle = "Schedule, permissions and alert style",
+                        onClick = onOpenReminders,
+                    )
+                }
+                Spacer(Modifier.height(HavnTheme.spacing.section))
+            }
+
+            // ── Profiles ─────────────────────────────────────────────────────
+            item(key = "profiles-header") {
+                Column(Modifier.padding(horizontal = gutter)) {
+                    Text("PROFILES", style = HavnType.Eyebrow, color = colors.textTertiary)
+                    Spacer(Modifier.height(HavnTheme.spacing.sm))
+                    Text(
+                        text = "Each profile keeps its own medications and history, " +
+                            "all on this device.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colors.textTertiary,
+                    )
+                    Spacer(Modifier.height(HavnTheme.spacing.lg))
+                }
+            }
+
+            items(uiState.profiles, key = { it.id }) { profile ->
+                ProfileRow(
+                    profile = profile,
+                    isActive = profile.id == uiState.activeUser?.id,
+                    onSelect = { viewModel.switchProfile(profile.id) },
+                    onDelete = { pendingDelete = profile },
+                    modifier = Modifier.padding(horizontal = gutter),
                 )
+            }
+
+            item(key = "add-profile") {
+                Spacer(Modifier.height(HavnTheme.spacing.md))
+                HavnButton(
+                    text = "Add a profile",
+                    onClick = { showAddProfile = true },
+                    tone = HavnButtonTone.Secondary,
+                    size = HavnButtonSize.Medium,
+                    modifier = Modifier.padding(horizontal = gutter),
+                )
+                Spacer(Modifier.height(HavnTheme.spacing.md))
+                HavnButton(
+                    text = "Sign out",
+                    onClick = { confirmSignOut = true },
+                    tone = HavnButtonTone.Ghost,
+                    size = HavnButtonSize.Medium,
+                    modifier = Modifier.padding(horizontal = gutter),
+                )
+                Spacer(Modifier.height(HavnTheme.spacing.section))
+            }
+
+            // ── Data ─────────────────────────────────────────────────────────
+            item(key = "data") {
+                Column(Modifier.padding(horizontal = gutter)) {
+                    Text("YOUR DATA", style = HavnType.Eyebrow, color = colors.textTertiary)
+                    Spacer(Modifier.height(HavnTheme.spacing.sm))
+                    Text(
+                        text = "Hävn has no account and no servers — it doesn't ask for " +
+                            "internet access at all. Android's own backup can restore your " +
+                            "history to a new phone; a file you keep yourself is the copy " +
+                            "nothing can take away.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colors.textTertiary,
+                    )
+                    Spacer(Modifier.height(HavnTheme.spacing.lg))
+
+                    HavnListRow(
+                        title = "Back up to Drive, Files or email",
+                        subtitle = "Sends a single backup file to whichever app you choose",
+                        onClick = viewModel::exportBackup,
+                    )
+                    HavnDivider()
+                    HavnListRow(
+                        title = "Save a copy to this device",
+                        subtitle = "Pick a folder and write the backup straight there",
+                        onClick = { saveLauncher.launch(viewModel.suggestedFileName()) },
+                    )
+                    HavnDivider()
+                    HavnListRow(
+                        title = "Restore from a backup",
+                        subtitle = "Adds the backup's profiles alongside what's already here",
+                        onClick = { openLauncher.launch(BackupManager.IMPORT_MIME_TYPES) },
+                    )
+                }
+                Spacer(Modifier.height(HavnTheme.spacing.section))
+            }
+
+            item(key = "maintenance") {
+                Column(Modifier.padding(horizontal = gutter)) {
+                    Text("MAINTENANCE", style = HavnType.Eyebrow, color = colors.textTertiary)
+                    Spacer(Modifier.height(HavnTheme.spacing.sm))
+                    HavnListRow(
+                        title = "Fill in sample history",
+                        subtitle = "Writes 30 days of example doses so Progress has " +
+                            "something to show",
+                        onClick = viewModel::seedSampleData,
+                    )
+                    HavnDivider()
+                    HavnListRow(
+                        title = "Clear dose history",
+                        subtitle = "Keeps your medications, removes every recorded dose",
+                        destructive = true,
+                        onClick = { confirmClearHistory = true },
+                    )
+                }
+                Spacer(Modifier.height(HavnTheme.spacing.section))
+            }
+
+            // ── About ────────────────────────────────────────────────────────
+            item(key = "about") {
+                Column(Modifier.padding(horizontal = gutter)) {
+                    Text("ABOUT", style = HavnType.Eyebrow, color = colors.textTertiary)
+                    Spacer(Modifier.height(HavnTheme.spacing.sm))
+                    HavnListRow(
+                        title = "Support Hävn",
+                        subtitle = "Buy the developer a coffee",
+                        onClick = {
+                            runCatching {
+                                uriHandler.openUri("https://buymeacoffee.com/hermanify")
+                            }
+                        },
+                    )
+                    HavnDivider()
+                    HavnListRow(title = "Version", value = "1.0.1")
+                }
+
+                Spacer(Modifier.height(HavnTheme.spacing.section))
+
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    HavnBrandLogo(
+                        iconSize = 44.dp,
+                        showWordmark = false,
+                        showTagline = false,
+                    )
+                    Spacer(Modifier.height(HavnTheme.spacing.md))
+                    Text(
+                        text = "No account. No servers. No tracking.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colors.textTertiary,
+                    )
+                }
             }
         }
 
-        Spacer(Modifier.height(28.dp))
-
-        // ── REMINDERS ─────────────────────────────────────────
-        SectionHeader("REMINDERS")
-        Spacer(Modifier.height(10.dp))
-        SettingsCard {
-            SettingsRow(
-                label = "Sound",
-                value = uiState.reminderSound.lowercase().replaceFirstChar { it.uppercase() },
-                onClick = {
-                    val next = when (uiState.reminderSound) {
-                        "CHIME" -> "MARIMBA"
-                        "MARIMBA" -> "SILENT"
-                        else -> "CHIME"
-                    }
-                    viewModel.setReminderSound(next)
-                },
-            )
-            Divider(color = SurfaceHighest, thickness = 0.5.dp)
-            SettingsToggle(
-                label = "Vibration",
-                checked = uiState.reminderVibration,
-                onCheckedChange = { viewModel.setVibration(it) },
-            )
+        // Result banner, anchored to the bottom above the tab bar so it never
+        // displaces the list the user is reading.
+        AnimatedVisibility(
+            visible = banner != null || busy,
+            enter = fadeIn(HavnMotion.standard()) +
+                slideInVertically(tween(HavnMotion.Standard, easing = HavnMotion.Enter)) { it / 2 },
+            exit = fadeOut(HavnMotion.exit()),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = contentPadding.calculateBottomPadding() + HavnTheme.spacing.lg)
+                .padding(horizontal = gutter),
+        ) {
+            val message = banner
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(HavnTheme.radius.md))
+                    .background(
+                        when {
+                            message?.isError == true -> colors.dangerSoft
+                            message != null -> colors.accentSoft
+                            else -> colors.surfaceRaised
+                        }
+                    )
+                    .padding(HavnTheme.spacing.lg),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (message == null) {
+                    HavnPulseDots(color = colors.textSecondary)
+                    Spacer(Modifier.width(HavnTheme.spacing.md))
+                    Text(
+                        text = "Working…",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = colors.textSecondary,
+                    )
+                } else {
+                    Text(
+                        text = message.text,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = if (message.isError) colors.onDangerSoft else colors.onAccentSoft,
+                    )
+                }
+            }
         }
-
-        Spacer(Modifier.height(28.dp))
-
-        // ── APPEARANCE ───────────────────────────────────────
-        SectionHeader("APPEARANCE")
-        Spacer(Modifier.height(10.dp))
-        SettingsCard {
-            SettingsRow(
-                label = "Theme",
-                value = uiState.theme.lowercase().replaceFirstChar { it.uppercase() },
-                onClick = {
-                    val next = when (uiState.theme) {
-                        "LIGHT" -> "DARK"
-                        "DARK" -> "SYSTEM"
-                        else -> "LIGHT"
-                    }
-                    viewModel.setTheme(next)
-                },
-            )
-            Divider(color = SurfaceHighest, thickness = 0.5.dp)
-            SettingsRow(
-                label = "App icon",
-                value = "Default",
-                onClick = {},
-            )
-        }
-
-        Spacer(Modifier.height(28.dp))
-
-        // ── GENERAL ──────────────────────────────────────────
-        SectionHeader("GENERAL")
-        Spacer(Modifier.height(10.dp))
-        SettingsCard {
-            SettingsRow(label = "Backup (Local)", value = "", onClick = {})
-            Divider(color = SurfaceHighest, thickness = 0.5.dp)
-            SettingsRow(label = "About H\u00e4vn", value = "v1.0", onClick = {})
-        }
-
-        Spacer(Modifier.height(48.dp))
     }
 
-    // Delete confirm dialog
-    showDeleteConfirm?.let { user ->
-        AlertDialog(
-            onDismissRequest = { showDeleteConfirm = null },
-            title = {
-                Text("Remove ${user.name}?", style = MaterialTheme.typography.titleMedium, color = Charcoal)
+    if (showAddProfile) {
+        AddProfileDialog(
+            onDismiss = { showAddProfile = false },
+            onCreate = { name, age, color ->
+                viewModel.createProfile(name, age, color)
+                showAddProfile = false
             },
-            text = {
-                Text(
-                    "This will delete all of ${user.name}'s medication data. This cannot be undone.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = CharcoalMid,
-                )
+        )
+    }
+
+    pendingDelete?.let { profile ->
+        val isLast = uiState.profiles.size == 1
+        HavnConfirmDialog(
+            title = "Delete ${profile.name}?",
+            body = if (isLast) {
+                "This removes the only profile on this device, along with every " +
+                    "medication and recorded dose. You'll be signed out."
+            } else {
+                "This permanently removes ${profile.name}'s medications and dose " +
+                    "history. It cannot be undone."
             },
-            confirmButton = {
-                TextButton(onClick = {
-                    viewModel.deleteUser(user)
-                    showDeleteConfirm = null
-                }) {
-                    Text("Remove", color = Terracotta, fontWeight = FontWeight.SemiBold)
-                }
+            confirmLabel = "Delete",
+            destructive = true,
+            onConfirm = {
+                viewModel.deleteProfile(profile)
+                pendingDelete = null
             },
-            dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = null }) {
-                    Text("Cancel", color = StoneGrey)
-                }
+            onDismiss = { pendingDelete = null },
+        )
+    }
+
+    if (confirmSignOut) {
+        HavnConfirmDialog(
+            title = "Sign out?",
+            body = "Your medications and history stay on this device. Reminders " +
+                "pause until you sign back in.",
+            confirmLabel = "Sign out",
+            onConfirm = {
+                viewModel.signOut()
+                confirmSignOut = false
             },
-            containerColor = White,
-            shape = RoundedCornerShape(20.dp),
+            onDismiss = { confirmSignOut = false },
+        )
+    }
+
+    pendingRestore?.let { uri ->
+        HavnConfirmDialog(
+            title = "Restore this backup?",
+            body = "Its profiles and history are added alongside what's already on this " +
+                "device — nothing currently here is removed or overwritten.",
+            confirmLabel = "Restore",
+            onConfirm = {
+                viewModel.restoreBackup(uri)
+                pendingRestore = null
+            },
+            onDismiss = { pendingRestore = null },
+        )
+    }
+
+    if (confirmClearHistory) {
+        HavnConfirmDialog(
+            title = "Clear dose history?",
+            body = "Every recorded dose is removed and your adherence resets to zero. " +
+                "Your medications are kept.",
+            confirmLabel = "Clear",
+            destructive = true,
+            onConfirm = {
+                viewModel.clearHistory()
+                confirmClearHistory = false
+            },
+            onDismiss = { confirmClearHistory = false },
         )
     }
 }
 
 @Composable
-private fun UserProfileCard(user: User, isActive: Boolean, onSelect: () -> Unit, onDelete: () -> Unit) {
-    val borderColor by animateColorAsState(
-        targetValue = if (isActive) Sage else SurfaceHighest,
-        animationSpec = spring(stiffness = Spring.StiffnessMedium),
-        label = "border",
-    )
-    val color = runCatching { Color(android.graphics.Color.parseColor(user.avatarColor)) }.getOrDefault(Sage)
+private fun ProfileRow(
+    profile: User,
+    isActive: Boolean,
+    onSelect: () -> Unit,
+    onDelete: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = HavnTheme.colors
+    val tint = remember(profile.avatarColor) {
+        runCatching { Color(android.graphics.Color.parseColor(profile.avatarColor)) }
+            .getOrDefault(Color(0xFF516351))
+    }
 
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(White)
-            .border(1.5.dp, borderColor, RoundedCornerShape(14.dp))
-            .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }, onClick = onSelect)
-            .padding(14.dp),
+            .havnPress(scaleDown = 0.99f, enabled = !isActive, onClick = onSelect)
+            .padding(vertical = HavnTheme.spacing.md),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
-                .background(color.copy(alpha = 0.2f))
-                .border(1.dp, color.copy(alpha = 0.4f), CircleShape),
+                .background(tint.copy(alpha = if (colors.isDark) 0.3f else 0.16f)),
             contentAlignment = Alignment.Center,
         ) {
             Text(
-                text = user.name.firstOrNull()?.uppercaseChar()?.toString() ?: "H",
+                text = profile.name.firstOrNull()?.uppercaseChar()?.toString() ?: "·",
                 style = MaterialTheme.typography.labelLarge,
-                color = color,
-                fontWeight = FontWeight.SemiBold,
+                color = tint,
             )
         }
-        Spacer(Modifier.width(14.dp))
+        Spacer(Modifier.width(HavnTheme.spacing.lg))
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = user.name,
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                color = Charcoal,
+                text = profile.name,
+                style = MaterialTheme.typography.bodyLarge,
+                color = colors.textPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
-            if (user.age > 0) {
-                Text(
-                    text = "Age ${user.age}",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = StoneGrey,
-                )
-            }
-        }
-        if (isActive) {
-            Box(
-                modifier = Modifier
-                    .size(20.dp)
-                    .clip(CircleShape)
-                    .background(Sage),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text("\u2713", color = White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-            }
-        } else {
-            Box(
-                modifier = Modifier
-                    .size(28.dp)
-                    .clip(CircleShape)
-                    .background(SurfaceHigh)
-                    .clickable(
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() },
-                        onClick = onDelete,
-                    ),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text("\u00d7", color = StoneGrey, fontSize = 14.sp)
-            }
-        }
-    }
-}
-
-@Composable
-private fun SectionHeader(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.labelSmall,
-        color = StoneGrey,
-        letterSpacing = 0.12.sp,
-    )
-}
-
-@Composable
-private fun SettingsCard(content: @Composable ColumnScope.() -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(
-                elevation = 8.dp,
-                shape = RoundedCornerShape(16.dp),
-                ambientColor = Sage.copy(alpha = 0.08f),
-                spotColor = Sage.copy(alpha = 0.05f),
+            Text(
+                text = when {
+                    isActive -> "Signed in"
+                    profile.age > 0 -> "Age ${profile.age}"
+                    else -> "Tap to switch"
+                },
+                style = MaterialTheme.typography.bodySmall,
+                color = if (isActive) colors.accent else colors.textTertiary,
             )
-            .clip(RoundedCornerShape(16.dp))
-            .background(White)
-            .border(1.dp, SurfaceHighest, RoundedCornerShape(16.dp)),
-        content = content,
-    )
-}
-
-@Composable
-private fun SettingsRow(label: String, value: String, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }, onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Text(label, style = MaterialTheme.typography.bodyMedium, color = Charcoal)
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(value, style = MaterialTheme.typography.bodyMedium, color = StoneGrey)
-            Spacer(Modifier.width(4.dp))
-            Text("\u203A", color = StoneLight, fontSize = 18.sp)
         }
-    }
-}
-
-@Composable
-private fun SettingsToggle(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Text(label, style = MaterialTheme.typography.bodyMedium, color = Charcoal)
-        Switch(
-            checked = checked,
-            onCheckedChange = onCheckedChange,
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = White,
-                checkedTrackColor = Sage,
-                uncheckedThumbColor = White,
-                uncheckedTrackColor = SurfaceHigh,
-            ),
+        HavnButton(
+            text = "Delete",
+            onClick = onDelete,
+            tone = HavnButtonTone.Ghost,
+            size = HavnButtonSize.Small,
+            fillWidth = false,
         )
     }
+}
+
+@Composable
+private fun AddProfileDialog(
+    onDismiss: () -> Unit,
+    onCreate: (String, Int?, String) -> Unit,
+) {
+    val colors = HavnTheme.colors
+    var name by remember { mutableStateOf("") }
+    var age by remember { mutableStateOf("") }
+    var color by remember { mutableStateOf(AVATAR_COLORS.first()) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = colors.surfaceRaised,
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(HavnTheme.radius.xl),
+        title = {
+            Text(
+                text = "Add a profile",
+                style = MaterialTheme.typography.titleLarge,
+                color = colors.textPrimary,
+            )
+        },
+        text = {
+            Column(modifier = Modifier.imePadding()) {
+                HavnTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = "Name",
+                    placeholder = "Who is this for?",
+                    imeAction = ImeAction.Next,
+                )
+                Spacer(Modifier.height(HavnTheme.spacing.lg))
+                HavnTextField(
+                    value = age,
+                    onValueChange = { if (it.length <= 3 && it.all(Char::isDigit)) age = it },
+                    label = "Age",
+                    placeholder = "Optional",
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Done,
+                )
+                Spacer(Modifier.height(HavnTheme.spacing.lg))
+                Text("COLOUR", style = HavnType.Eyebrow, color = colors.textTertiary)
+                Spacer(Modifier.height(HavnTheme.spacing.md))
+                Row(horizontalArrangement = Arrangement.spacedBy(HavnTheme.spacing.md)) {
+                    AVATAR_COLORS.forEach { hex ->
+                        val tint = runCatching {
+                            Color(android.graphics.Color.parseColor(hex))
+                        }.getOrDefault(Color(0xFF516351))
+                        Box(
+                            modifier = Modifier
+                                .size(if (hex == color) 34.dp else 28.dp)
+                                .clip(CircleShape)
+                                .background(tint)
+                                .havnPress(scaleDown = 0.9f) { color = hex }
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            HavnButton(
+                text = "Create",
+                onClick = { onCreate(name, age.toIntOrNull(), color) },
+                enabled = name.isNotBlank(),
+                size = HavnButtonSize.Medium,
+                fillWidth = false,
+            )
+        },
+        dismissButton = {
+            HavnButton(
+                text = "Cancel",
+                onClick = onDismiss,
+                tone = HavnButtonTone.Ghost,
+                size = HavnButtonSize.Medium,
+                fillWidth = false,
+            )
+        },
+    )
 }

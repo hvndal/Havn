@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Forest05 / Forest00 — matching HavnColors.kt's dark canvas. -->
+    <color name="window_background">#121410</color>
+    <color name="splash_background">#121410</color>
+</resources>

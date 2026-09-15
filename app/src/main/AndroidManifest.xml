@@ -2,16 +2,37 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <attribution
+        android:tag="default"
+        android:label="@string/app_name" />
+
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!--
+      Removed: INTERNET, SCHEDULE_EXACT_ALARM, USE_EXACT_ALARM.
+
+      • INTERNET was needed only because the 3D organizer loaded three.js from a
+        CDN, which also meant the app's signature screen silently failed to
+        render offline. three.js is now bundled in assets, so Hävn requests no
+        network access at all — which matches what it tells users on the
+        onboarding screen ("everything stays on this device").
+
+      • The exact-alarm permissions were never exercised: reminders are
+        scheduled through WorkManager, and AlarmManager is touched only to
+        cancel alarms left behind by older installs, which needs no permission.
+        Both are restricted permissions that draw Play Store review, so
+        declaring them unused was a liability.
+    -->
 
     <application
         android:name=".HavnApplication"
         android:allowBackup="true"
-        android:icon="@drawable/ic_splash_logo"
+        android:fullBackupContent="@xml/backup_rules"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.Havn"
@@ -21,6 +42,7 @@
             android:name=".ui.MainActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize"
+            android:configChanges="uiMode|orientation|screenSize|screenLayout|keyboardHidden|density|fontScale|smallestScreenSize"
             android:theme="@style/Theme.Havn.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -28,7 +50,19 @@
             </intent-filter>
         </activity>
 
-        <!-- WorkManager -->
+        <!-- Hands a single export file to the share sheet. Scoped to the
+             exports cache folder only (res/xml/file_paths.xml). -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <!-- WorkManager is initialised on demand via HavnApplication -->
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"
@@ -40,7 +74,6 @@
                 tools:node="remove" />
         </provider>
 
-        <!-- Notification receiver for boot -->
         <receiver
             android:name=".notifications.BootReceiver"
             android:exported="true">
@@ -49,12 +82,11 @@
             </intent-filter>
         </receiver>
 
-        <!-- Alarm receiver -->
+        <!-- Handles "Mark taken" and "In 15 min" from a reminder notification -->
         <receiver
             android:name=".notifications.AlarmReceiver"
             android:exported="false" />
 
-        <!-- Widget -->
         <receiver
             android:name=".widget.HavnWidgetReceiver"
             android:exported="true">

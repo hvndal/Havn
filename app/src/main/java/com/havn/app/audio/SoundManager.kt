@@ -80,10 +80,15 @@ class SoundManager @Inject constructor(
         }
     }
 
-    private suspend fun isSoundEnabled(): Boolean {
-        val soundPref = userPreferences.reminderSound.first()
-        return soundPref != "SILENT"
-    }
+    /**
+     * Interface sounds are governed by their own preference.
+     *
+     * This previously read `reminderSound`, which conflated two unrelated
+     * things: choosing a silent *notification* also silenced every in-app tap
+     * and chime, and there was no way to keep notification sound while working
+     * quietly in the app (or the reverse).
+     */
+    private suspend fun isSoundEnabled(): Boolean = userPreferences.interfaceSound.first()
 
     private fun synthesizeAndPlay(
         sampleRate: Int,

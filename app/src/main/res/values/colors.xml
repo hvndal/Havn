@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_background">#FAF8F4</color>
+    <!-- Launcher icon -->
+    <color name="ic_launcher_background">#F9F7F3</color>
     <color name="ic_launcher_foreground">#516351</color>
-    <color name="warm_ivory">#FAF8F4</color>
-    <color name="sage">#516351</color>
-    <color name="charcoal">#1B1C1A</color>
+
+    <!--
+      The window background the system paints before Compose draws its first
+      frame. A values-night variant exists alongside this one, so a dark-mode
+      user no longer gets a flash of ivory on every cold start.
+    -->
+    <color name="window_background">#F9F7F3</color>
+    <color name="splash_background">#F9F7F3</color>
+
+    <color name="brand_sage">#516351</color>
 </resources>

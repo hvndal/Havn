@@ -1,90 +1,153 @@
 package com.havn.app.ui.screens.onboarding
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.havn.app.domain.model.User
-import com.havn.app.ui.components.StaggeredTextReveal
-import com.havn.app.ui.screens.splash.HavnShaderBackground
-import com.havn.app.ui.theme.*
+import com.havn.app.ui.components.HavnAmbientField
+import com.havn.app.ui.components.HavnBrandLogo
+import com.havn.app.ui.components.HavnButton
+import com.havn.app.ui.components.HavnButtonSize
+import com.havn.app.ui.components.HavnButtonTone
+import com.havn.app.ui.components.HavnTextField
+import com.havn.app.ui.components.HavnTextReveal
+import com.havn.app.ui.components.havnPress
+import com.havn.app.ui.components.havnReveal
+import com.havn.app.ui.components.rememberRevealProgress
+import com.havn.app.ui.theme.HavnMotion
+import com.havn.app.ui.theme.HavnTheme
+import com.havn.app.ui.theme.HavnType
 
+/** The palette a profile can be identified by. */
 val AVATAR_COLORS = listOf(
-    "#8DA08C", "#B49759", "#C07050", "#9BAEB5", "#BEB09A", "#A89AAA",
+    "#516351", // sage
+    "#9A5637", // clay
+    "#8A6B22", // amber
+    "#7E929A", // slate
+    "#A89878", // sand
+    "#6B5F7A", // plum
 )
 
+/**
+ * Sign in, or create the first local profile.
+ *
+ * Structurally different from the previous version in one important way: every
+ * page scrolls and respects the keyboard. Before, each page was a `Column` with
+ * `verticalArrangement = Center` and no scroll container, so on a small phone —
+ * or with three or more saved profiles, or simply with the keyboard open — the
+ * name field and the Continue button were pushed off-screen with no way to
+ * reach them.
+ */
 @Composable
 fun OnboardingScreen(
-    onDone: () -> Unit,
     viewModel: OnboardingViewModel = hiltViewModel(),
 ) {
-    val existingUsers by viewModel.existingUsers.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val colors = HavnTheme.colors
+
     var page by remember { mutableIntStateOf(0) }
     var name by remember { mutableStateOf("") }
     var age by remember { mutableStateOf("") }
-    var selectedColor by remember { mutableStateOf(AVATAR_COLORS[0]) }
+    var selectedColor by remember { mutableStateOf(AVATAR_COLORS.first()) }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(WarmIvory)
+            .background(colors.canvas)
     ) {
-        HavnShaderBackground(modifier = Modifier.fillMaxSize())
+        HavnAmbientField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(0.7f),
+        )
 
         AnimatedContent(
             targetState = page,
             transitionSpec = {
-                (fadeIn() + slideInHorizontally { it / 4 }) togetherWith
-                (fadeOut() + slideOutHorizontally { -it / 4 })
+                if (targetState > initialState) {
+                    (slideInHorizontally(tween(HavnMotion.Considered, easing = HavnMotion.Enter)) { it / 5 } +
+                        fadeIn(tween(HavnMotion.Standard))) togetherWith
+                        (slideOutHorizontally(tween(HavnMotion.Standard, easing = HavnMotion.Exit)) { -it / 5 } +
+                            fadeOut(tween(HavnMotion.Quick)))
+                } else {
+                    (slideInHorizontally(tween(HavnMotion.Considered, easing = HavnMotion.Enter)) { -it / 5 } +
+                        fadeIn(tween(HavnMotion.Standard))) togetherWith
+                        (slideOutHorizontally(tween(HavnMotion.Standard, easing = HavnMotion.Exit)) { it / 5 } +
+                            fadeOut(tween(HavnMotion.Quick)))
+                }
             },
-            label = "onboarding",
+            label = "onboardingPage",
         ) { currentPage ->
             when (currentPage) {
-                0 -> OnboardingPage1(
+                0 -> IdentityPage(
                     name = name,
                     age = age,
-                    existingUsers = existingUsers,
+                    profiles = uiState.existingProfiles,
+                    isSubmitting = uiState.isSubmitting,
+                    error = uiState.error,
                     onNameChange = { name = it },
-                    onAgeChange = { age = it },
+                    onAgeChange = { input -> if (input.length <= 3 && input.all(Char::isDigit)) age = input },
                     onContinue = { if (name.isNotBlank()) page = 1 },
-                    onSelectUser = { user ->
-                        viewModel.signInAsUser(user.id, onDone)
-                    }
+                    onSignIn = viewModel::signIn,
                 )
-                1 -> OnboardingPage2(
+
+                else -> ColourPage(
                     name = name,
                     selectedColor = selectedColor,
-                    onColorSelect = { selectedColor = it },
-                    onDone = {
-                        viewModel.createUser(
-                            name = name.trim(),
-                            age = age.toIntOrNull() ?: 0,
-                            color = selectedColor,
-                            onComplete = onDone,
+                    isSubmitting = uiState.isSubmitting,
+                    onSelectColor = { selectedColor = it },
+                    onBack = { page = 0 },
+                    onFinish = {
+                        viewModel.createProfile(
+                            name = name,
+                            age = age.toIntOrNull(),
+                            avatarColor = selectedColor,
                         )
-                    }
+                    },
                 )
             }
         }
@@ -92,240 +155,322 @@ fun OnboardingScreen(
 }
 
 @Composable
-private fun OnboardingPage1(
+private fun IdentityPage(
     name: String,
     age: String,
-    existingUsers: List<User>,
+    profiles: List<User>,
+    isSubmitting: Boolean,
+    error: String?,
     onNameChange: (String) -> Unit,
     onAgeChange: (String) -> Unit,
     onContinue: () -> Unit,
-    onSelectUser: (User) -> Unit,
+    onSignIn: (Long) -> Unit,
 ) {
-    val focusRequester = remember { FocusRequester() }
+    val colors = HavnTheme.colors
+    val gutter = HavnTheme.spacing.gutter
+    val reveal = rememberRevealProgress()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 32.dp)
-            .systemBarsPadding(),
-        verticalArrangement = Arrangement.Center,
+            .verticalScroll(rememberScrollState())
+            .statusBarsPadding()
+            .navigationBarsPadding()
+            .imePadding()
+            .padding(horizontal = gutter),
     ) {
-        // Text Reveal Animation for Brand / Welcome Title
-        StaggeredTextReveal(
-            text = "Welcome.",
-            style = MaterialTheme.typography.displayLarge.copy(fontSize = 52.sp),
-            color = Charcoal,
-            letterDelayMs = 70L,
-            initialDelayMs = 150L,
+        Spacer(Modifier.height(HavnTheme.spacing.xxxl))
+
+        HavnBrandLogo(
+            iconSize = 56.dp,
+            showWordmark = false,
+            showTagline = false,
+            modifier = Modifier.havnReveal(reveal),
         )
 
-        Spacer(Modifier.height(6.dp))
+        Spacer(Modifier.height(HavnTheme.spacing.xxl))
+
+        HavnTextReveal(
+            text = if (profiles.isEmpty()) "Welcome." else "Welcome back.",
+            style = MaterialTheme.typography.displayMedium,
+            color = colors.textPrimary,
+        )
+        Spacer(Modifier.height(HavnTheme.spacing.md))
         Text(
-            text = if (existingUsers.isNotEmpty()) "Sign in or create a profile" else "What's your name?",
-            style = MaterialTheme.typography.headlineMedium,
-            color = CharcoalMid,
+            text = "No account, no cloud, no sign-up. Your medication history stays on this phone.",
+            style = MaterialTheme.typography.bodyLarge,
+            color = colors.textTertiary,
+            modifier = Modifier.havnReveal(rememberRevealProgress(delayMs = 200)),
         )
-        Spacer(Modifier.height(36.dp))
 
-        // Sign In Option (If existing local profiles exist)
-        if (existingUsers.isNotEmpty()) {
+        Spacer(Modifier.height(HavnTheme.spacing.section))
+
+        if (profiles.isNotEmpty()) {
             Text(
-                text = "SIGN IN TO PROFILE",
-                style = MaterialTheme.typography.labelSmall,
-                color = StoneGrey,
-                letterSpacing = 0.12.sp,
+                text = "CONTINUE AS",
+                style = HavnType.Eyebrow,
+                color = colors.textTertiary,
             )
-            Spacer(Modifier.height(12.dp))
-            existingUsers.forEach { user ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(White)
-                        .border(1.dp, SurfaceHighest, RoundedCornerShape(16.dp))
-                        .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
-                            onSelectUser(user)
-                        }
-                        .padding(14.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    val avatarColor = runCatching { Color(android.graphics.Color.parseColor(user.avatarColor)) }.getOrDefault(Sage)
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(avatarColor.copy(alpha = 0.2f)),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            text = user.name.firstOrNull()?.uppercaseChar()?.toString() ?: "H",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = avatarColor,
-                        )
-                    }
-                    Spacer(Modifier.width(12.dp))
-                    Text(
-                        text = user.name,
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                        color = Charcoal,
-                    )
-                    Spacer(Modifier.weight(1f))
-                    Text("Sign In →", style = MaterialTheme.typography.labelMedium, color = Sage)
-                }
-                Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(HavnTheme.spacing.md))
+
+            profiles.forEachIndexed { index, profile ->
+                ProfileRow(
+                    profile = profile,
+                    index = index,
+                    enabled = !isSubmitting,
+                    onClick = { onSignIn(profile.id) },
+                )
             }
-            Spacer(Modifier.height(20.dp))
+
+            Spacer(Modifier.height(HavnTheme.spacing.xxl))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    Modifier
+                        .weight(1f)
+                        .height(1.dp)
+                        .background(colors.hairline)
+                )
+                Text(
+                    text = "OR ADD SOMEONE",
+                    style = HavnType.Eyebrow,
+                    color = colors.textTertiary,
+                    modifier = Modifier.padding(horizontal = HavnTheme.spacing.md),
+                )
+                Box(
+                    Modifier
+                        .weight(1f)
+                        .height(1.dp)
+                        .background(colors.hairline)
+                )
+            }
+            Spacer(Modifier.height(HavnTheme.spacing.xxl))
+        }
+
+        HavnTextField(
+            value = name,
+            onValueChange = onNameChange,
+            label = "Name",
+            placeholder = "Who is this for?",
+            imeAction = ImeAction.Next,
+            enabled = !isSubmitting,
+        )
+
+        Spacer(Modifier.height(HavnTheme.spacing.lg))
+
+        HavnTextField(
+            value = age,
+            onValueChange = onAgeChange,
+            label = "Age",
+            placeholder = "Optional",
+            keyboardType = KeyboardType.Number,
+            imeAction = ImeAction.Done,
+            enabled = !isSubmitting,
+        )
+
+        if (error != null) {
+            Spacer(Modifier.height(HavnTheme.spacing.lg))
             Text(
-                text = "OR CREATE NEW",
-                style = MaterialTheme.typography.labelSmall,
-                color = StoneGrey,
-                letterSpacing = 0.12.sp,
-            )
-            Spacer(Modifier.height(12.dp))
-        }
-
-        // Name input
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(White, RoundedCornerShape(16.dp))
-                .border(1.dp, SurfaceHighest, RoundedCornerShape(16.dp))
-                .padding(horizontal = 20.dp, vertical = 16.dp),
-        ) {
-            BasicTextField(
-                value = name,
-                onValueChange = onNameChange,
-                modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
-                textStyle = MaterialTheme.typography.titleMedium.copy(color = Charcoal, fontSize = 18.sp),
-                cursorBrush = SolidColor(Sage),
-                singleLine = true,
-                decorationBox = { inner ->
-                    if (name.isEmpty()) Text("Your name", style = MaterialTheme.typography.titleMedium.copy(color = StoneGrey, fontSize = 18.sp))
-                    inner()
-                }
+                text = error,
+                style = MaterialTheme.typography.bodySmall,
+                color = colors.danger,
             )
         }
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(HavnTheme.spacing.xxl))
 
-        // Age input
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(White, RoundedCornerShape(16.dp))
-                .border(1.dp, SurfaceHighest, RoundedCornerShape(16.dp))
-                .padding(horizontal = 20.dp, vertical = 16.dp),
-        ) {
-            BasicTextField(
-                value = age,
-                onValueChange = { if (it.length <= 3) onAgeChange(it) },
-                modifier = Modifier.fillMaxWidth(),
-                textStyle = MaterialTheme.typography.titleMedium.copy(color = Charcoal, fontSize = 18.sp),
-                cursorBrush = SolidColor(Sage),
-                singleLine = true,
-                decorationBox = { inner ->
-                    if (age.isEmpty()) Text("Your age (optional)", style = MaterialTheme.typography.titleMedium.copy(color = StoneGrey, fontSize = 18.sp))
-                    inner()
-                }
-            )
-        }
+        HavnButton(
+            text = "Continue",
+            onClick = onContinue,
+            enabled = name.isNotBlank() && !isSubmitting,
+        )
 
-        Spacer(Modifier.height(32.dp))
-
-        HavnButton(text = "Continue", onClick = onContinue, enabled = name.isNotBlank())
+        Spacer(Modifier.height(HavnTheme.spacing.xxxl))
     }
 }
 
 @Composable
-private fun OnboardingPage2(
+private fun ProfileRow(
+    profile: User,
+    index: Int,
+    enabled: Boolean,
+    onClick: () -> Unit,
+) {
+    val colors = HavnTheme.colors
+    val reveal = rememberRevealProgress(
+        key = profile.id,
+        delayMs = HavnMotion.staggerDelay(index, step = 60),
+    )
+    val tint = remember(profile.avatarColor) {
+        runCatching { Color(android.graphics.Color.parseColor(profile.avatarColor)) }
+            .getOrDefault(Color(0xFF516351))
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .havnReveal(reveal)
+            .clip(RoundedCornerShape(HavnTheme.radius.md))
+            .background(colors.surface)
+            .border(1.dp, colors.hairline, RoundedCornerShape(HavnTheme.radius.md))
+            .havnPress(scaleDown = 0.985f, enabled = enabled, onClick = onClick)
+            .padding(HavnTheme.spacing.lg),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(tint.copy(alpha = if (colors.isDark) 0.3f else 0.16f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = profile.name.firstOrNull()?.uppercaseChar()?.toString() ?: "·",
+                style = MaterialTheme.typography.labelLarge,
+                color = tint,
+            )
+        }
+        Spacer(Modifier.width(HavnTheme.spacing.lg))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = profile.name,
+                style = MaterialTheme.typography.bodyLarge,
+                color = colors.textPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            if (profile.age > 0) {
+                Text(
+                    text = "Age ${profile.age}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.textTertiary,
+                )
+            }
+        }
+        Text(
+            text = "Open",
+            style = MaterialTheme.typography.labelMedium,
+            color = colors.accent,
+        )
+    }
+    Spacer(Modifier.height(HavnTheme.spacing.sm))
+}
+
+@Composable
+private fun ColourPage(
     name: String,
     selectedColor: String,
-    onColorSelect: (String) -> Unit,
-    onDone: () -> Unit,
+    isSubmitting: Boolean,
+    onSelectColor: (String) -> Unit,
+    onBack: () -> Unit,
+    onFinish: () -> Unit,
 ) {
+    val colors = HavnTheme.colors
+    val gutter = HavnTheme.spacing.gutter
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 32.dp)
-            .systemBarsPadding(),
-        verticalArrangement = Arrangement.Center,
+            .verticalScroll(rememberScrollState())
+            .statusBarsPadding()
+            .navigationBarsPadding()
+            .imePadding()
+            .padding(horizontal = gutter),
     ) {
-        StaggeredTextReveal(
+        Spacer(Modifier.height(HavnTheme.spacing.xxxl))
+
+        Text(
+            text = "STEP 2 OF 2",
+            style = HavnType.Eyebrow,
+            color = colors.textTertiary,
+        )
+        Spacer(Modifier.height(HavnTheme.spacing.md))
+
+        HavnTextReveal(
             text = "Hello, $name.",
-            style = MaterialTheme.typography.displayLarge.copy(fontSize = 48.sp),
-            color = Charcoal,
-            letterDelayMs = 60L,
-            initialDelayMs = 150L,
+            style = MaterialTheme.typography.displayMedium,
+            color = colors.textPrimary,
         )
-
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(HavnTheme.spacing.md))
         Text(
-            text = "Your organizer is ready.",
-            style = MaterialTheme.typography.headlineMedium,
-            color = CharcoalMid,
+            text = "Pick a colour. It marks your profile wherever it appears.",
+            style = MaterialTheme.typography.bodyLarge,
+            color = colors.textTertiary,
         )
-        Spacer(Modifier.height(40.dp))
 
-        Text(
-            text = "CHOOSE YOUR COLOUR",
-            style = MaterialTheme.typography.labelSmall,
-            color = StoneGrey,
-            letterSpacing = 0.12.sp,
-        )
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(HavnTheme.spacing.section))
 
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(HavnTheme.spacing.md),
+        ) {
             AVATAR_COLORS.forEach { hex ->
-                val color = Color(android.graphics.Color.parseColor(hex))
-                val isSelected = hex == selectedColor
-                Box(
-                    modifier = Modifier
-                        .size(if (isSelected) 44.dp else 36.dp)
-                        .clip(CircleShape)
-                        .background(color)
-                        .border(if (isSelected) 2.dp else 0.dp, Charcoal.copy(alpha = 0.4f), CircleShape)
-                        .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { onColorSelect(hex) },
+                ColourSwatch(
+                    hex = hex,
+                    selected = hex == selectedColor,
+                    onClick = { onSelectColor(hex) },
+                    modifier = Modifier.weight(1f),
                 )
             }
         }
 
-        Spacer(Modifier.height(48.dp))
+        Spacer(Modifier.height(HavnTheme.spacing.section))
 
-        HavnButton(text = "Begin", onClick = onDone)
-        Spacer(Modifier.height(16.dp))
-        Text(
-            text = "Everything stays on your device. Local only.",
-            style = MaterialTheme.typography.bodySmall,
-            color = StoneLight,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth(),
+        HavnButton(
+            text = "Begin",
+            onClick = onFinish,
+            loading = isSubmitting,
+            enabled = !isSubmitting,
         )
+        Spacer(Modifier.height(HavnTheme.spacing.md))
+        HavnButton(
+            text = "Back",
+            onClick = onBack,
+            tone = HavnButtonTone.Ghost,
+            size = HavnButtonSize.Medium,
+            enabled = !isSubmitting,
+        )
+
+        Spacer(Modifier.height(HavnTheme.spacing.xxxl))
     }
 }
 
 @Composable
-fun HavnButton(
-    text: String,
+private fun ColourSwatch(
+    hex: String,
+    selected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true,
 ) {
-    val scale by animateFloatAsState(
-        targetValue = if (enabled) 1f else 0.96f,
-        animationSpec = spring(stiffness = Spring.StiffnessMedium),
-        label = "scale",
+    val colors = HavnTheme.colors
+    val tint = remember(hex) {
+        runCatching { Color(android.graphics.Color.parseColor(hex)) }
+            .getOrDefault(Color(0xFF516351))
+    }
+    // The ring grows rather than the swatch: changing the swatch's own size
+    // would reflow the row and make its neighbours twitch on every selection.
+    val ring by animateDpAsState(
+        targetValue = if (selected) 3.dp else 0.dp,
+        animationSpec = HavnMotion.settle(),
+        label = "swatchRing",
     )
-    Button(
-        onClick = onClick,
-        enabled = enabled,
-        modifier = modifier.fillMaxWidth().height(56.dp).graphicsLayer { scaleX = scale; scaleY = scale },
-        shape = RoundedCornerShape(28.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Sage, contentColor = White,
-            disabledContainerColor = SurfaceHigh, disabledContentColor = StoneGrey,
-        ),
-        elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp, 0.dp),
+
+    Box(
+        modifier = modifier
+            .aspectRatio(1f)
+            .havnPress(scaleDown = 0.9f, onClickLabel = "Select colour", onClick = onClick),
+        contentAlignment = Alignment.Center,
     ) {
-        Text(text = text, style = MaterialTheme.typography.labelLarge.copy(letterSpacing = 0.04.sp))
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(CircleShape)
+                .background(tint)
+                .border(ring, colors.canvas, CircleShape)
+                .border(
+                    width = if (selected) 1.5.dp else 0.dp,
+                    color = if (selected) colors.textPrimary else Color.Transparent,
+                    shape = CircleShape,
+                )
+        )
     }
 }

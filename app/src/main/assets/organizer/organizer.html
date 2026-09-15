@@ -8,22 +8,18 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body {
     width: 100%; height: 100%;
-    background: #FAF8F4;
+    /* Transparent: Compose paints the ambient field behind this view. The page
+       previously ran its own WebGL background shader in a second GL context on
+       top of three.js — two contexts inside one WebView, for what is now a
+       native Canvas one layer down. */
+    background: transparent;
     overflow: hidden;
     touch-action: none;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
-    font-family: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
-  #bg-canvas {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: 1;
-    opacity: 0.65;
-    pointer-events: none;
-  }
-  #c {
+  #three-container {
     position: absolute;
     top: 0; left: 0;
     width: 100%; height: 100%;
@@ -31,453 +27,656 @@
     cursor: grab;
     display: block;
   }
-  #c:active { cursor: grabbing; }
-  #hud {
-    position: absolute;
-    bottom: 12px;
-    right: 12px;
-    z-index: 3;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    color: #1B1C1A;
-    background: rgba(255, 255, 255, 0.85);
-    padding: 6px 14px;
-    border-radius: 9999px;
-    border: 1px solid #E4E2DE;
-    backdrop-filter: blur(8px);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    box-shadow: 0 4px 16px rgba(81, 99, 81, 0.08);
-    transition: opacity 1.5s ease;
-    pointer-events: none;
-  }
+  #three-container:active { cursor: grabbing; }
 </style>
+<script src="three.min.js"></script>
 </head>
 <body>
-<canvas id="bg-canvas"></canvas>
-<canvas id="c"></canvas>
-<div id="hud">
-  <span>Interact</span>
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#516351" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 14a4 4 0 1 1 4-4 4 4 4 0 0 1-4 4z"/></svg>
-</div>
-
+<div id="three-container"></div>
 <script>
-// ─────────────────────────────────────────────────────────────────────────────
-// 1. W E B G L   A M B I E N T   S H A D E R  (from stitch ANIMATION_4)
-// ─────────────────────────────────────────────────────────────────────────────
-(function initShader() {
-  const bgCanvas = document.getElementById('bg-canvas');
-  const gl = bgCanvas.getContext('webgl') || bgCanvas.getContext('experimental-webgl');
-  if (!gl) return;
-
-  function syncShaderSize() {
-    const w = bgCanvas.clientWidth || window.innerWidth;
-    const h = bgCanvas.clientHeight || window.innerHeight;
-    if (bgCanvas.width !== w || bgCanvas.height !== h) {
-      bgCanvas.width = w;
-      bgCanvas.height = h;
-    }
-  }
-  syncShaderSize();
-  window.addEventListener('resize', syncShaderSize);
-
-  const vs = `attribute vec2 a_position;
-varying vec2 v_texCoord;
-void main() {
-  v_texCoord = a_position * 0.5 + 0.5;
-  gl_Position = vec4(a_position, 0.0, 1.0);
-}`;
-
-  const fs = `precision highp float;
-varying vec2 v_texCoord;
-uniform float u_time;
-uniform vec2 u_resolution;
-
-void main() {
-    vec2 uv = v_texCoord;
-    vec3 ivory = vec3(0.98, 0.97, 0.96); // #FAF8F4
-    vec3 sand = vec3(0.95, 0.93, 0.90);  // Warm Sand
-    vec3 sage = vec3(0.55, 0.63, 0.55);  // #8DA08C (Muted Sage)
-    
-    float wave1 = sin(uv.x * 2.0 + u_time * 0.1) * 0.5 + 0.5;
-    float wave2 = cos(uv.y * 3.0 - u_time * 0.15) * 0.5 + 0.5;
-    float noise = wave1 * wave2;
-    
-    vec3 color = mix(ivory, sand, noise * 0.35);
-    float vignette = length(uv - 0.5);
-    color *= 1.0 - vignette * 0.12;
-    
-    gl_FragColor = vec4(color, 1.0);
-}`;
-
-  function compileShader(type, src) {
-    const s = gl.createShader(type);
-    gl.shaderSource(s, src);
-    gl.compileShader(s);
-    return s;
-  }
-
-  const prog = gl.createProgram();
-  gl.attachShader(prog, compileShader(gl.VERTEX_SHADER, vs));
-  gl.attachShader(prog, compileShader(gl.FRAGMENT_SHADER, fs));
-  gl.linkProgram(prog);
-  gl.useProgram(prog);
-
-  const buf = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
-
-  const pos = gl.getAttribLocation(prog, 'a_position');
-  gl.enableVertexAttribArray(pos);
-  gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
-
-  const uTime = gl.getUniformLocation(prog, 'u_time');
-  const uRes = gl.getUniformLocation(prog, 'u_resolution');
-
-  function renderShader(t) {
-    syncShaderSize();
-    gl.viewport(0, 0, bgCanvas.width, bgCanvas.height);
-    if (uTime) gl.uniform1f(uTime, t * 0.001);
-    if (uRes) gl.uniform2f(uRes, bgCanvas.width, bgCanvas.height);
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-    requestAnimationFrame(renderShader);
-  }
-  requestAnimationFrame(renderShader);
-})();
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 2. 3 D   V I R T U A L   P I L L   O R G A N I Z E R  (from Three.js + Canvas)
+// 2. T H R E E . J S   3 D   D Y N A M I C   O R G A N I Z E R
 // ─────────────────────────────────────────────────────────────────────────────
-const canvas = document.getElementById('c');
-const ctx = canvas.getContext('2d');
 
-let W = canvas.width = window.innerWidth * (window.devicePixelRatio || 1);
-let H = canvas.height = window.innerHeight * (window.devicePixelRatio || 1);
-
-const DAYS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
-const SLOTS = 7;
-
-// Color Palette (from Warm Minimalism DESIGN.md & code.html)
-const PALETTE = {
-  bg: 'transparent',
-  caseBody: '#F5F3EF',     // bodyMaterial color 0xf5f3ef
-  caseShadow: '#E4E2DE',   // surface-container-highest
-  slotMarker: '#DBDAD6',   // slot color 0xdbdad6
-  lidClosed: '#FAF8F4',    // surface-bright
-  lidOpen: '#D4E8D2',      // primary-fixed
-  lidEdge: '#C3C8C0',      // outline-variant
-  text: '#747872',         // outline
-  textActive: '#516351',   // primary
-  pillSage: '#8DA08C',     // primary-container
-  pillAmber: '#E2C381',    // tertiary-fixed-dim
-  pillTerracotta: '#FEB28F',// secondary-container
-  pillSlate: '#9BAEB5',
+// ─────────────────────────────────────────────────────────────────────────────
+// T H E M E
+//
+// Every colour below used to be a literal. That meant the organiser rendered a
+// pale ivory box with near-black labels regardless of the app's theme, so in
+// dark mode it glowed like a lightbox in the middle of an ink-dark screen.
+// Compose now pushes the resolved palette in via setTheme() and the materials
+// and label textures are rebuilt from it.
+// ─────────────────────────────────────────────────────────────────────────────
+let HAVN_THEME = {
+  isDark: false,
+  canvas: '#F9F7F3',
+  surface: '#FCFBF8',
+  body: '#FFFFFF',
+  accent: '#516351',
+  accentSoft: '#E2EBDE',
+  text: '#15170F',
+  textSoft: '#6C7166',
+  hairline: '#DFDBD2'
 };
 
-const PILL_COLORS = [PALETTE.pillSage, PALETTE.pillAmber, PALETTE.pillTerracotta, PALETTE.pillSlate];
-
-let rotX = 0.40;
-let rotY = 0.0;
-let targetRotY = 0.0;
-let targetRotX = 0.40;
-let idleTime = 0;
-
-let weekData = Array(SLOTS).fill(null).map(() => ({ count: 0, colors: [], isToday: false }));
-let selectedDay = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
-
-const openAngle = Array(SLOTS).fill(0);
-const anglePos   = Array(SLOTS).fill(0);
-const angleVel   = Array(SLOTS).fill(0);
-
-function slotHasPills(i) {
-  return weekData[i] && weekData[i].count > 0;
+function hexToInt(hex) {
+  return parseInt(String(hex || '#000000').replace('#', '0x'), 16);
 }
 
-function slotColors(i) {
-  if (!weekData[i] || !weekData[i].colors || weekData[i].colors.length === 0) {
-    return [PILL_COLORS[i % PILL_COLORS.length]];
-  }
-  return weekData[i].colors;
+/** Mixes two hex colours; t=0 returns a, t=1 returns b. */
+function mixHex(a, b, t) {
+  const ai = hexToInt(a), bi = hexToInt(b);
+  const ar = (ai >> 16) & 255, ag = (ai >> 8) & 255, ab = ai & 255;
+  const br = (bi >> 16) & 255, bg = (bi >> 8) & 255, bb = bi & 255;
+  const r = Math.round(ar + (br - ar) * t);
+  const g = Math.round(ag + (bg - ag) * t);
+  const bl = Math.round(ab + (bb - ab) * t);
+  return '#' + [r, g, bl].map(v => v.toString(16).padStart(2, '0')).join('');
 }
 
-const K = 170.0;
-const DAMP = 15.0;
-
-let isDragging = false;
-let startX = 0, startY = 0;
-
-function resize() {
-  W = canvas.width = window.innerWidth * (window.devicePixelRatio || 1);
-  H = canvas.height = window.innerHeight * (window.devicePixelRatio || 1);
-}
-window.addEventListener('resize', resize);
-
-const fov = 650;
-
-function project(x, y, z) {
-  const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
-  let x1 = x * cosY - z * sinY;
-  let z1 = x * sinY + z * cosY;
-
-  const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
-  let y2 = y * cosX - z1 * sinX;
-  let z2 = y * sinX + z1 * cosX;
-
-  const dist = fov / (fov + z2 + 400);
-  return {
-    px: W / 2 + x1 * dist,
-    py: H / 2 + y2 * dist,
-    scale: dist,
-    z: z2,
+/** Palette derived once per theme change, used by materials and textures. */
+function themePalette() {
+  const t = HAVN_THEME;
+  return t.isDark ? {
+    shell: '#2A3029',
+    shellSpecular: 0x4a544a,
+    lid: '#333A31',
+    slotIdle: '#242A23',
+    slotDone: mixHex('#242A23', t.accent, 0.42),
+    labelIdle: '#2C3329',
+    labelCurrent: mixHex('#2C3329', t.accent, 0.26),
+    labelSelected: mixHex('#2C3329', t.accent, 0.38),
+    labelDone: mixHex('#2C3329', t.accent, 0.55),
+    labelBorder: '#48513F',
+    labelBorderDone: t.accent,
+    labelText: t.text,
+    labelTextSoft: t.textSoft,
+    ambient: 0x8f9a8c,
+    ambientIntensity: 0.55,
+    key: 0xdfe6d8,
+    keyIntensity: 0.75,
+    fill: 0x5d7a60,
+    fillIntensity: 0.35,
+    shadowOpacity: 0.34
+  } : {
+    shell: '#DCE3DA',
+    shellSpecular: 0xffffff,
+    lid: '#FFFFFF',
+    slotIdle: '#DBDAD6',
+    slotDone: '#C5DAC3',
+    labelIdle: '#F2EFE9',
+    labelCurrent: '#E5EFE4',
+    labelSelected: '#D3E6D1',
+    labelDone: '#C8DEC6',
+    labelBorder: '#ADA89E',
+    labelBorderDone: '#445744',
+    labelText: '#2D3B2D',
+    labelTextSoft: '#828680',
+    ambient: 0xfffdfa,
+    ambientIntensity: 0.60,
+    key: 0xfffdf5,
+    keyIntensity: 0.95,
+    fill: 0x7c947b,
+    fillIntensity: 0.45,
+    shadowOpacity: 0.22
   };
 }
+let organizerSlots = [
+  { label: 'MORNING', period: '05:00 - 11:59', isCompleted: false, isCurrent: true, pills: [] },
+  { label: 'AFTERNOON', period: '12:00 - 16:59', isCompleted: false, isCurrent: false, pills: [] },
+  { label: 'EVENING', period: '17:00 - 20:59', isCompleted: false, isCurrent: false, pills: [] },
+  { label: 'NIGHT', period: '21:00 - 04:59', isCompleted: false, isCurrent: false, pills: [] }
+];
 
-function render(timestamp) {
-  ctx.clearRect(0, 0, W, H);
+let selectedSlotIndex = 0;
+let openAngles = [];
+let targetAngles = [];
 
-  // Slow ambient rotation matching Three.js scene
+const container = document.getElementById('three-container');
+const width = container.clientWidth || window.innerWidth;
+const height = container.clientHeight || window.innerHeight;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 1000);
+camera.position.set(0, 3.2, 5.5);
+camera.lookAt(0, 0, 0);
+
+const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+renderer.setSize(width, height);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+container.appendChild(renderer.domElement);
+
+// Multi-directional Scandinavian lighting with depth shadows
+const ambientLight = new THREE.AmbientLight(themePalette().ambient, themePalette().ambientIntensity);
+scene.add(ambientLight);
+
+const dirLight = new THREE.DirectionalLight(themePalette().key, themePalette().keyIntensity);
+dirLight.position.set(4, 9, 5);
+dirLight.castShadow = true;
+dirLight.shadow.mapSize.width = 1024;
+dirLight.shadow.mapSize.height = 1024;
+dirLight.shadow.camera.near = 0.5;
+dirLight.shadow.camera.far = 15;
+dirLight.shadow.camera.left = -5;
+dirLight.shadow.camera.right = 5;
+dirLight.shadow.camera.top = 5;
+dirLight.shadow.camera.bottom = -5;
+dirLight.shadow.bias = -0.0005;
+scene.add(dirLight);
+
+const softFillLight = new THREE.DirectionalLight(themePalette().fill, themePalette().fillIntensity);
+softFillLight.position.set(-4, -1, -3);
+scene.add(softFillLight);
+
+// Ground Shadow Catcher Plane
+const shadowPlaneGeo = new THREE.PlaneGeometry(12, 12);
+const shadowPlaneMat = new THREE.ShadowMaterial({ opacity: themePalette().shadowOpacity });
+const shadowPlane = new THREE.Mesh(shadowPlaneGeo, shadowPlaneMat);
+shadowPlane.rotation.x = -Math.PI / 2;
+shadowPlane.position.y = -0.28;
+shadowPlane.receiveShadow = true;
+scene.add(shadowPlane);
+
+// Main Pill Organizer Parent Group
+const boxGroup = new THREE.Group();
+scene.add(boxGroup);
+
+let bodyMesh = null;
+let slotBaseMeshes = [];
+let lidPivots = [];
+let lidMeshes = [];
+let pillGroups = [];
+
+// Helper: Create Lid Canvas Texture
+function createSlotLabelTexture(slotData, isSelected) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 128;
+  canvas.height = 256;
+  const ctx = canvas.getContext('2d');
+
+  const p = themePalette();
+  const isCompleted = slotData.isCompleted;
+  const isCurrent = slotData.isCurrent;
+
+  // Background
+  if (isCompleted)      ctx.fillStyle = p.labelDone;
+  else if (isSelected)  ctx.fillStyle = p.labelSelected;
+  else if (isCurrent)   ctx.fillStyle = p.labelCurrent;
+  else                  ctx.fillStyle = p.labelIdle;
+  ctx.fillRect(0, 0, 128, 256);
+
+  // Outer border
+  ctx.strokeStyle = isCompleted ? p.labelBorderDone : p.labelBorder;
+  ctx.lineWidth = 6;
+  ctx.strokeRect(3, 3, 122, 250);
+
+  // Period label. Tracked out to match the app's eyebrow style — the lids are
+  // the only typography in the 3D scene, so they carry the brand voice.
+  ctx.fillStyle = p.labelText;
+  ctx.font = '600 21px -apple-system, "Segoe UI", Roboto, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  const labelText = slotData.label || 'SLOT';
+  const tracked = labelText.split('').join(' ');
+  ctx.fillText(tracked, 64, 100, 116);
+
+  // Subtitle
+  ctx.font = '15px -apple-system, "Segoe UI", Roboto, sans-serif';
+  ctx.fillStyle = isCompleted ? p.labelText : p.labelTextSoft;
+
+  const pillCount = (slotData.pills && slotData.pills.length) || 0;
+  if (isCompleted) {
+    ctx.fillText('✓ Done', 64, 145);
+  } else {
+    ctx.fillText(pillCount > 0 ? pillCount + (pillCount === 1 ? ' dose' : ' doses') : 'Empty', 64, 145);
+  }
+  
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.needsUpdate = true;
+  return texture;
+}
+
+// Build or Rebuild 3D Organizer Structure for N slots
+function rebuildOrganizer(slots) {
+  organizerSlots = slots;
+  const numSlots = slots.length;
+  
+  openAngles = Array(numSlots).fill(0);
+  targetAngles = Array(numSlots).fill(0);
+  if (selectedSlotIndex < numSlots) {
+    targetAngles[selectedSlotIndex] = 1;
+  }
+  
+  // Clear old meshes
+  while (boxGroup.children.length > 0) {
+    boxGroup.remove(boxGroup.children[0]);
+  }
+  slotBaseMeshes = [];
+  lidPivots = [];
+  lidMeshes = [];
+  pillGroups = [];
+  
+  const slotWidth = (numSlots === 4) ? 0.56 : 0.44;
+  const boxWidth = numSlots * slotWidth + 0.28;
+  
+  // Main Body
+  const bodyGeometry = new THREE.BoxGeometry(boxWidth, 0.55, 1.35);
+  const bodyMaterial = new THREE.MeshPhongMaterial({
+    color: hexToInt(themePalette().shell),
+    shininess: 32,
+    specular: themePalette().shellSpecular
+  });
+  bodyMesh = new THREE.Mesh(bodyGeometry, bodyMaterial);
+  bodyMesh.castShadow = true;
+  bodyMesh.receiveShadow = true;
+  boxGroup.add(bodyMesh);
+  
+  const startX = -((numSlots - 1) * slotWidth) / 2;
+  
+  for (let i = 0; i < numSlots; i++) {
+    const xPos = startX + i * slotWidth;
+    const slotData = slots[i];
+    
+    // Base Marker
+    const slotGeo = new THREE.BoxGeometry(slotWidth - 0.08, 0.04, 1.1);
+    const slotMat = new THREE.MeshBasicMaterial({
+      color: hexToInt(slotData.isCompleted ? themePalette().slotDone : themePalette().slotIdle)
+    });
+    const slotMesh = new THREE.Mesh(slotGeo, slotMat);
+    slotMesh.position.set(xPos, 0.28, 0);
+    slotMesh.userData = { slotIndex: i };
+    slotMesh.receiveShadow = true;
+    boxGroup.add(slotMesh);
+    slotBaseMeshes.push(slotMesh);
+    
+    // Pill Group
+    const pGroup = new THREE.Group();
+    pGroup.position.set(xPos, 0.32, 0);
+    boxGroup.add(pGroup);
+    pillGroups.push(pGroup);
+    
+    // Hinged Lid Pivot
+    const pivot = new THREE.Group();
+    pivot.position.set(xPos, 0.32, -0.62);
+    
+    const lidGeo = new THREE.BoxGeometry(slotWidth - 0.08, 0.08, 1.25);
+    const labelTex = createSlotLabelTexture(slotData, i === selectedSlotIndex);
+    const lidMat = new THREE.MeshPhongMaterial({
+      map: labelTex,
+      color: 0xffffff,
+      shininess: 16
+    });
+    const lidMesh = new THREE.Mesh(lidGeo, lidMat);
+    lidMesh.position.set(0, 0.04, 0.625);
+    lidMesh.userData = { slotIndex: i };
+    lidMesh.castShadow = true;
+    lidMesh.receiveShadow = true;
+    
+    pivot.add(lidMesh);
+    boxGroup.add(pivot);
+    
+    lidPivots.push(pivot);
+    lidMeshes.push(lidMesh);
+  }
+  
+  update3DPills();
+}
+
+// Build 3D Pill Mesh for specific medication
+function createPillMesh(pillData) {
+  const pGroup = new THREE.Group();
+  const hexColor = parseInt((pillData.color || '#8DA08C').replace('#', '0x'), 16);
+  const secHexColor = parseInt((pillData.secondaryColor || '#FAF8F4').replace('#', '0x'), 16);
+  const shape = pillData.shape || 'capsule';
+  
+  if (shape === 'softgel') {
+    // Glossy translucent amber/colored ellipsoid
+    const geo = new THREE.SphereGeometry(0.065, 24, 16);
+    const mat = new THREE.MeshPhongMaterial({
+      color: hexColor,
+      transparent: true,
+      opacity: 0.82,
+      shininess: 85,
+      specular: 0xffffff
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.scale.set(1.0, 1.35, 0.85);
+    mesh.castShadow = true;
+    pGroup.add(mesh);
+  } else if (shape === 'tablet') {
+    // Round tablet disc with score line
+    const geo = new THREE.CylinderGeometry(0.075, 0.075, 0.045, 24);
+    const mat = new THREE.MeshPhongMaterial({
+      color: hexColor,
+      shininess: 18,
+      specular: 0xffffff
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.castShadow = true;
+    
+    // Subtle score line across center
+    const lineGeo = new THREE.BoxGeometry(0.13, 0.01, 0.008);
+    const lineMat = new THREE.MeshBasicMaterial({ color: 0x666666 });
+    const line = new THREE.Mesh(lineGeo, lineMat);
+    line.position.y = 0.023;
+    mesh.add(line);
+    
+    pGroup.add(mesh);
+  } else {
+    // Two-tone Capsule
+    const cap1Geo = new THREE.CylinderGeometry(0.055, 0.055, 0.10, 16);
+    const cap1Mat = new THREE.MeshPhongMaterial({ color: hexColor, shininess: 30 });
+    const cap1 = new THREE.Mesh(cap1Geo, cap1Mat);
+    cap1.position.y = 0.05;
+    cap1.castShadow = true;
+    
+    const cap2Geo = new THREE.CylinderGeometry(0.055, 0.055, 0.10, 16);
+    const cap2Mat = new THREE.MeshPhongMaterial({ color: secHexColor, shininess: 30 });
+    const cap2 = new THREE.Mesh(cap2Geo, cap2Mat);
+    cap2.position.y = -0.05;
+    cap2.castShadow = true;
+    
+    // Rounded End Caps
+    const sphere1 = new THREE.Mesh(new THREE.SphereGeometry(0.055, 16, 8), cap1Mat);
+    sphere1.position.y = 0.10;
+    sphere1.castShadow = true;
+    const sphere2 = new THREE.Mesh(new THREE.SphereGeometry(0.055, 16, 8), cap2Mat);
+    sphere2.position.y = -0.10;
+    sphere2.castShadow = true;
+    
+    pGroup.add(cap1);
+    pGroup.add(cap2);
+    pGroup.add(sphere1);
+    pGroup.add(sphere2);
+  }
+  
+  pGroup.rotation.z = Math.PI / 2 + (Math.random() * 0.2 - 0.1);
+  pGroup.rotation.x = 0.25;
+  
+  return pGroup;
+}
+
+// Update 3D Pills in Compartments with Smooth Scale Animations
+function update3DPills() {
+  for (let i = 0; i < organizerSlots.length; i++) {
+    const pGroup = pillGroups[i];
+    if (!pGroup) continue;
+    
+    const slotData = organizerSlots[i];
+    const pills = slotData.pills || [];
+    
+    // If empty compartment, clear all children
+    if (pills.length === 0) {
+      while (pGroup.children.length > 0) {
+        pGroup.remove(pGroup.children[0]);
+      }
+      continue;
+    }
+    
+    // Build or sync 3D pills
+    while (pGroup.children.length > 0) {
+      pGroup.remove(pGroup.children[0]);
+    }
+    
+    const count = pills.length;
+    for (let p = 0; p < count; p++) {
+      const pillData = pills[p];
+      const pillMesh = createPillMesh(pillData);
+      
+      const xOffset = (p - (count - 1) / 2) * 0.13;
+      const yOffset = p * 0.02;
+      const zOffset = (p % 2) * 0.08 - 0.04;
+      
+      pillMesh.position.set(xOffset, yOffset, zOffset);
+      pillMesh.userData = {
+        pillId: pillData.id,
+        isTaken: pillData.isTaken,
+        targetScale: pillData.isTaken ? 0.001 : 1.0
+      };
+      
+      if (pillData.isTaken) {
+        pillMesh.scale.set(0.001, 0.001, 0.001);
+        pillMesh.visible = false;
+      } else {
+        pillMesh.scale.set(1, 1, 1);
+        pillMesh.visible = true;
+      }
+      
+      pGroup.add(pillMesh);
+    }
+    
+    // Sync base slot marker color
+    if (slotBaseMeshes[i]) {
+      slotBaseMeshes[i].material.color.setHex(slotData.isCompleted ? 0xc5dac3 : 0xdbdad6);
+    }
+    
+    // Sync lid texture
+    if (lidMeshes[i]) {
+      lidMeshes[i].material.map = createSlotLabelTexture(slotData, i === selectedSlotIndex);
+      lidMeshes[i].material.needsUpdate = true;
+    }
+  }
+}
+
+// Initial Build
+rebuildOrganizer(organizerSlots);
+
+// Initial Rotation
+boxGroup.rotation.x = 0.35;
+boxGroup.rotation.y = -0.05;
+
+// Pointer Drag & Interaction
+let isDragging = false;
+let startXTouch = 0, startYTouch = 0;
+let targetRotY = -0.05;
+let targetRotX = 0.35;
+let idleTime = 0;
+
+const raycaster = new THREE.Raycaster();
+const mouseVec = new THREE.Vector2();
+
+function onPointerDown(e) {
+  isDragging = false;
+  startXTouch = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+  startYTouch = e.clientY || (e.touches && e.touches[0].clientY) || 0;
+}
+
+function onPointerMove(e) {
+  const currentX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+  const currentY = e.clientY || (e.touches && e.touches[0].clientY) || 0;
+  const dx = currentX - startXTouch;
+  const dy = currentY - startYTouch;
+  
+  if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+    if (!isDragging && window.AndroidOrganizer && window.AndroidOrganizer.onDragStarted) {
+      window.AndroidOrganizer.onDragStarted();
+    }
+    isDragging = true;
+    targetRotY += dx * 0.005;
+    targetRotX = Math.max(0.1, Math.min(0.75, targetRotX + dy * 0.003));
+    startXTouch = currentX;
+    startYTouch = currentY;
+  }
+}
+
+function onPointerUp(e) {
+  if (!isDragging) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    const clientX = e.clientX || (e.changedTouches && e.changedTouches[0].clientX) || 0;
+    const clientY = e.clientY || (e.changedTouches && e.changedTouches[0].clientY) || 0;
+    
+    mouseVec.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+    mouseVec.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+    
+    raycaster.setFromCamera(mouseVec, camera);
+    const intersects = raycaster.intersectObjects([...lidMeshes, ...boxGroup.children], true);
+    
+    if (intersects.length > 0) {
+      let hitSlot = -1;
+      for (let hit of intersects) {
+        if (hit.object.userData && hit.object.userData.slotIndex !== undefined) {
+          hitSlot = hit.object.userData.slotIndex;
+          break;
+        }
+      }
+      if (hitSlot >= 0 && hitSlot < organizerSlots.length) {
+        window.HavnOrganizer.toggleSlot(hitSlot);
+        if (window.AndroidOrganizer) {
+          window.AndroidOrganizer.onSlotTapped(hitSlot, targetAngles[hitSlot] > 0.5);
+        }
+        const hud = document.getElementById('hud');
+        if (hud) hud.style.opacity = '0';
+      }
+    }
+  }
+}
+
+container.addEventListener('pointerdown', onPointerDown);
+container.addEventListener('pointermove', onPointerMove);
+container.addEventListener('pointerup', onPointerUp);
+
+// 60 FPS Animation & Interpolation Loop
+function animate() {
+  requestAnimationFrame(animate);
+  
   idleTime += 0.005;
   if (!isDragging) {
     targetRotY += 0.0015;
-    targetRotX = 0.40 + Math.sin(idleTime) * 0.03;
+    targetRotX = 0.35 + Math.sin(idleTime) * 0.03;
   }
-
-  rotY += (targetRotY - rotY) * 0.08;
-  rotX += (targetRotX - rotX) * 0.08;
-
-  const slotW = 52;
-  const slotH = 135;
-  const slotDepth = 36;
-  const gap = 12;
-  const totalW = SLOTS * slotW + (SLOTS - 1) * gap;
-  const casePaddingX = 22;
-  const casePaddingY = 18;
-
-  const caseW = totalW + casePaddingX * 2;
-  const caseH = slotH + casePaddingY * 2;
-
-  // Soft Ambient Shadow
-  const shadowCenter = project(0, caseH / 2 + 12, 0);
-  ctx.save();
-  ctx.beginPath();
-  ctx.ellipse(shadowCenter.px, shadowCenter.py + 25, (caseW / 2 + 25) * shadowCenter.scale, 40 * shadowCenter.scale, 0, 0, Math.PI * 2);
-  const grad = ctx.createRadialGradient(shadowCenter.px, shadowCenter.py + 25, 5, shadowCenter.px, shadowCenter.py + 25, (caseW / 2 + 25) * shadowCenter.scale);
-  grad.addColorStop(0, 'rgba(81, 99, 81, 0.12)');
-  grad.addColorStop(1, 'rgba(251, 249, 245, 0)');
-  ctx.fillStyle = grad;
-  ctx.fill();
-  ctx.restore();
-
-  // Case Base Body
-  const c0 = project(-caseW / 2, -caseH / 2, 0);
-  const c1 = project(caseW / 2, -caseH / 2, 0);
-  const c2 = project(caseW / 2, caseH / 2, 0);
-  const c3 = project(-caseW / 2, caseH / 2, 0);
-
-  const cb2 = project(caseW / 2, caseH / 2, slotDepth);
-  const cb3 = project(-caseW / 2, caseH / 2, slotDepth);
-
-  ctx.fillStyle = PALETTE.caseShadow;
-  ctx.beginPath();
-  ctx.moveTo(c3.px, c3.py);
-  ctx.lineTo(c2.px, c2.py);
-  ctx.lineTo(cb2.px, cb2.py);
-  ctx.lineTo(cb3.px, cb3.py);
-  ctx.fill();
-
-  ctx.fillStyle = PALETTE.caseBody;
-  ctx.beginPath();
-  ctx.moveTo(c0.px, c0.py);
-  ctx.lineTo(c1.px, c1.py);
-  ctx.lineTo(c2.px, c2.py);
-  ctx.lineTo(c3.px, c3.py);
-  ctx.fill();
-  ctx.strokeStyle = PALETTE.lidEdge;
-  ctx.lineWidth = 1.5 * c0.scale;
-  ctx.stroke();
-
-  // Slots & Lids
-  const startXPos = -totalW / 2 + slotW / 2;
-
-  for (let i = 0; i < SLOTS; i++) {
-    const sx = startXPos + i * (slotW + gap);
-    const sy = 0;
-
-    const w0 = project(sx - slotW/2, sy - slotH/2, 4);
-    const w1 = project(sx + slotW/2, sy - slotH/2, 4);
-    const w2 = project(sx + slotW/2, sy + slotH/2, 4);
-    const w3 = project(sx - slotW/2, sy + slotH/2, 4);
-
-    ctx.fillStyle = PALETTE.slotMarker;
-    ctx.beginPath();
-    ctx.moveTo(w0.px, w0.py);
-    ctx.lineTo(w1.px, w1.py);
-    ctx.lineTo(w2.px, w2.py);
-    ctx.lineTo(w3.px, w3.py);
-    ctx.fill();
-
-    if (slotHasPills(i)) {
-      const colors = slotColors(i);
-      const pillCount = Math.min(colors.length, 3);
-      for (let p = 0; p < pillCount; p++) {
-        const offsetX = (p - (pillCount - 1) / 2) * 10;
-        const pCenter = project(sx + offsetX, sy + (p * 3), 14 + p * 2);
-        const pillColor = colors[p] || PILL_COLORS[i % PILL_COLORS.length];
-
-        ctx.save();
-        ctx.translate(pCenter.px, pCenter.py);
-        ctx.rotate(-Math.PI / 6);
-
-        ctx.fillStyle = pillColor;
-        ctx.beginPath();
-        ctx.arc(0, -8 * pCenter.scale, 9 * pCenter.scale, Math.PI, 0);
-        ctx.rect(-9 * pCenter.scale, -8 * pCenter.scale, 18 * pCenter.scale, 8 * pCenter.scale);
-        ctx.fill();
-
-        ctx.fillStyle = 'rgba(255,255,255,0.85)';
-        ctx.beginPath();
-        ctx.arc(0, 8 * pCenter.scale, 9 * pCenter.scale, 0, Math.PI);
-        ctx.rect(-9 * pCenter.scale, 0, 18 * pCenter.scale, 8 * pCenter.scale);
-        ctx.fill();
-
-        ctx.restore();
-      }
-      if (weekData[i].count > 3) {
-        const badge = project(sx + slotW/2 - 8, sy - slotH/2 + 8, 20);
-        ctx.fillStyle = PALETTE.textActive;
-        ctx.beginPath();
-        ctx.arc(badge.px, badge.py, 8 * badge.scale, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = '#FFFFFF';
-        ctx.font = `bold ${Math.max(8, Math.round(9 * badge.scale))}px sans-serif`;
-        ctx.textAlign = 'center';
-        ctx.fillText('+' + (weekData[i].count - 2), badge.px, badge.py + 3 * badge.scale);
-      }
-    } else {
-      const emptyPos = project(sx, sy, 10);
-      ctx.strokeStyle = PALETTE.lidEdge;
-      ctx.lineWidth = 1 * emptyPos.scale;
-      ctx.setLineDash([3 * emptyPos.scale, 3 * emptyPos.scale]);
-      ctx.beginPath();
-      ctx.ellipse(emptyPos.px, emptyPos.py, 14 * emptyPos.scale, 6 * emptyPos.scale, 0, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.setLineDash([]);
-    }
-
-    const lblPos = project(sx, sy + slotH/2 + 8, 0);
-    ctx.fillStyle = PALETTE.text;
-    ctx.font = `600 ${Math.max(9, Math.round(11 * lblPos.scale))}px "Hanken Grotesk", sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.fillText(DAYS[i], lblPos.px, lblPos.py);
-
-    const dt = 0.016;
-    const target = openAngle[i] * 1.8;
-    const force = K * (target - anglePos[i]) - DAMP * angleVel[i];
-    angleVel[i] += force * dt;
-    anglePos[i] += angleVel[i] * dt;
-
-    const topY = sy - slotH / 2;
-    const lidHeight = slotH;
-
-    const angle = anglePos[i];
-    const lidZ = Math.sin(angle) * lidHeight;
-    const lidYOffset = Math.cos(angle) * lidHeight;
-
-    const l0 = project(sx - slotW/2, topY, 0);
-    const l1 = project(sx + slotW/2, topY, 0);
-    const l2 = project(sx + slotW/2, topY + lidYOffset, -lidZ);
-    const l3 = project(sx - slotW/2, topY + lidYOffset, -lidZ);
-
-    const isLidOpen = angle > 0.2;
-    const isSelected = i === selectedDay;
-    const isToday = weekData[i] && weekData[i].isToday;
-
-    if (isSelected) ctx.fillStyle = PALETTE.lidOpen;
-    else if (isToday) ctx.fillStyle = '#E9F0E8';
-    else ctx.fillStyle = isLidOpen ? PALETTE.lidOpen : PALETTE.lidClosed;
-
-    ctx.beginPath();
-    ctx.moveTo(l0.px, l0.py);
-    ctx.lineTo(l1.px, l1.py);
-    ctx.lineTo(l2.px, l2.py);
-    ctx.lineTo(l3.px, l3.py);
-    ctx.fill();
-
-    ctx.strokeStyle = isSelected ? PALETTE.textActive : (isToday ? PALETTE.textActive : (isLidOpen ? PALETTE.textActive : PALETTE.lidEdge));
-    ctx.lineWidth = 1.5 * l0.scale;
-    ctx.stroke();
-
-    const lidCenter = project(sx, topY + lidYOffset / 2, -lidZ / 2);
-    ctx.fillStyle = isLidOpen ? PALETTE.textActive : PALETTE.text;
-    ctx.font = `bold ${Math.max(10, Math.round(13 * lidCenter.scale))}px "Hanken Grotesk", sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.fillText(DAYS[i][0], lidCenter.px, lidCenter.py);
+  
+  boxGroup.rotation.y += (targetRotY - boxGroup.rotation.y) * 0.08;
+  boxGroup.rotation.x += (targetRotX - boxGroup.rotation.x) * 0.08;
+  
+  // Smooth Lid Hinges Rotation
+  for (let i = 0; i < lidPivots.length; i++) {
+    const target = targetAngles[i] * (-Math.PI * 0.55);
+    openAngles[i] += (target - openAngles[i]) * 0.15;
+    if (lidPivots[i]) lidPivots[i].rotation.x = openAngles[i];
   }
-
-  requestAnimationFrame(render);
+  
+  // Smooth Pill Scale Lerp for Disappearing Taken Doses
+  pillGroups.forEach((pGroup) => {
+    pGroup.children.forEach((pillMesh) => {
+      const targetS = pillMesh.userData.targetScale !== undefined ? pillMesh.userData.targetScale : 1.0;
+      pillMesh.scale.x += (targetS - pillMesh.scale.x) * 0.15;
+      pillMesh.scale.y += (targetS - pillMesh.scale.y) * 0.15;
+      pillMesh.scale.z += (targetS - pillMesh.scale.z) * 0.15;
+      
+      if (pillMesh.scale.x < 0.02) {
+        pillMesh.visible = false;
+      } else {
+        pillMesh.visible = true;
+      }
+    });
+  });
+  
+  renderer.render(scene, camera);
 }
 
-canvas.addEventListener('pointerdown', (e) => {
-  isDragging = false;
-  startX = e.clientX;
-  startY = e.clientY;
+animate();
+
+window.addEventListener('resize', () => {
+  const w = container.clientWidth || window.innerWidth;
+  const h = container.clientHeight || window.innerHeight;
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
 });
 
-canvas.addEventListener('pointermove', (e) => {
-  const dx = e.clientX - startX;
-  const dy = e.clientY - startY;
-  if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
-    isDragging = true;
-    targetRotY += dx * 0.005;
-    targetRotX = Math.max(0.1, Math.min(0.8, targetRotX + dy * 0.003));
-    startX = e.clientX;
-    startY = e.clientY;
-  }
-});
-
-canvas.addEventListener('pointerup', (e) => {
-  if (!isDragging) {
-    const rect = canvas.getBoundingClientRect();
-    const clickX = (e.clientX - rect.left) * (window.devicePixelRatio || 1);
-
-    const slotW = 52 + 12;
-    const totalW = SLOTS * slotW;
-    const startXPos = W / 2 - totalW / 2;
-    const clickedSlot = Math.floor((clickX - startXPos) / slotW);
-
-    if (clickedSlot >= 0 && clickedSlot < SLOTS) {
-      HavnOrganizer.toggleSlot(clickedSlot);
-      if (window.AndroidOrganizer) {
-        window.AndroidOrganizer.onSlotTapped(clickedSlot, openAngle[clickedSlot] === 1);
-      }
-      const hud = document.getElementById('hud');
-      if (hud) hud.style.opacity = '0';
-    }
-  }
-});
-
+// JavaScript API Bridge
 window.HavnOrganizer = {
+  /**
+   * Applies the app's resolved palette. Called by Compose on first load and
+   * again whenever the user changes theme, so the 3D scene transitions with the
+   * rest of the app instead of staying stuck in light mode.
+   */
+  setTheme: (theme) => {
+    let parsed = theme;
+    if (typeof theme === 'string') {
+      try { parsed = JSON.parse(theme); } catch (e) { return; }
+    }
+    if (!parsed) return;
+    HAVN_THEME = Object.assign({}, HAVN_THEME, parsed);
+    const p = themePalette();
+
+    ambientLight.color.setHex(p.ambient);
+    ambientLight.intensity = p.ambientIntensity;
+    dirLight.color.setHex(p.key);
+    dirLight.intensity = p.keyIntensity;
+    softFillLight.color.setHex(p.fill);
+    softFillLight.intensity = p.fillIntensity;
+    shadowPlaneMat.opacity = p.shadowOpacity;
+
+    if (bodyMesh) {
+      bodyMesh.material.color.setHex(hexToInt(p.shell));
+      bodyMesh.material.specular.setHex(p.shellSpecular);
+      bodyMesh.material.needsUpdate = true;
+    }
+    slotBaseMeshes.forEach((mesh, i) => {
+      const done = organizerSlots[i] && organizerSlots[i].isCompleted;
+      mesh.material.color.setHex(hexToInt(done ? p.slotDone : p.slotIdle));
+      mesh.material.needsUpdate = true;
+    });
+    lidMeshes.forEach((mesh, i) => {
+      if (!organizerSlots[i]) return;
+      // Dispose the old canvas texture before replacing it — theme flips would
+      // otherwise leak one GPU texture per lid, per switch.
+      if (mesh.material.map) mesh.material.map.dispose();
+      mesh.material.map = createSlotLabelTexture(organizerSlots[i], i === selectedSlotIndex);
+      mesh.material.needsUpdate = true;
+    });
+  },
+
   setWeekData: (data) => {
-    if (Array.isArray(data) && data.length === SLOTS) weekData = data;
+    let parsed = data;
+    if (typeof data === 'string') {
+      try { parsed = JSON.parse(data); } catch (e) { return; }
+    }
+    let slots = [];
+    if (parsed && Array.isArray(parsed.slots)) {
+      slots = parsed.slots;
+    } else if (Array.isArray(parsed)) {
+      slots = parsed;
+    }
+    if (slots.length > 0) {
+      if (slots.length !== organizerSlots.length) {
+        rebuildOrganizer(slots);
+      } else {
+        organizerSlots = slots;
+        update3DPills();
+      }
+    }
   },
   selectDay: (i) => {
-    if (i < 0 || i >= SLOTS) return;
-    selectedDay = i;
-    for (let j = 0; j < SLOTS; j++) openAngle[j] = j === i ? 1 : 0;
+    if (i < 0 || i >= organizerSlots.length) return;
+    selectedSlotIndex = i;
+    for (let j = 0; j < organizerSlots.length; j++) {
+      targetAngles[j] = (j === i) ? 1 : 0;
+      if (lidMeshes[j]) {
+        lidMeshes[j].material.map = createSlotLabelTexture(organizerSlots[j], j === i);
+        lidMeshes[j].material.needsUpdate = true;
+      }
+    }
   },
-  openSlot: (i) => { if (i >= 0 && i < SLOTS) { selectedDay = i; openAngle[i] = 1; } },
-  closeSlot: (i) => { if (i >= 0 && i < SLOTS) openAngle[i] = 0; },
   toggleSlot: (i) => {
-    if (i < 0 || i >= SLOTS) return;
-    selectedDay = i;
-    openAngle[i] = openAngle[i] === 0 ? 1 : 0;
-    for (let j = 0; j < SLOTS; j++) if (j !== i) openAngle[j] = 0;
-  },
+    if (i < 0 || i >= organizerSlots.length) return;
+    selectedSlotIndex = i;
+    const isOpen = targetAngles[i] > 0.5;
+    for (let j = 0; j < organizerSlots.length; j++) targetAngles[j] = 0;
+    targetAngles[i] = isOpen ? 0 : 1;
+    for (let j = 0; j < organizerSlots.length; j++) {
+      if (lidMeshes[j]) {
+        lidMeshes[j].material.map = createSlotLabelTexture(organizerSlots[j], j === i && targetAngles[i] > 0.5);
+        lidMeshes[j].material.needsUpdate = true;
+      }
+    }
+  }
 };
-
-render(0);
 </script>
 </body>
 </html>

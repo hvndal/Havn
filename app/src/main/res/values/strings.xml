@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Hävn</string>
+    <!-- Launcher label. Carries the category so the app is recognisable in a
+         drawer of 60 icons and findable by search, rather than relying on a
+         one-word brand nobody has learned yet. -->
+    <string name="app_name">Hävn Medication Reminder</string>
+    <!-- The short form, used in-app where the brand already has context. -->
+    <string name="brand_name">Hävn</string>
+    <string name="brand_descriptor">Medication reminder</string>
+
     <string name="notification_channel_name">Daily Ritual</string>
     <string name="widget_today_title">Today</string>
     <string name="widget_desc">Hävn pill organizer widget</string>

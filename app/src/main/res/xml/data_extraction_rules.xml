@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  API 31+ replacement for backup_rules.xml.
+
+  cloud-backup  — what Google's servers may hold, for restore after phone loss.
+  device-transfer — direct phone-to-phone, which never leaves the user's hands.
+
+  Both carry the database and preferences; neither carries the exports scratch
+  folder.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <include domain="database" path="." />
+        <include domain="sharedpref" path="." />
+        <exclude domain="root" path="exports" />
+    </cloud-backup>
+    <device-transfer>
+        <include domain="database" path="." />
+        <include domain="sharedpref" path="." />
+        <exclude domain="root" path="exports" />
+    </device-transfer>
+</data-extraction-rules>

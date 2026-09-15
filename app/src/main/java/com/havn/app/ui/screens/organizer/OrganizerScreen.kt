@@ -1,294 +1,320 @@
 package com.havn.app.ui.screens.organizer
 
-import androidx.compose.animation.core.*
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.havn.app.R
-import com.havn.app.domain.model.Medication
+import com.havn.app.domain.model.DayPeriod
+import com.havn.app.domain.model.TodayDose
+import com.havn.app.ui.components.HavnAmbientField
+import com.havn.app.ui.components.HavnBreathingMark
+import com.havn.app.ui.components.HavnDoseCheck
+import com.havn.app.ui.components.HavnEmptyState
 import com.havn.app.ui.components.HavnOrganizerView
 import com.havn.app.ui.components.MedIcon
-import com.havn.app.ui.components.OrganizerWeekMapper
-import com.havn.app.ui.theme.*
-import java.time.LocalDate
+import com.havn.app.ui.components.havnPress
+import com.havn.app.ui.components.havnReveal
+import com.havn.app.ui.components.rememberRevealProgress
+import com.havn.app.ui.screens.home.medAccent
+import com.havn.app.ui.theme.HavnMotion
+import com.havn.app.ui.theme.HavnTheme
+import com.havn.app.ui.theme.HavnType
 
+/**
+ * The organizer, at full size.
+ *
+ * The 3D object is the screen — it runs edge to edge with the compartment
+ * selector beneath it and the selected compartment's doses below that.
+ *
+ * Structurally corrected: this screen used to show seven weekday chips above a
+ * 3D model that only ever had four compartments, because the view model fed it
+ * the four-period payload. Selecting a day past Thursday sent an out-of-range
+ * index the model ignored, and the list below filtered by a `medsForDay` helper
+ * that returned the same medications for every weekday anyway. Both halves now
+ * speak in day periods, which is what the physical object actually divides.
+ */
 @Composable
 fun OrganizerScreen(
-    onBack: () -> Unit,
+    contentPadding: PaddingValues,
     viewModel: OrganizerViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val colors = HavnTheme.colors
+    val gutter = HavnTheme.spacing.gutter
 
-    val fadeAnim = remember { Animatable(0f) }
-    val scaleAnim = remember { Animatable(0.97f) }
-
-    LaunchedEffect(Unit) {
-        fadeAnim.animateTo(1f, animationSpec = tween(1200, easing = EaseOutCubic))
-    }
-    LaunchedEffect(Unit) {
-        scaleAnim.animateTo(1f, animationSpec = tween(1000, easing = EaseOutQuart))
-    }
-
-    val days = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
-    val todayDow = LocalDate.now().dayOfWeek.value - 1
-    var selectedDay by remember { mutableIntStateOf(uiState.selectedDayIndex) }
-
-    LaunchedEffect(uiState.selectedDayIndex) {
-        selectedDay = uiState.selectedDayIndex
-    }
-
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(WarmIvory)
-            .systemBarsPadding()
-            .alpha(fadeAnim.value)
-            .scale(scaleAnim.value)
-            .verticalScroll(rememberScrollState()),
+            .background(colors.canvas)
     ) {
-        Row(
+        HavnAmbientField(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(SurfaceHigh)
-                    .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
-                        viewModel.soundManager.playSoftTap()
-                        onBack()
-                    },
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_back),
-                    contentDescription = "Back",
-                    tint = CharcoalMid,
-                    modifier = Modifier.size(18.dp),
-                )
-            }
-            Spacer(Modifier.width(16.dp))
-            Column {
-                Text(
-                    text = "Organizer",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Charcoal,
-                )
-                Text(
-                    text = "Your weekly ritual",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = StoneGrey,
-                )
-            }
-        }
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(300.dp)
-                .padding(horizontal = 24.dp)
-                .shadow(
-                    elevation = 12.dp,
-                    shape = RoundedCornerShape(24.dp),
-                    ambientColor = Sage.copy(alpha = 0.10f),
-                    spotColor = Sage.copy(alpha = 0.08f),
-                )
-                .clip(RoundedCornerShape(24.dp))
-                .background(SurfaceLow)
-                .border(1.dp, SurfaceHighest, RoundedCornerShape(24.dp)),
-        ) {
-            HavnOrganizerView(
-                weekDataJson = uiState.weekDataJson,
-                selectedDay = selectedDay,
-                modifier = Modifier.fillMaxSize(),
-                onSlotTapped = { slot ->
-                    selectedDay = slot
-                    viewModel.selectDay(slot)
-                    viewModel.onSlotTapped(slot)
-                },
-            )
-        }
-
-        Spacer(Modifier.height(20.dp))
-
-        LazyRow(
-            contentPadding = PaddingValues(horizontal = 24.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            items(days.indices.toList()) { i ->
-                DayChip(
-                    label = days[i],
-                    isToday = i == todayDow,
-                    isSelected = i == selectedDay,
-                    medCount = OrganizerWeekMapper.medsForDay(uiState.allMeds, i).size,
-                    onClick = {
-                        selectedDay = i
-                        viewModel.selectDay(i)
-                        viewModel.soundManager.playCeramicClick()
-                    },
-                )
-            }
-        }
-
-        Spacer(Modifier.height(24.dp))
-
-        Text(
-            text = "${days[selectedDay]}'s ritual",
-            style = MaterialTheme.typography.labelMedium,
-            color = StoneGrey,
-            modifier = Modifier.padding(horizontal = 24.dp),
-            letterSpacing = 0.06.sp,
+                .aspectRatio(0.9f),
+            intensity = 0.75f,
         )
-        Spacer(Modifier.height(12.dp))
 
-        if (uiState.selectedDayMeds.isEmpty()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 32.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_leaf),
-                    contentDescription = null,
-                    tint = SageLight,
-                    modifier = Modifier.size(40.dp),
-                )
-                Spacer(Modifier.height(12.dp))
-                Text(
-                    text = "Nothing scheduled.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = StoneGrey,
-                )
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(
+                bottom = contentPadding.calculateBottomPadding() + HavnTheme.spacing.xxl,
+            ),
+        ) {
+            item(key = "header") {
+                Column(
+                    modifier = Modifier
+                        .statusBarsPadding()
+                        .padding(horizontal = gutter)
+                        .padding(top = HavnTheme.spacing.xl),
+                ) {
+                    Text(
+                        text = "MODEL H.01",
+                        style = HavnType.Eyebrow,
+                        color = colors.textTertiary,
+                    )
+                    Spacer(Modifier.height(HavnTheme.spacing.sm))
+                    Text(
+                        text = "Organizer",
+                        style = MaterialTheme.typography.displaySmall,
+                        color = colors.textPrimary,
+                    )
+                }
+                Spacer(Modifier.height(HavnTheme.spacing.xl))
             }
-        } else {
-            uiState.selectedDayMeds.forEach { med ->
-                OrganizerMedRow(
-                    med = med,
-                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp),
-                )
+
+            if (!uiState.hasMedications && !uiState.isLoading) {
+                item(key = "empty") {
+                    HavnEmptyState(
+                        eyebrow = "Empty compartments",
+                        headline = "Nothing to organize yet",
+                        body = "Add a medication with a time and it will appear in the " +
+                            "compartment for that part of the day.",
+                        illustration = { HavnBreathingMark() },
+                        modifier = Modifier.padding(horizontal = gutter),
+                    )
+                }
+                return@LazyColumn
+            }
+
+            item(key = "model") {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1.15f)
+                ) {
+                    HavnOrganizerView(
+                        dataJson = uiState.payloadJson,
+                        selectedSlot = uiState.selectedPeriod.ordinal,
+                        onSlotTapped = viewModel::selectSlotIndex,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
+                Spacer(Modifier.height(HavnTheme.spacing.xl))
+            }
+
+            item(key = "periods") {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = gutter),
+                    horizontalArrangement = Arrangement.spacedBy(HavnTheme.spacing.sm),
+                ) {
+                    DayPeriod.entries.forEach { period ->
+                        PeriodChip(
+                            period = period,
+                            count = uiState.count(period),
+                            selected = period == uiState.selectedPeriod,
+                            isNow = period == DayPeriod.current(),
+                            onClick = { viewModel.selectPeriod(period) },
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                }
+                Spacer(Modifier.height(HavnTheme.spacing.section))
+            }
+
+            item(key = "period-header") {
+                Column(Modifier.padding(horizontal = gutter)) {
+                    Text(
+                        text = uiState.selectedPeriod.range,
+                        style = HavnType.Eyebrow,
+                        color = colors.textTertiary,
+                    )
+                    Spacer(Modifier.height(HavnTheme.spacing.xs))
+                    Text(
+                        text = uiState.selectedPeriod.label,
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = colors.textPrimary,
+                    )
+                }
+                Spacer(Modifier.height(HavnTheme.spacing.lg))
+            }
+
+            val doses = uiState.selectedDoses
+            if (doses.isEmpty()) {
+                item(key = "period-empty") {
+                    Text(
+                        text = "Nothing in this compartment.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = colors.textTertiary,
+                        modifier = Modifier.padding(horizontal = gutter),
+                    )
+                }
+            } else {
+                itemsIndexed(doses, key = { _, d -> "${d.medication.id}-${d.slot}" }) { index, dose ->
+                    OrganizerDoseRow(
+                        dose = dose,
+                        index = index,
+                        onToggle = { viewModel.toggleDose(dose) },
+                        modifier = Modifier.padding(horizontal = gutter),
+                    )
+                }
             }
         }
-
-        Spacer(Modifier.height(100.dp))
     }
 }
 
 @Composable
-private fun DayChip(
-    label: String,
-    isToday: Boolean,
-    isSelected: Boolean,
-    medCount: Int,
+private fun PeriodChip(
+    period: DayPeriod,
+    count: Int,
+    selected: Boolean,
+    isNow: Boolean,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    val bg = when {
-        isSelected -> Sage
-        isToday -> SagePale
-        else -> SurfaceHigh
-    }
-    val text = when {
-        isSelected -> White
-        isToday -> SageDeep
-        else -> CharcoalMid
-    }
+    val colors = HavnTheme.colors
+    val background by animateColorAsState(
+        targetValue = if (selected) colors.accent else colors.surfaceSunken,
+        animationSpec = HavnMotion.standard(),
+        label = "chipBg",
+    )
+    val content by animateColorAsState(
+        targetValue = when {
+            selected -> colors.onAccent
+            isNow -> colors.accent
+            else -> colors.textTertiary
+        },
+        animationSpec = HavnMotion.standard(),
+        label = "chipContent",
+    )
+
     Column(
-        modifier = Modifier
-            .clip(RoundedCornerShape(20.dp))
-            .background(bg)
-            .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }, onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 10.dp),
+        modifier = modifier
+            .clip(RoundedCornerShape(HavnTheme.radius.md))
+            .background(background)
+            .havnPress(scaleDown = 0.94f, onClickLabel = period.label, onClick = onClick)
+            .padding(vertical = HavnTheme.spacing.md),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = text,
-            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
+            text = period.label.take(3).uppercase(),
+            style = HavnType.EyebrowQuiet,
+            color = content,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
-        if (medCount > 0) {
-            Text(
-                text = "$medCount",
-                style = MaterialTheme.typography.labelSmall,
-                color = text.copy(alpha = 0.75f),
-            )
-        }
+        Spacer(Modifier.height(HavnTheme.spacing.xs))
+        Text(
+            text = if (count == 0) "—" else "$count",
+            style = MaterialTheme.typography.titleMedium,
+            color = content,
+        )
     }
 }
 
 @Composable
-private fun OrganizerMedRow(med: Medication, modifier: Modifier = Modifier) {
-    val swatch = OrganizerWeekMapper.colorTagToHex(med.colorTag)
-    val swatchColor = runCatching {
-        androidx.compose.ui.graphics.Color(android.graphics.Color.parseColor(swatch))
-    }.getOrDefault(Sage)
+private fun OrganizerDoseRow(
+    dose: TodayDose,
+    index: Int,
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = HavnTheme.colors
+    val accent = medAccent(dose.medication.colorTag)
+    val reveal = rememberRevealProgress(
+        key = "${dose.medication.id}-${dose.slot}",
+        delayMs = HavnMotion.staggerDelay(index),
+    )
+    val contentAlpha by animateFloatAsState(
+        targetValue = if (dose.isPending) 1f else 0.5f,
+        animationSpec = HavnMotion.standard(),
+        label = "organizerDoseAlpha",
+    )
 
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .shadow(
-                elevation = 6.dp,
-                shape = RoundedCornerShape(14.dp),
-                ambientColor = Sage.copy(alpha = 0.06f),
-                spotColor = Sage.copy(alpha = 0.04f),
-            )
-            .clip(RoundedCornerShape(14.dp))
-            .background(White)
-            .border(1.dp, SurfaceHighest, RoundedCornerShape(14.dp))
-            .padding(14.dp),
+            .havnReveal(reveal)
+            .padding(vertical = HavnTheme.spacing.md),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
             modifier = Modifier
                 .size(40.dp)
+                .graphicsLayer { alpha = contentAlpha }
                 .clip(CircleShape)
-                .background(swatchColor.copy(alpha = 0.15f)),
+                .background(accent.copy(alpha = if (colors.isDark) 0.18f else 0.12f)),
             contentAlignment = Alignment.Center,
         ) {
-            MedIcon(type = med.iconType, size = 22.dp, tint = swatchColor)
+            MedIcon(type = dose.medication.iconType, size = 20.dp, tint = accent)
         }
-        Spacer(Modifier.width(12.dp))
+        Spacer(Modifier.width(HavnTheme.spacing.lg))
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = med.name,
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                color = Charcoal,
+                text = dose.medication.name,
+                style = MaterialTheme.typography.bodyLarge,
+                color = colors.textPrimary.copy(alpha = contentAlpha),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
             Text(
-                text = med.dosage,
-                style = MaterialTheme.typography.labelSmall,
-                color = StoneGrey,
+                text = buildString {
+                    append(dose.displayTime())
+                    if (dose.medication.dosage.isNotBlank()) {
+                        append("  ·  ").append(dose.medication.dosage)
+                    }
+                },
+                style = MaterialTheme.typography.bodySmall,
+                color = colors.textTertiary.copy(alpha = contentAlpha),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
         }
-        Text(
-            text = med.reminderTimes.firstOrNull() ?: "Any time",
-            style = MaterialTheme.typography.labelMedium,
-            color = CharcoalMid,
+        HavnDoseCheck(
+            status = dose.status,
+            onToggle = onToggle,
+            accent = accent,
+            contentDescription = dose.medication.name,
         )
     }
 }

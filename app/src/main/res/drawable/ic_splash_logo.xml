@@ -4,11 +4,66 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+
+    <!-- Outer Box (Positioned center 54, 54 size 56x56) -->
+    <!-- Left White Background -->
     <path
-        android:fillColor="#516351"
-        android:pathData="M38,54 A16,16 0 0 1 38,54 A16,22 0 0 1 38,32 L70,32 A16,22 0 0 1 70,76 L38,76 A16,22 0 0 1 38,54 Z" />
+        android:fillColor="#FFFFFF"
+        android:pathData="M38,26 H54 V82 H38 A12,12 0 0 1 26,70 V38 A12,12 0 0 1 38,26 Z" />
+
+    <!-- Right Soft Beige Background -->
     <path
-        android:strokeColor="#FAF8F4"
-        android:strokeWidth="2"
-        android:pathData="M54,32 L54,76" />
+        android:fillColor="#EDE8DF"
+        android:pathData="M54,26 H70 A12,12 0 0 1 82,38 V70 A12,12 0 0 1 70,82 H54 V26 Z" />
+
+    <!-- Compartment Horizontal Dividers -->
+    <path
+        android:strokeColor="#5E6E5D"
+        android:strokeWidth="2.5"
+        android:pathData="M26,44.66 L54,44.66 M26,63.33 L54,63.33" />
+
+    <!-- Vertical Center Line Divider -->
+    <path
+        android:strokeColor="#5E6E5D"
+        android:strokeWidth="2.5"
+        android:pathData="M54,26 L54,82" />
+
+    <!-- 1. Top Capsule (Angled) -->
+    <path
+        android:fillColor="#5E6E5D"
+        android:pathData="M35,32 A3.5,3.5 0 0 1 40,32 L38,37 A3.5,3.5 0 0 1 33,37 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:strokeColor="#5E6E5D"
+        android:strokeWidth="1"
+        android:pathData="M40,32 A3.5,3.5 0 0 1 45,37 L43,42 A3.5,3.5 0 0 1 38,37 Z" />
+
+    <!-- 2. Middle Round Tablet -->
+    <path
+        android:fillColor="#F0ECE3"
+        android:strokeColor="#C5BEB0"
+        android:strokeWidth="1.2"
+        android:pathData="M40,54 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0" />
+    <path
+        android:strokeColor="#B5AE9E"
+        android:strokeWidth="1"
+        android:pathData="M37,51 L43,57" />
+
+    <!-- 3. Bottom Oval Pill -->
+    <path
+        android:fillColor="#536352"
+        android:pathData="M35,72.6 A3.5,3.5 0 0 1 40,69 L43,72.6 A3.5,3.5 0 0 1 38,76.2 Z" />
+
+    <!-- Right Side: Slender Letter 'H' -->
+    <path
+        android:strokeColor="#1B241A"
+        android:strokeWidth="2.2"
+        android:strokeLineCap="round"
+        android:pathData="M63,44 V64 M73,44 V64 M63,54 H73" />
+
+    <!-- Outer Frame Stroke -->
+    <path
+        android:strokeColor="#5E6E5D"
+        android:strokeWidth="2.5"
+        android:pathData="M38,26 H70 A12,12 0 0 1 82,38 V70 A12,12 0 0 1 70,82 H38 A12,12 0 0 1 26,70 V38 A12,12 0 0 1 38,26 Z" />
 </vector>

@@ -1,17 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Adaptive-icon foreground: the Hävn organiser mark.
+
+  Drawn inside the 66dp safe zone of the 108dp canvas (centred, 21dp inset on
+  every side) so no launcher mask can clip the box or the H.
+-->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+
+    <!-- Shell: left half white, right half warm sand -->
     <path
-        android:fillColor="#516351"
-        android:pathData="M54,28 L38,28 A26,26 0 0 0 38,80 L54,80 Z" />
+        android:pathData="M35,31 h38 a9,9 0 0 1 9,9 v28 a9,9 0 0 1 -9,9 h-38 a9,9 0 0 1 -9,-9 v-28 a9,9 0 0 1 9,-9 z"
+        android:fillColor="#FFFFFF" />
     <path
-        android:fillColor="#8DA08C"
-        android:pathData="M54,28 L70,28 A26,26 0 0 1 70,80 L54,80 Z" />
+        android:pathData="M54,31 h19 a9,9 0 0 1 9,9 v28 a9,9 0 0 1 -9,9 h-19 z"
+        android:fillColor="#EDE8DF" />
+
+    <!-- Compartment rules -->
+    <path android:pathData="M54,31 V77" android:strokeColor="#5E6E5D" android:strokeWidth="2.1" />
+    <path android:pathData="M26,46.3 H54" android:strokeColor="#5E6E5D" android:strokeWidth="2.1" />
+    <path android:pathData="M26,61.6 H54" android:strokeColor="#5E6E5D" android:strokeWidth="2.1" />
+
+    <!-- Top compartment: capsule -->
+    <group android:pivotX="40" android:pivotY="38.6" android:rotation="-35">
+        <path
+            android:pathData="M32.5,35.6 h15 a3,3 0 0 1 0,6 h-15 a3,3 0 0 1 0,-6 z"
+            android:fillColor="#5E6E5D" />
+        <path
+            android:pathData="M40,35.6 h7.5 a3,3 0 0 1 0,6 H40 z"
+            android:fillColor="#FFFFFF" />
+        <path
+            android:pathData="M32.5,35.6 h15 a3,3 0 0 1 0,6 h-15 a3,3 0 0 1 0,-6 z"
+            android:strokeColor="#5E6E5D" android:strokeWidth="1.1" />
+    </group>
+
+    <!-- Middle compartment: scored tablet -->
     <path
-        android:strokeColor="#FAF8F4"
-        android:strokeWidth="2.5"
-        android:pathData="M54,28 L54,80" />
+        android:pathData="M40,49.2 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0"
+        android:fillColor="#F0ECE3" android:strokeColor="#D3CDBF" android:strokeWidth="1.1" />
+    <path android:pathData="M37,51.2 L43,47.2" android:strokeColor="#B5AE9E" android:strokeWidth="1.1" />
+
+    <!-- Bottom compartment: oval -->
+    <group android:pivotX="40" android:pivotY="69.3" android:rotation="-15">
+        <path
+            android:pathData="M33.5,66.6 h13 a2.7,2.7 0 0 1 0,5.4 h-13 a2.7,2.7 0 0 1 0,-5.4 z"
+            android:fillColor="#536352" />
+    </group>
+
+    <!-- The H -->
+    <path android:pathData="M63,45 V63" android:strokeColor="#1B241A" android:strokeWidth="2.6" android:strokeLineCap="round" />
+    <path android:pathData="M73,45 V63" android:strokeColor="#1B241A" android:strokeWidth="2.6" android:strokeLineCap="round" />
+    <path android:pathData="M63,54 H73" android:strokeColor="#1B241A" android:strokeWidth="2.6" android:strokeLineCap="round" />
+
+    <!-- Shell outline, drawn last so it sits over every fill -->
+    <path
+        android:pathData="M35,31 h38 a9,9 0 0 1 9,9 v28 a9,9 0 0 1 -9,9 h-38 a9,9 0 0 1 -9,-9 v-28 a9,9 0 0 1 9,-9 z"
+        android:strokeColor="#5E6E5D" android:strokeWidth="2.3" />
 </vector>

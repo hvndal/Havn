@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android Auto Backup (API 23–30).
+
+  Deliberately left ON. Hävn stores medication history in exactly one place,
+  so having Android restore it automatically after a lost or replaced phone is
+  the single biggest thing protecting the user's data — more reliable than
+  hoping they remembered to export.
+
+  The exports cache is excluded: it is a scratch folder holding one file on its
+  way to the share sheet, and backing it up would duplicate the database.
+-->
+<full-backup-content>
+    <include domain="database" path="." />
+    <include domain="sharedpref" path="." />
+    <exclude domain="external" path="." />
+    <exclude domain="root" path="exports" />
+</full-backup-content>
