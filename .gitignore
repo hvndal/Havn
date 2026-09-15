@@ -1,23 +1,41 @@
-# Build output
+# ── Build output ─────────────────────────────────────────────────────────────
 /build
 /app/build
 .gradle/
 /captures
 .externalNativeBuild
 .cxx
+*.apk
+*.aab
 
-# Local machine config — contains the absolute SDK path
+# ── Machine-local config ─────────────────────────────────────────────────────
+# Contains the absolute Android SDK path for this machine.
 local.properties
 
-# Signing material. debug.keystore is only a debug key, but a keystore is a
-# signing credential and does not belong in version control.
+# ── Secrets ──────────────────────────────────────────────────────────────────
+# Signing material. A keystore is a credential: whoever holds it can publish
+# an update that Android accepts as coming from this developer.
 *.keystore
 *.jks
+*.p12
+*.pfx
+keystore.properties
 
-# IDE
+# API keys and service credentials.
+.env
+.env.*
+!.env.example
+secrets.properties
+google-services.json
+service-account*.json
+*.pem
+*.key
+
+# ── IDE / OS ─────────────────────────────────────────────────────────────────
 .idea/
 *.iml
 .DS_Store
+Thumbs.db
 
-# Local scratch archive (never tracked upstream)
+# ── Local scratch ────────────────────────────────────────────────────────────
 /havn.zip

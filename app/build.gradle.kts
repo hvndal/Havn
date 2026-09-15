@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -20,23 +22,56 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    /**
+     * Release signing is read from `keystore.properties` (gitignored) or from
+     * the environment, so no credential ever lands in version control.
+     *
+     * If neither is present the release build is left **unsigned** rather than
+     * falling back to a debug key. That is the important part: this project
+     * previously signed release with the debug keystore, whose password is the
+     * literal string "android" and is documented publicly. Anyone could have
+     * modified the APK, re-signed it with the same well-known key, and Android
+     * would have accepted it as a legitimate update from this developer — on an
+     * app that holds medication schedules.
+     */
+    val keystoreProps = Properties().apply {
+        val f = rootProject.file("keystore.properties")
+        if (f.exists()) f.inputStream().use { load(it) }
+    }
+
+    fun prop(name: String, env: String): String? =
+        keystoreProps.getProperty(name) ?: System.getenv(env)
+
+    val releaseStorePath = prop("storeFile", "HAVN_KEYSTORE")
+    val hasReleaseSigning = releaseStorePath != null && file(releaseStorePath).exists()
+
     signingConfigs {
-        create("debugConfig") {
-            storeFile = file("${rootDir}/debug.keystore")
-            storePassword = "android"
-            keyAlias = "androiddebugkey"
-            keyPassword = "android"
+        if (hasReleaseSigning) {
+            create("release") {
+                storeFile = file(releaseStorePath!!)
+                storePassword = prop("storePassword", "HAVN_KEYSTORE_PASSWORD")
+                keyAlias = prop("keyAlias", "HAVN_KEY_ALIAS")
+                keyPassword = prop("keyPassword", "HAVN_KEY_PASSWORD")
+            }
         }
     }
 
     buildTypes {
         debug {
-            signingConfig = signingConfigs.getByName("debugConfig")
+            // No explicit signingConfig: AGP's built-in debug key is used, which
+            // every developer already has. Pointing this at a keystore committed
+            // beside the source only created something that looked like a secret.
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
+            isMinifyEnabled = false
         }
         release {
-            signingConfig = signingConfigs.getByName("debugConfig")
-            isMinifyEnabled = false
-            isShrinkResources = false
+            if (hasReleaseSigning) {
+                signingConfig = signingConfigs.getByName("release")
+            }
+            // R8 on: shrinks the APK and strips readable class and method names.
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
