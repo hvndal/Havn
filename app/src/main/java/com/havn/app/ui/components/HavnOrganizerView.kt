@@ -99,6 +99,11 @@ fun HavnOrganizerView(
                     settings.domStorageEnabled = true
                     // The page is a local asset and loads no remote content;
                     // leaving file access on would only widen its reach.
+                    settings.cacheMode = android.webkit.WebSettings.LOAD_NO_CACHE
+                    if (android.os.Build.VERSION.SDK_INT in 29..32) {
+                        @Suppress("DEPRECATION")
+                        settings.forceDark = android.webkit.WebSettings.FORCE_DARK_OFF
+                    }
                     settings.allowFileAccess = false
                     settings.allowContentAccess = false
                     settings.mediaPlaybackRequiresUserGesture = true
@@ -146,6 +151,7 @@ fun HavnOrganizerView(
                 // Order matters: stop the page before tearing the view down, or
                 // the renderer can keep running against a detached host.
                 stopLoading()
+                clearCache(true)
                 loadUrl("about:blank")
                 removeJavascriptInterface("AndroidOrganizer")
                 (parent as? ViewGroup)?.removeView(this)

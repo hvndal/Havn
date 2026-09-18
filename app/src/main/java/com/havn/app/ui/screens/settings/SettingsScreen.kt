@@ -7,7 +7,9 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,6 +41,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import com.havn.app.BuildConfig
+import com.havn.app.R
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.input.ImeAction
@@ -264,9 +270,8 @@ fun SettingsScreen(
                     Spacer(Modifier.height(HavnTheme.spacing.sm))
                     Text(
                         text = "Hävn has no account and no servers — it doesn't ask for " +
-                            "internet access at all. Android's own backup can restore your " +
-                            "history to a new phone; a file you keep yourself is the copy " +
-                            "nothing can take away.",
+                            "internet access at all. Nothing is copied off this phone, so " +
+                            "export a backup file before switching devices.",
                         style = MaterialTheme.typography.bodySmall,
                         color = colors.textTertiary,
                     )
@@ -297,13 +302,15 @@ fun SettingsScreen(
                 Column(Modifier.padding(horizontal = gutter)) {
                     Text("MAINTENANCE", style = HavnType.Eyebrow, color = colors.textTertiary)
                     Spacer(Modifier.height(HavnTheme.spacing.sm))
-                    HavnListRow(
-                        title = "Fill in sample history",
-                        subtitle = "Writes 30 days of example doses so Progress has " +
-                            "something to show",
-                        onClick = viewModel::seedSampleData,
-                    )
-                    HavnDivider()
+                    if (BuildConfig.DEBUG) {
+                        HavnListRow(
+                            title = "Fill in sample history",
+                            subtitle = "Writes 30 days of example doses so Progress has " +
+                                "something to show",
+                            onClick = viewModel::seedSampleData,
+                        )
+                        HavnDivider()
+                    }
                     HavnListRow(
                         title = "Clear dose history",
                         subtitle = "Keeps your medications, removes every recorded dose",
@@ -319,17 +326,22 @@ fun SettingsScreen(
                 Column(Modifier.padding(horizontal = gutter)) {
                     Text("ABOUT", style = HavnType.Eyebrow, color = colors.textTertiary)
                     Spacer(Modifier.height(HavnTheme.spacing.sm))
-                    HavnListRow(
-                        title = "Support Hävn",
-                        subtitle = "Buy the developer a coffee",
+                    SupportCard(
                         onClick = {
-                            runCatching {
-                                uriHandler.openUri("https://buymeacoffee.com/hermanify")
-                            }
+                            runCatching { uriHandler.openUri("https://buymeacoffee.com/hermanify") }
+                        },
+                    )
+                    Spacer(Modifier.height(HavnTheme.spacing.lg))
+                    HavnListRow(
+                        title = "Need an app or website?",
+                        subtitle = "Hävn is made by Mander — web design, apps and projects",
+                        value = "mander.tech",
+                        onClick = {
+                            runCatching { uriHandler.openUri("https://mander.tech") }
                         },
                     )
                     HavnDivider()
-                    HavnListRow(title = "Version", value = "1.0.1")
+                    HavnListRow(title = "Version", value = BuildConfig.VERSION_NAME)
                 }
 
                 Spacer(Modifier.height(HavnTheme.spacing.section))
@@ -614,4 +626,51 @@ private fun AddProfileDialog(
             )
         },
     )
+}
+
+
+/**
+ * Tappable image card for supporting the app. Hävn is free with no ads, so
+ * this is the only ask it makes — and it opens in the browser, so the app
+ * itself still needs no internet permission.
+ */
+@Composable
+private fun SupportCard(onClick: () -> Unit) {
+    val colors = HavnTheme.colors
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(HavnTheme.radius.lg))
+            .background(colors.surfaceRaised)
+            .border(1.dp, colors.hairline, RoundedCornerShape(HavnTheme.radius.lg))
+            .havnPress(onClickLabel = "Open Buy Me a Coffee", onClick = onClick)
+            .padding(HavnTheme.spacing.lg),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Image(
+            painter = painterResource(R.drawable.ic_support_coffee),
+            contentDescription = "Buy me a coffee",
+            modifier = Modifier.size(72.dp),
+        )
+        Spacer(Modifier.width(HavnTheme.spacing.lg))
+        Column(Modifier.weight(1f)) {
+            Text(
+                text = "Keep Hävn free",
+                style = MaterialTheme.typography.titleMedium,
+                color = colors.textPrimary,
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = "No ads, no subscriptions. If it helps you, a coffee helps keep it that way.",
+                style = MaterialTheme.typography.bodySmall,
+                color = colors.textSecondary,
+            )
+            Spacer(Modifier.height(HavnTheme.spacing.md))
+            Text(
+                text = "Buy me a coffee  →",
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                color = colors.accent,
+            )
+        }
+    }
 }

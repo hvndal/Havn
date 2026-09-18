@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-  API 31+ replacement for backup_rules.xml.
-
-  cloud-backup    — what Google's servers may hold, for restore after phone loss.
-  device-transfer — direct phone-to-phone, which never leaves the user's hands.
-
-  Both carry only the database and preferences. An explicit include list means
-  everything else — including the export cache — is excluded by default.
--->
+<!-- Nothing leaves the device. Every install starts clean: no profile, name or
+     history is restored from a previous install or another person's device.
+     The in-app backup file is the only way to move data. -->
 <data-extraction-rules>
     <cloud-backup>
-        <include domain="database" path="." />
-        <include domain="sharedpref" path="." />
+        <exclude domain="root" path="." />
+        <exclude domain="file" path="." />
+        <exclude domain="database" path="." />
+        <exclude domain="sharedpref" path="." />
+        <exclude domain="external" path="." />
     </cloud-backup>
     <device-transfer>
-        <include domain="database" path="." />
-        <include domain="sharedpref" path="." />
+        <exclude domain="root" path="." />
+        <exclude domain="file" path="." />
+        <exclude domain="database" path="." />
+        <exclude domain="sharedpref" path="." />
+        <exclude domain="external" path="." />
     </device-transfer>
 </data-extraction-rules>

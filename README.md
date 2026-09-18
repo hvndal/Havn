@@ -26,14 +26,14 @@ Built with Jetpack Compose, Room, WorkManager, Hilt and Glance.
 
 ## Build
 
-Requires JDK 17+ and the Android SDK (compileSdk 35).
+Requires JDK 17+ and the Android SDK (compileSdk 36).
 
 ```bash
 ./gradlew assembleDebug
 ```
 
 The debug build uses AGP's standard debug key and installs as
-`com.aistudio.havn.pills.debug`, so it can sit alongside a release install.
+`com.havnmeds.app.debug`, so it can sit alongside a release install.
 
 ### Release builds
 
@@ -58,11 +58,11 @@ is the safe outcome; silently signing with a known key is not.
 
 - The app declares **no network permission**. It cannot phone home.
 - Data lives in a Room database in the app's private storage.
-- **Android Auto Backup is enabled** and scoped to the database and preferences
-  (see `res/xml/data_extraction_rules.xml`). This means Android — not Hävn —
-  may sync an encrypted copy to the user's own Google account so a new phone
-  can be restored. To opt out entirely, set `android:allowBackup="false"` in
-  the manifest; the in-app export then becomes the only backup route.
+- **Android backup is off** (`allowBackup="false"`, everything excluded in
+  `data_extraction_rules.xml`). Every install starts clean — no profile, name or
+  history carries over from a previous install. The in-app export is the only
+  way to move data.
+- The app cache and WebView cache are cleared on every cold start.
 - Exports are written to `cacheDir/exports` and handed to the system share
   sheet. The `FileProvider` is scoped to that one directory, so no other app
   can reach the database through it.

@@ -1,5 +1,7 @@
 package com.havn.app.ui
 
+import android.app.UiModeManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -8,6 +10,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import com.havn.app.data.prefs.UserPreferences
 import com.havn.app.data.session.SessionManager
 import com.havn.app.data.session.SessionState
@@ -62,6 +65,24 @@ class MainActivity : ComponentActivity() {
         setContent {
             val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
             val session by viewModel.session.collectAsStateWithLifecycle()
+
+            // Tell Android which mode the app is in. Without this, choosing
+            // Light while the phone is in dark mode left the launch window,
+            // splash and the 3D organizer WebView in dark.
+            LaunchedEffect(themeMode) {
+                val mode = themeMode ?: return@LaunchedEffect
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    runCatching {
+                        getSystemService(UiModeManager::class.java)?.setApplicationNightMode(
+                            when (mode) {
+                                ThemeMode.LIGHT -> UiModeManager.MODE_NIGHT_NO
+                                ThemeMode.DARK -> UiModeManager.MODE_NIGHT_YES
+                                ThemeMode.SYSTEM -> UiModeManager.MODE_NIGHT_AUTO
+                            }
+                        )
+                    }
+                }
+            }
 
             HavnTheme(themeMode = themeMode ?: ThemeMode.SYSTEM) {
                 HavnNavGraph(session = session)

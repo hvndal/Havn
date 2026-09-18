@@ -39,3 +39,6 @@ Thumbs.db
 
 # ── Local scratch ────────────────────────────────────────────────────────────
 /havn.zip
+
+# Local release builds (build-release.sh)
+/release-output/

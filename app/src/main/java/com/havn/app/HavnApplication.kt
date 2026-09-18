@@ -32,6 +32,10 @@ class HavnApplication : Application(), Configuration.Provider {
         // Channels are registered up front so they exist in system settings
         // before the first notification fires — a channel created lazily at
         // notify() time cannot have its importance changed afterwards.
+        // No stale cache between launches: old export files and WebView
+        // leftovers are cleared on every cold start.
+        runCatching { cacheDir.listFiles()?.forEach { it.deleteRecursively() } }
+        runCatching { codeCacheDir.listFiles()?.forEach { it.deleteRecursively() } }
         HavnNotificationChannels.ensureCreated(this)
         reminderScheduler.scheduleDailySyncWork()
     }
