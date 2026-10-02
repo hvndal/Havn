@@ -14,9 +14,6 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - uses: android-actions/setup-android@v3
-        env:
-          ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
       - uses: gradle/actions/setup-gradle@v4
       - run: chmod +x gradlew && ./gradlew --no-daemon assembleDebug
       - uses: actions/upload-artifact@v4
