@@ -10,7 +10,7 @@ import com.havn.app.data.session.SessionState
 import com.havn.app.domain.model.MedIconType
 import com.havn.app.domain.model.Medication
 import com.havn.app.domain.model.RepeatType
-import com.havn.app.notifications.ReminderScheduler
+import com.havn.app.notifications.HavnAlarmScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,7 +46,7 @@ class ManageMedicationsViewModel @Inject constructor(
     private val repository: HavnRepository,
     private val sessionManager: SessionManager,
     private val prefs: UserPreferences,
-    private val reminderScheduler: ReminderScheduler,
+    private val alarmScheduler: HavnAlarmScheduler,
     val soundManager: SoundManager,
 ) : ViewModel() {
 
@@ -109,24 +109,15 @@ class ManageMedicationsViewModel @Inject constructor(
         viewModelScope.launch {
             val updated = med.copy(isActive = !med.isActive)
             repository.updateMedication(updated)
-            if (updated.isActive) {
-                reminderScheduler.scheduleReminder(updated, prefs.preDoseEnabled.first())
-            } else {
-                reminderScheduler.cancelReminder(med)
-            }
+            alarmScheduler.rebuildAlarms()
             soundManager.playSoftTap()
         }
     }
 
     fun delete(med: Medication) {
         viewModelScope.launch {
-            // Cancel before deleting. Cancelling afterwards used the medication's
-            // own reminderTimes to clear legacy alarms, which is fine, but the
-            // WorkManager tag cancel has to happen regardless — a deleted
-            // medication with live work would keep waking the worker, which then
-            // found no row and did nothing, forever.
-            reminderScheduler.cancelReminder(med)
             repository.deleteMedication(med)
+            alarmScheduler.rebuildAlarms()
             soundManager.playSoftTap()
         }
     }

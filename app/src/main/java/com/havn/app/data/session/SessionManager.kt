@@ -3,7 +3,7 @@ package com.havn.app.data.session
 import com.havn.app.data.prefs.UserPreferences
 import com.havn.app.data.repository.HavnRepository
 import com.havn.app.domain.model.User
-import com.havn.app.notifications.ReminderScheduler
+import com.havn.app.notifications.HavnAlarmScheduler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -60,7 +60,7 @@ sealed interface SessionState {
 class SessionManager @Inject constructor(
     private val prefs: UserPreferences,
     private val repository: HavnRepository,
-    private val reminderScheduler: ReminderScheduler,
+    private val alarmScheduler: HavnAlarmScheduler,
     private val appScope: CoroutineScope,
 ) {
 
@@ -126,7 +126,7 @@ class SessionManager @Inject constructor(
         val user = repository.getUserById(userId) ?: return
         prefs.setActiveUser(user.id)
         prefs.setOnboardingDone(true)
-        reminderScheduler.scheduleDailySyncWork()
+        alarmScheduler.rebuildAlarms()
     }
 
     /** Create a profile and sign straight into it. */
@@ -136,7 +136,7 @@ class SessionManager @Inject constructor(
         )
         prefs.setActiveUser(id)
         prefs.setOnboardingDone(true)
-        reminderScheduler.scheduleDailySyncWork()
+        alarmScheduler.rebuildAlarms()
         return id
     }
 
@@ -147,14 +147,8 @@ class SessionManager @Inject constructor(
      * notifications naming a profile nobody is signed into.
      */
     suspend fun signOut() {
-        val current = state.value.userOrNull
-        if (current != null) {
-            repository.getMedicationsForUser(current.id).first().forEach { med ->
-                reminderScheduler.cancelReminder(med)
-            }
-        }
-        reminderScheduler.cancelAllScheduledWork()
         prefs.clearSession()
+        alarmScheduler.rebuildAlarms()
     }
 
     /**
@@ -165,22 +159,19 @@ class SessionManager @Inject constructor(
      * so callers can react without re-reading.
      */
     suspend fun deleteProfile(user: User) {
-        repository.getMedicationsForUser(user.id).first().forEach { med ->
-            reminderScheduler.cancelReminder(med)
-        }
         repository.deleteUser(user)
 
         val remaining = repository.getAllUsers().first()
         val wasActive = prefs.activeUserId.first() == user.id
         when {
             remaining.isEmpty() -> {
-                reminderScheduler.cancelAllScheduledWork()
                 prefs.clearSession()
+                alarmScheduler.rebuildAlarms()
             }
             wasActive -> {
                 prefs.setActiveUser(remaining.first().id)
                 prefs.setOnboardingDone(true)
-                reminderScheduler.scheduleDailySyncWork()
+                alarmScheduler.rebuildAlarms()
             }
         }
     }

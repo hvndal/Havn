@@ -10,20 +10,19 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.VIBRATE" />
 
-    <!--
-      Removed: INTERNET, SCHEDULE_EXACT_ALARM, USE_EXACT_ALARM.
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
+    <!--
       • INTERNET was needed only because the 3D organizer loaded three.js from a
         CDN, which also meant the app's signature screen silently failed to
         render offline. three.js is now bundled in assets, so Hävn requests no
         network access at all — which matches what it tells users on the
         onboarding screen ("everything stays on this device").
 
-      • The exact-alarm permissions were never exercised: reminders are
-        scheduled through WorkManager, and AlarmManager is touched only to
-        cancel alarms left behind by older installs, which needs no permission.
-        Both are restricted permissions that draw Play Store review, so
-        declaring them unused was a liability.
+      • SCHEDULE_EXACT_ALARM is used to fire reminders on time (Android 12+), 
+        but relies on user consent via settings. If denied, alarms fall back 
+        to inexact Doze-safe triggers. USE_EXACT_ALARM remains excluded to avoid 
+        Play Store friction since this is not a strict alarm clock app.
     -->
 
     <application
@@ -83,6 +82,8 @@
             android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.TIME_SET" />
             </intent-filter>
         </receiver>
 

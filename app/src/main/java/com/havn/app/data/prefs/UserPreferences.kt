@@ -34,6 +34,7 @@ class UserPreferences @Inject constructor(
         val EVENING_CHECK_TIME = stringPreferencesKey("evening_check_time") // "HH:mm"
         val PRE_DOSE_ENABLED = booleanPreferencesKey("pre_dose_enabled")
         val NOTIF_PERMISSION_ASKED = booleanPreferencesKey("notif_permission_asked")
+        val SCHEDULED_ALARMS = stringPreferencesKey("scheduled_alarms")
 
         const val NO_USER = -1L
         const val DEFAULT_EVENING_CHECK = "20:00"
@@ -55,8 +56,18 @@ class UserPreferences @Inject constructor(
     val interfaceSound: Flow<Boolean> = data.map { it[INTERFACE_SOUND] ?: true }
     val eveningCheckEnabled: Flow<Boolean> = data.map { it[EVENING_CHECK_ENABLED] ?: true }
     val eveningCheckTime: Flow<String> = data.map { it[EVENING_CHECK_TIME] ?: DEFAULT_EVENING_CHECK }
-    val preDoseEnabled: Flow<Boolean> = data.map { it[PRE_DOSE_ENABLED] ?: true }
+    val preDoseEnabled: Flow<Boolean> = data.map { it[PRE_DOSE_ENABLED] ?: false }
     val notifPermissionAsked: Flow<Boolean> = data.map { it[NOTIF_PERMISSION_ASKED] ?: false }
+
+    val scheduledAlarms: Flow<List<Long>> = data.map { prefs ->
+        val raw = prefs[SCHEDULED_ALARMS] ?: ""
+        if (raw.isBlank()) emptyList()
+        else raw.split(",").mapNotNull { it.toLongOrNull() }
+    }
+
+    suspend fun saveScheduledAlarms(alarms: List<Long>) {
+        context.dataStore.edit { it[SCHEDULED_ALARMS] = alarms.joinToString(",") }
+    }
 
     suspend fun setActiveUser(id: Long) {
         context.dataStore.edit { it[ACTIVE_USER_ID] = id }

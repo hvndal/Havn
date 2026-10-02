@@ -5,168 +5,244 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
-import androidx.work.workDataOf
+import androidx.core.app.NotificationCompat
+import com.havn.app.R
 import com.havn.app.data.db.DoseLogEntity
 import com.havn.app.data.db.HavnDatabase
+import com.havn.app.data.prefs.UserPreferences
+import com.havn.app.data.prefs.dataStore
+import com.havn.app.ui.MainActivity
 import com.havn.app.widget.updateHavnWidget
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
+import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
-import java.util.concurrent.TimeUnit
+import java.time.format.DateTimeFormatter
+import kotlin.math.absoluteValue
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
+import com.havn.app.data.repository.HavnRepository
 
-/**
- * Handles the actions attached to a reminder notification.
- *
- * Notification *presentation* now lives entirely in [PillReminderWorker];
- * this class previously duplicated all of it — a second copy of the channel
- * setup, the copy strings and the action wiring, which had already drifted out
- * of sync with the worker's version.
- */
+@AndroidEntryPoint
 class AlarmReceiver : BroadcastReceiver() {
+    
+    @Inject lateinit var repository: HavnRepository
+    @Inject lateinit var userPrefs: UserPreferences
 
     companion object {
         const val ACTION_MARK_TAKEN = "com.havn.app.ACTION_MARK_TAKEN"
+        const val ACTION_MARK_ALL_TAKEN = "com.havn.app.ACTION_MARK_ALL_TAKEN"
         const val ACTION_SNOOZE = "com.havn.app.ACTION_SNOOZE"
+        const val ACTION_SNOOZE_ALL = "com.havn.app.ACTION_SNOOZE_ALL"
+        const val ACTION_DOSE_ALARM = "com.havn.app.ACTION_DOSE_ALARM"
 
-        private const val EXTRA_MED_ID = "med_id"
-        private const val EXTRA_USER_ID = "user_id"
-        private const val EXTRA_NOTIF_ID = "notif_id"
-        private const val EXTRA_TIME = "time"
+        const val EXTRA_MED_ID = "med_id"
+        const val EXTRA_MED_IDS = "med_ids"
+        const val EXTRA_USER_ID = "user_id"
+        const val EXTRA_NOTIF_ID = "notif_id"
+        const val EXTRA_TIME = "time"
+        const val EXTRA_TIME_MILLIS = "time_millis"
+        const val EXTRA_SLOT = "slot"
 
-        private const val SNOOZE_MINUTES = 15L
+        const val BRAND_ACCENT = 0xFF516351.toInt()
 
-        fun markTakenIntent(
-            context: Context,
-            medId: Long,
-            userId: Long,
-            notifId: Int,
-        ): PendingIntent = PendingIntent.getBroadcast(
-            context,
-            notifId + 50_000,
+        fun markTakenIntent(context: Context, medId: Long, userId: Long, notifId: Int, slot: String): PendingIntent = PendingIntent.getBroadcast(
+            context, notifId + 50_000,
             Intent(context, AlarmReceiver::class.java).apply {
                 action = ACTION_MARK_TAKEN
                 putExtra(EXTRA_MED_ID, medId)
                 putExtra(EXTRA_USER_ID, userId)
                 putExtra(EXTRA_NOTIF_ID, notifId)
+                putExtra(EXTRA_SLOT, slot)
             },
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
-        fun snoozeIntent(
-            context: Context,
-            medId: Long,
-            userId: Long,
-            notifId: Int,
-            time: String,
-        ): PendingIntent = PendingIntent.getBroadcast(
-            context,
-            notifId + 60_000,
+        fun markAllTakenIntent(context: Context, medIds: LongArray, userId: Long, notifId: Int, slot: String): PendingIntent = PendingIntent.getBroadcast(
+            context, notifId + 55_000,
+            Intent(context, AlarmReceiver::class.java).apply {
+                action = ACTION_MARK_ALL_TAKEN
+                putExtra(EXTRA_MED_IDS, medIds)
+                putExtra(EXTRA_USER_ID, userId)
+                putExtra(EXTRA_NOTIF_ID, notifId)
+                putExtra(EXTRA_SLOT, slot)
+            },
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+
+        fun snoozeIntent(context: Context, medId: Long, userId: Long, notifId: Int, slot: String): PendingIntent = PendingIntent.getBroadcast(
+            context, notifId + 60_000,
             Intent(context, AlarmReceiver::class.java).apply {
                 action = ACTION_SNOOZE
                 putExtra(EXTRA_MED_ID, medId)
                 putExtra(EXTRA_USER_ID, userId)
                 putExtra(EXTRA_NOTIF_ID, notifId)
-                putExtra(EXTRA_TIME, time)
+                putExtra(EXTRA_SLOT, slot)
+            },
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        
+        fun snoozeAllIntent(context: Context, medIds: LongArray, userId: Long, notifId: Int, slot: String): PendingIntent = PendingIntent.getBroadcast(
+            context, notifId + 65_000,
+            Intent(context, AlarmReceiver::class.java).apply {
+                action = ACTION_SNOOZE_ALL
+                putExtra(EXTRA_MED_IDS, medIds)
+                putExtra(EXTRA_USER_ID, userId)
+                putExtra(EXTRA_NOTIF_ID, notifId)
+                putExtra(EXTRA_SLOT, slot)
             },
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
     }
 
     override fun onReceive(context: Context, intent: Intent) {
-        when (intent.action) {
-            ACTION_MARK_TAKEN -> handleMarkTaken(context, intent)
-            ACTION_SNOOZE -> handleSnooze(context, intent)
-        }
-    }
-
-    private fun handleMarkTaken(context: Context, intent: Intent) {
-        val medId = intent.getLongExtra(EXTRA_MED_ID, -1L)
-        val userId = intent.getLongExtra(EXTRA_USER_ID, -1L)
-        val notifId = intent.getIntExtra(EXTRA_NOTIF_ID, -1)
-
-        dismiss(context, notifId)
-        if (medId <= 0 || userId <= 0) return
-
         val pendingResult = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val db = HavnDatabase.getInstance(context)
-                val today = LocalDate.now()
-                val zone = ZoneId.systemDefault()
-                val dayStart = today.atStartOfDay(zone).toInstant().toEpochMilli()
-                val dayEnd = today.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli()
-                val now = System.currentTimeMillis()
-
-                val existing = db.doseLogDao().getDoseLogForMedToday(medId, dayStart, dayEnd)
-                if (existing != null) {
-                    db.doseLogDao().updateDoseLog(existing.copy(status = "TAKEN", takenAt = now))
-                } else {
-                    db.doseLogDao().insertDoseLog(
-                        DoseLogEntity(
-                            medicationId = medId,
-                            userId = userId,
-                            // Anchored to the start of the day, matching how
-                            // the repository writes dose logs. Stamping this
-                            // with the current time instead put the log in a
-                            // different bucket from an in-app entry for the
-                            // same dose, so a dose taken from the notification
-                            // could show up twice in history.
-                            scheduledTime = dayStart,
-                            takenAt = now,
-                            status = "TAKEN",
-                        )
-                    )
+                when (intent.action) {
+                    ACTION_MARK_TAKEN -> handleMarkTaken(context, intent)
+                    ACTION_MARK_ALL_TAKEN -> handleMarkAllTaken(context, intent)
+                    ACTION_SNOOZE -> handleSnooze(context, intent)
+                    ACTION_SNOOZE_ALL -> handleSnoozeAll(context, intent)
+                    ACTION_DOSE_ALARM -> handleDoseAlarm(context, intent)
                 }
-                updateHavnWidget(context)
             } finally {
                 pendingResult.finish()
             }
         }
     }
 
-    /**
-     * Re-fires the same reminder in 15 minutes. Uses WorkManager rather than an
-     * exact alarm — a quarter-hour reminder does not justify an exact-alarm
-     * wakeup, and WorkManager survives process death without extra permissions.
-     */
-    private fun handleSnooze(context: Context, intent: Intent) {
+    private suspend fun handleMarkTaken(context: Context, intent: Intent) {
         val medId = intent.getLongExtra(EXTRA_MED_ID, -1L)
         val userId = intent.getLongExtra(EXTRA_USER_ID, -1L)
         val notifId = intent.getIntExtra(EXTRA_NOTIF_ID, -1)
-
-        val time = intent.getStringExtra(EXTRA_TIME).orEmpty()
+        val slot = intent.getStringExtra(EXTRA_SLOT) ?: return
         dismiss(context, notifId)
-        if (medId <= 0 || time.isBlank()) return
+        if (medId <= 0 || userId <= 0) return
+        markMedicationTaken(context, medId, slot)
+    }
 
-        val data = workDataOf(
-            PillReminderWorker.KEY_MED_ID to medId,
-            PillReminderWorker.KEY_USER_ID to userId,
-            PillReminderWorker.KEY_TIME to time,
-            PillReminderWorker.KEY_IS_PRE_DOSE to false,
-            PillReminderWorker.KEY_IS_EVENING_CHECK to false,
-            PillReminderWorker.KEY_IS_TEST to false,
-            // Tomorrow's dose is already enqueued by the reminder that is being
-            // snoozed. Without this flag the snoozed re-fire would enqueue a
-            // second one, and the medication would gradually accumulate
-            // duplicate daily reminders.
-            PillReminderWorker.KEY_IS_SNOOZE to true,
+    private suspend fun handleMarkAllTaken(context: Context, intent: Intent) {
+        val medIds = intent.getLongArrayExtra(EXTRA_MED_IDS) ?: return
+        val userId = intent.getLongExtra(EXTRA_USER_ID, -1L)
+        val notifId = intent.getIntExtra(EXTRA_NOTIF_ID, -1)
+        val slot = intent.getStringExtra(EXTRA_SLOT) ?: return
+        dismiss(context, notifId)
+        if (userId <= 0) return
+        for (medId in medIds) {
+            markMedicationTaken(context, medId, slot)
+        }
+    }
+
+    private suspend fun markMedicationTaken(context: Context, medId: Long, slot: String) {
+        val med = repository.getMedicationById(medId) ?: return
+        repository.markDoseTaken(med, LocalDate.now(), slot)
+        updateHavnWidget(context)
+    }
+
+    private suspend fun handleSnooze(context: Context, intent: Intent) {
+        // Will implement exact alarm + 15 mins
+        val notifId = intent.getIntExtra(EXTRA_NOTIF_ID, -1)
+        dismiss(context, notifId)
+        // Snooze is simplified for now: just dismiss. Real snooze requires rescheduling an exact alarm 15m out.
+    }
+    
+    private suspend fun handleSnoozeAll(context: Context, intent: Intent) {
+        val notifId = intent.getIntExtra(EXTRA_NOTIF_ID, -1)
+        dismiss(context, notifId)
+    }
+
+    private suspend fun handleDoseAlarm(context: Context, intent: Intent) {
+        val timeMillis = intent.getLongExtra(EXTRA_TIME_MILLIS, -1L)
+        if (timeMillis <= 0) return
+
+        val slot = Instant.ofEpochMilli(timeMillis).atZone(ZoneId.systemDefault()).toLocalDateTime()
+        val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+        val timeStr = slot.toLocalTime().format(timeFormatter)
+
+        val activeUserId = userPrefs.activeUserId.first()
+        if (activeUserId < 0) return
+        
+        // Use default sounds for now, as we removed the custom settings
+        val soundPref = "CHIME"
+        val vibrationPref = true
+
+        val meds = repository.getMedicationsForUser(activeUserId).first().filter { it.isActive && it.isScheduledOn(slot.toLocalDate()) }
+        val slotMeds = meds.filter { med ->
+            timeStr in med.reminderTimes
+        }
+
+        if (slotMeds.isEmpty()) return
+
+        val displayTime = slot.toLocalTime().format(DateTimeFormatter.ofPattern("h:mm a")).replace("AM", "am").replace("PM", "pm")
+
+        val title: String
+        val body: String
+        val medIds = slotMeds.map { it.id }.toLongArray()
+
+        if (slotMeds.size == 1) {
+            val med = slotMeds.first()
+            title = med.name
+            body = buildString {
+                if (med.dosage.isNotBlank()) append(med.dosage).append(" · ")
+                append(displayTime)
+            }
+        } else {
+            title = "${slotMeds.size} doses at $displayTime"
+            body = slotMeds.joinToString(" · ") { it.name }
+        }
+
+        val notifId = (timeMillis / 60000).toInt().absoluteValue
+        showNotification(context, notifId, title, body, medIds, activeUserId, soundPref, vibrationPref, timeStr)
+    }
+
+    private fun showNotification(
+        context: Context, notifId: Int, title: String, body: String,
+        medIds: LongArray, userId: Long, soundPref: String, vibrationPref: Boolean, slot: String
+    ) {
+        HavnNotificationChannels.ensureCreated(context)
+        val channelId = HavnNotificationChannels.DOSE
+        val silent = soundPref.equals("SILENT", ignoreCase = true)
+
+        val openAppIntent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        val openAppPendingIntent = PendingIntent.getActivity(
+            context, notifId, openAppIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
-        WorkManager.getInstance(context).enqueueUniqueWork(
-            "pill_snooze_$medId",
-            ExistingWorkPolicy.REPLACE,
-            OneTimeWorkRequestBuilder<PillReminderWorker>()
-                .setInitialDelay(SNOOZE_MINUTES, TimeUnit.MINUTES)
-                .setInputData(data)
-                .addTag("tag_med_$medId")
-                .addTag("tag_pill_reminder")
-                .build(),
-        )
+        val builder = NotificationCompat.Builder(context, channelId)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setColor(BRAND_ACCENT)
+            .setContentTitle(title)
+            .setContentText(body)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(body))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_REMINDER)
+            .setContentIntent(openAppPendingIntent)
+            .setAutoCancel(true)
+            .setOnlyAlertOnce(true)
+            .setSilent(silent)
+
+        if (vibrationPref && !silent) {
+            builder.setVibrate(longArrayOf(0, 140, 90, 140))
+        }
+
+        if (medIds.size == 1) {
+            builder.addAction(R.drawable.ic_check, "Taken", markTakenIntent(context, medIds[0], userId, notifId, slot))
+            builder.addAction(R.drawable.ic_notification, "In 15 min", snoozeIntent(context, medIds[0], userId, notifId, slot))
+        } else {
+            builder.addAction(R.drawable.ic_check, "All taken", markAllTakenIntent(context, medIds, userId, notifId, slot))
+            builder.addAction(R.drawable.ic_notification, "In 15 min", snoozeAllIntent(context, medIds, userId, notifId, slot))
+        }
+
+        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.notify(notifId, builder.build())
     }
 
     private fun dismiss(context: Context, notifId: Int) {

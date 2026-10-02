@@ -11,7 +11,7 @@ import com.havn.app.data.session.SessionState
 import com.havn.app.domain.model.MedIconType
 import com.havn.app.domain.model.Medication
 import com.havn.app.domain.model.RepeatType
-import com.havn.app.notifications.ReminderScheduler
+import com.havn.app.notifications.HavnAlarmScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -43,7 +43,7 @@ class AddMedicationViewModel @Inject constructor(
     private val repository: HavnRepository,
     private val sessionManager: SessionManager,
     private val prefs: UserPreferences,
-    private val reminderScheduler: ReminderScheduler,
+    private val alarmScheduler: HavnAlarmScheduler,
     private val soundManager: SoundManager,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -157,9 +157,8 @@ class AddMedicationViewModel @Inject constructor(
                 isActive = true,
             )
 
-            val id = repository.saveMedication(medication)
-            val includePreDose = prefs.preDoseEnabled.first()
-            reminderScheduler.scheduleReminder(medication.copy(id = id), includePreDose)
+            repository.saveMedication(medication)
+            alarmScheduler.rebuildAlarms()
 
             soundManager.playSoftChime()
             _uiState.update { it.copy(isSaving = false, saved = true) }

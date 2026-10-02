@@ -5,15 +5,16 @@ import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import com.havn.app.data.session.SessionManager
 import com.havn.app.notifications.HavnNotificationChannels
-import com.havn.app.notifications.ReminderScheduler
+import com.havn.app.notifications.HavnAlarmScheduler
 import dagger.hilt.android.HiltAndroidApp
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltAndroidApp
 class HavnApplication : Application(), Configuration.Provider {
 
     @Inject lateinit var workerFactory: HiltWorkerFactory
-    @Inject lateinit var reminderScheduler: ReminderScheduler
+    @Inject lateinit var alarmScheduler: HavnAlarmScheduler
 
     /**
      * Injected purely so the session begins resolving at process start rather
@@ -41,8 +42,12 @@ class HavnApplication : Application(), Configuration.Provider {
         runCatching {
             HavnNotificationChannels.ensureCreated(this)
         }
-        runCatching {
-            reminderScheduler.scheduleDailySyncWork()
+        
+        // Launch a coroutine to do the suspend call
+        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+            runCatching {
+                alarmScheduler.rebuildAlarms()
+            }
         }
     }
 }

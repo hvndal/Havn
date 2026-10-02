@@ -275,12 +275,34 @@ fun RemindersScreen(
                             { showEveningTimePicker = true }
                         } else null,
                     )
-                    HavnSwitchRow(
-                        title = "Vibrate",
-                        subtitle = "Alongside the notification sound",
-                        checked = uiState.vibration,
-                        onCheckedChange = viewModel::setVibration,
-                    )
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .havnPress(scaleDown = 0.99f) {
+                                context.startActivity(
+                                    Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                                        putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    }
+                                )
+                            }
+                            .padding(vertical = HavnTheme.spacing.md),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Notification sound",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = colors.textPrimary,
+                            )
+                            Text(
+                                text = "Managed in Android settings",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = colors.textTertiary,
+                            )
+                        }
+                    }
                 }
 
                 Spacer(Modifier.height(HavnTheme.spacing.xl))
@@ -292,22 +314,12 @@ fun RemindersScreen(
                         color = colors.textTertiary,
                     )
                     Spacer(Modifier.height(HavnTheme.spacing.md))
-                    HavnSegmented(
-                        options = listOf("Chime", "Marimba", "Silent"),
-                        selectedIndex = when (uiState.sound.uppercase()) {
-                            "MARIMBA" -> 1
-                            "SILENT" -> 2
-                            else -> 0
-                        },
-                        onSelect = { index ->
-                            viewModel.setSound(
-                                when (index) {
-                                    1 -> "MARIMBA"
-                                    2 -> "SILENT"
-                                    else -> "CHIME"
-                                }
-                            )
-                        },
+                    HavnButton(
+                        text = "Preview sound",
+                        onClick = viewModel::previewSound,
+                        tone = HavnButtonTone.Secondary,
+                        size = HavnButtonSize.Medium,
+                        fillWidth = true,
                     )
                 }
 
