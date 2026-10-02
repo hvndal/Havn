@@ -132,9 +132,9 @@ fun OrganizerScreen(
                         .aspectRatio(1.15f)
                 ) {
                     HavnOrganizerView(
-                        dataJson = uiState.payloadJson,
-                        selectedSlot = uiState.selectedPeriod.ordinal,
-                        onSlotTapped = viewModel::selectSlotIndex,
+                        doses = uiState.doses,
+                        selectedPeriod = uiState.selectedPeriod,
+                        onSlotTapped = viewModel::selectPeriod,
                         modifier = Modifier.fillMaxSize(),
                     )
                 }

@@ -1,170 +1,155 @@
 package com.havn.app.ui.components
 
-import android.annotation.SuppressLint
-import android.graphics.Color as AndroidColor
-import android.view.ViewGroup
-import android.webkit.JavascriptInterface
-import android.webkit.WebView
-import android.webkit.WebViewClient
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.TextMeasurer
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.havn.app.domain.model.DayPeriod
+import com.havn.app.domain.model.DoseStatus
+import com.havn.app.domain.model.TodayDose
 import com.havn.app.ui.theme.HavnTheme
-import org.json.JSONObject
 
-/**
- * The 3D pill organiser.
- *
- * This is the most distinctive asset in the product, so it stays — but it is
- * now driven by the theme and torn down properly.
- *
- * Three fixes over the previous version:
- *
- *  • **Theme.** The page painted a fixed `#EDEAE4` body and light-mode slot
- *    labels, so in dark mode it was a bright rectangle in the middle of an ink
- *    canvas. It now receives the resolved palette and repaints on theme change.
- *
- *  • **Lifecycle.** The WebView was never destroyed. Navigating away and back
- *    leaked a renderer each time, and with a WebGL context per instance that
- *    added up quickly. It is now destroyed on dispose.
- *
- *  • **Re-entrancy.** `update` reassigned the captured reference on every
- *    recomposition, which meant the data push could race the page load. Load
- *    state is now explicit.
- */
-@SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun HavnOrganizerView(
-    dataJson: String,
-    selectedSlot: Int,
+    doses: List<TodayDose>,
+    selectedPeriod: DayPeriod,
+    onSlotTapped: (DayPeriod) -> Unit,
     modifier: Modifier = Modifier,
-    onSlotTapped: (Int) -> Unit = {},
 ) {
-    val colors = HavnTheme.colors
-    val haptics = rememberHavnHaptics()
-    val currentOnSlotTapped by rememberUpdatedState(onSlotTapped)
+    val periods = DayPeriod.entries
+    val textMeasurer = rememberTextMeasurer()
+    val brandAccent = HavnTheme.colors.accent
+    val background = HavnTheme.colors.surface
+    val textPrimary = HavnTheme.colors.textPrimary
+    
+    // Animate the selected index for a smooth camera shift effect
+    val animatedSelectedIndex by animateFloatAsState(
+        targetValue = selectedPeriod.ordinal.toFloat(),
+        animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow),
+        label = "selectedIndex"
+    )
 
-    var webView by remember { mutableStateOf<WebView?>(null) }
-    var pageReady by remember { mutableStateOf(false) }
-
-    val themeJson = remember(colors) {
-        JSONObject()
-            .put("isDark", colors.isDark)
-            .put("canvas", colors.canvas.hex())
-            .put("surface", colors.surface.hex())
-            .put("body", colors.surfaceRaised.hex())
-            .put("accent", colors.accent.hex())
-            .put("accentSoft", colors.accentSoft.hex())
-            .put("text", colors.textPrimary.hex())
-            .put("textSoft", colors.textTertiary.hex())
-            .put("hairline", colors.hairlineStrong.hex())
-            .toString()
-    }
-
-    LaunchedEffect(pageReady, dataJson, selectedSlot, themeJson) {
-        val view = webView ?: return@LaunchedEffect
-        if (!pageReady) return@LaunchedEffect
-        view.evaluateJavascript(
-            """
-            HavnOrganizer.setTheme($themeJson);
-            HavnOrganizer.setWeekData($dataJson);
-            HavnOrganizer.selectDay($selectedSlot);
-            """.trimIndent(),
-            null,
-        )
-    }
-
-    Box(modifier = modifier) {
-        AndroidView(
-            modifier = Modifier.fillMaxSize(),
-            factory = { ctx ->
-                try {
-                    WebView(ctx).apply {
-                        layoutParams = ViewGroup.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                        )
-                        settings.javaScriptEnabled = true
-                        settings.domStorageEnabled = true
-                        // The page is a local asset and loads no remote content;
-                        // leaving file access on would only widen its reach.
-                        settings.cacheMode = android.webkit.WebSettings.LOAD_NO_CACHE
-                        if (android.os.Build.VERSION.SDK_INT in 29..32) {
-                            @Suppress("DEPRECATION")
-                            settings.forceDark = android.webkit.WebSettings.FORCE_DARK_OFF
-                        }
-                        settings.allowFileAccess = false
-                        settings.allowContentAccess = false
-                        settings.mediaPlaybackRequiresUserGesture = true
-                        setBackgroundColor(AndroidColor.TRANSPARENT)
-                        isVerticalScrollBarEnabled = false
-                        isHorizontalScrollBarEnabled = false
-                        overScrollMode = WebView.OVER_SCROLL_NEVER
-
-                        webViewClient = object : WebViewClient() {
-                            override fun onPageFinished(view: WebView?, url: String?) {
-                                pageReady = true
-                            }
-                        }
-
-                        addJavascriptInterface(
-                            object {
-                                @JavascriptInterface
-                                fun onSlotTapped(slotIndex: Int, isOpen: Boolean) {
-                                    post {
-                                        haptics.latch()
-                                        currentOnSlotTapped(slotIndex)
-                                    }
-                                }
-
-                                @JavascriptInterface
-                                fun onDragStarted() {
-                                    post {
-                                        haptics.tick()
-                                    }
-                                }
-                            },
-                            "AndroidOrganizer",
-                        )
-
-                        loadUrl("file:///android_asset/organizer/organizer.html")
-                        webView = this
-                    }
-                } catch (t: Throwable) {
-                    android.view.View(ctx)
-                }
-            },
-        )
-    }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            webView?.apply {
-                // Order matters: stop the page before tearing the view down, or
-                // the renderer can keep running against a detached host.
-                stopLoading()
-                clearCache(true)
-                loadUrl("about:blank")
-                removeJavascriptInterface("AndroidOrganizer")
-                (parent as? ViewGroup)?.removeView(this)
-                destroy()
+    Canvas(
+        modifier = modifier.pointerInput(Unit) {
+            detectTapGestures { offset ->
+                // Basic hit detection (divide height by 4)
+                val compartmentHeight = size.height / 4
+                val tappedIndex = (offset.y / compartmentHeight).toInt().coerceIn(0, 3)
+                onSlotTapped(periods[tappedIndex])
             }
-            webView = null
+        }
+    ) {
+        val width = size.width
+        val height = size.height
+        
+        val compartmentHeight = height / 5f
+        val cylinderWidth = width * 0.5f
+        val startX = (width - cylinderWidth) / 2f
+        
+        // Draw 4 compartments from top to bottom
+        for (i in 0 until 4) {
+            val period = periods[i]
+            val periodDoses = doses.filter { it.period == period }
+            
+            // Determine state
+            val allTaken = periodDoses.isNotEmpty() && periodDoses.all { it.status == DoseStatus.TAKEN }
+            val anyDue = periodDoses.any { it.status == DoseStatus.PENDING } && period == DayPeriod.current() // Simplification
+            val isUpcoming = period > DayPeriod.current()
+            val isSelected = selectedPeriod == period
+            
+            val yOffset = i * compartmentHeight + (height * 0.1f)
+            
+            // 3D pseudo-projection offset
+            val popOutOffset = if (isSelected) -20f else 0f
+            
+            translate(left = popOutOffset) {
+                // Base cylinder body
+                val bodyRect = Rect(Offset(startX, yOffset), Size(cylinderWidth, compartmentHeight * 0.8f))
+                
+                // Lid color
+                val lidColor = when {
+                    allTaken -> brandAccent.copy(alpha = 0.8f)
+                    anyDue -> brandAccent.copy(alpha = 0.4f)
+                    else -> Color.Gray.copy(alpha = 0.2f)
+                }
+                
+                // Draw compartment shadow
+                drawRoundRect(
+                    color = Color.Black.copy(alpha = 0.1f),
+                    topLeft = Offset(startX + 10f, yOffset + 10f),
+                    size = Size(cylinderWidth, compartmentHeight * 0.8f),
+                    cornerRadius = CornerRadius(20f, 20f)
+                )
+                
+                // Draw compartment body
+                drawRoundRect(
+                    color = background,
+                    topLeft = bodyRect.topLeft,
+                    size = bodyRect.size,
+                    cornerRadius = CornerRadius(20f, 20f)
+                )
+                drawRoundRect(
+                    color = textPrimary.copy(alpha = 0.1f),
+                    topLeft = bodyRect.topLeft,
+                    size = bodyRect.size,
+                    cornerRadius = CornerRadius(20f, 20f),
+                    style = Stroke(width = 2f)
+                )
+                
+                // Draw Lid
+                val lidOpenAngle = if (anyDue) -15f else 0f
+                withTransform({
+                    translate(left = startX, top = yOffset)
+                    rotate(lidOpenAngle, pivot = Offset(0f, 0f))
+                    translate(left = -startX, top = -yOffset)
+                }) {
+                    drawRoundRect(
+                        color = lidColor,
+                        topLeft = Offset(startX, yOffset),
+                        size = Size(cylinderWidth, compartmentHeight * 0.2f),
+                        cornerRadius = CornerRadius(10f, 10f)
+                    )
+                }
+                
+                // Text label
+                drawText(
+                    textMeasurer = textMeasurer,
+                    text = period.name,
+                    topLeft = Offset(startX + 20f, yOffset + compartmentHeight * 0.3f),
+                    style = TextStyle(color = textPrimary, fontSize = 16.sp)
+                )
+                
+                // "Now" tag
+                if (anyDue) {
+                    drawText(
+                        textMeasurer = textMeasurer,
+                        text = "Now",
+                        topLeft = Offset(startX + cylinderWidth - 60f, yOffset + compartmentHeight * 0.3f),
+                        style = TextStyle(color = brandAccent, fontSize = 14.sp)
+                    )
+                }
+            }
         }
     }
 }
-
-private fun androidx.compose.ui.graphics.Color.hex(): String =
-    String.format("#%06X", 0xFFFFFF and toArgb())

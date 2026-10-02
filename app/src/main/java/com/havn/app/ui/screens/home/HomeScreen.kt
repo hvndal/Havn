@@ -84,7 +84,6 @@ import com.havn.app.ui.components.HavnOrganizerView
 import com.havn.app.ui.components.HavnSwipeToLogRow
 import com.havn.app.ui.components.HavnTextAction
 import com.havn.app.ui.components.MedIcon
-import com.havn.app.ui.components.OrganizerDataMapper
 import com.havn.app.ui.components.havnPress
 import com.havn.app.ui.components.havnReveal
 import com.havn.app.ui.components.rememberHavnHaptics
@@ -702,7 +701,6 @@ private fun OrganizerHero(
     val colors = HavnTheme.colors
     val gutter = HavnTheme.spacing.gutter
     val currentPeriod = remember { DayPeriod.current() }
-    val payload = remember(doses) { OrganizerDataMapper.buildPeriodJson(doses) }
 
     Column {
         SectionRule(
@@ -719,8 +717,9 @@ private fun OrganizerHero(
                 .havnPress(scaleDown = 0.995f, onClickLabel = "Open organizer", onClick = onOpen),
         ) {
             HavnOrganizerView(
-                dataJson = payload,
-                selectedSlot = currentPeriod.ordinal,
+                doses = doses,
+                selectedPeriod = currentPeriod,
+                onSlotTapped = { },
                 modifier = Modifier.fillMaxSize(),
             )
         }

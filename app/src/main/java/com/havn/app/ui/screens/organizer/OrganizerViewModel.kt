@@ -11,7 +11,6 @@ import com.havn.app.domain.model.DoseLog
 import com.havn.app.domain.model.DoseStatus
 import com.havn.app.domain.model.Medication
 import com.havn.app.domain.model.TodayDose
-import com.havn.app.ui.components.OrganizerDataMapper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,7 +27,6 @@ import javax.inject.Inject
 data class OrganizerUiState(
     val doses: List<TodayDose> = emptyList(),
     val selectedPeriod: DayPeriod = DayPeriod.current(),
-    val payloadJson: String = "{}",
     val hasMedications: Boolean = false,
     val isLoading: Boolean = true,
 ) {
@@ -62,7 +60,6 @@ class OrganizerViewModel @Inject constructor(
                     OrganizerUiState(
                         doses = doses,
                         selectedPeriod = period,
-                        payloadJson = OrganizerDataMapper.buildPeriodJson(doses),
                         hasMedications = meds.any { it.isActive },
                         isLoading = false,
                     )
