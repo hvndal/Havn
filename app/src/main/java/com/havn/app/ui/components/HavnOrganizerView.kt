@@ -53,7 +53,7 @@ fun HavnOrganizerView(
     onSlotTapped: (Int) -> Unit = {},
 ) {
     val colors = HavnTheme.colors
-    val haptics = LocalHapticFeedback.current
+    val haptics = rememberHavnHaptics()
     val currentOnSlotTapped by rememberUpdatedState(onSlotTapped)
 
     var webView by remember { mutableStateOf<WebView?>(null) }
@@ -90,56 +90,60 @@ fun HavnOrganizerView(
         AndroidView(
             modifier = Modifier.fillMaxSize(),
             factory = { ctx ->
-                WebView(ctx).apply {
-                    layoutParams = ViewGroup.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                    )
-                    settings.javaScriptEnabled = true
-                    settings.domStorageEnabled = true
-                    // The page is a local asset and loads no remote content;
-                    // leaving file access on would only widen its reach.
-                    settings.cacheMode = android.webkit.WebSettings.LOAD_NO_CACHE
-                    if (android.os.Build.VERSION.SDK_INT in 29..32) {
-                        @Suppress("DEPRECATION")
-                        settings.forceDark = android.webkit.WebSettings.FORCE_DARK_OFF
-                    }
-                    settings.allowFileAccess = false
-                    settings.allowContentAccess = false
-                    settings.mediaPlaybackRequiresUserGesture = true
-                    setBackgroundColor(AndroidColor.TRANSPARENT)
-                    isVerticalScrollBarEnabled = false
-                    isHorizontalScrollBarEnabled = false
-                    overScrollMode = WebView.OVER_SCROLL_NEVER
-
-                    webViewClient = object : WebViewClient() {
-                        override fun onPageFinished(view: WebView?, url: String?) {
-                            pageReady = true
+                try {
+                    WebView(ctx).apply {
+                        layoutParams = ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                        )
+                        settings.javaScriptEnabled = true
+                        settings.domStorageEnabled = true
+                        // The page is a local asset and loads no remote content;
+                        // leaving file access on would only widen its reach.
+                        settings.cacheMode = android.webkit.WebSettings.LOAD_NO_CACHE
+                        if (android.os.Build.VERSION.SDK_INT in 29..32) {
+                            @Suppress("DEPRECATION")
+                            settings.forceDark = android.webkit.WebSettings.FORCE_DARK_OFF
                         }
+                        settings.allowFileAccess = false
+                        settings.allowContentAccess = false
+                        settings.mediaPlaybackRequiresUserGesture = true
+                        setBackgroundColor(AndroidColor.TRANSPARENT)
+                        isVerticalScrollBarEnabled = false
+                        isHorizontalScrollBarEnabled = false
+                        overScrollMode = WebView.OVER_SCROLL_NEVER
+
+                        webViewClient = object : WebViewClient() {
+                            override fun onPageFinished(view: WebView?, url: String?) {
+                                pageReady = true
+                            }
+                        }
+
+                        addJavascriptInterface(
+                            object {
+                                @JavascriptInterface
+                                fun onSlotTapped(slotIndex: Int, isOpen: Boolean) {
+                                    post {
+                                        haptics.latch()
+                                        currentOnSlotTapped(slotIndex)
+                                    }
+                                }
+
+                                @JavascriptInterface
+                                fun onDragStarted() {
+                                    post {
+                                        haptics.tick()
+                                    }
+                                }
+                            },
+                            "AndroidOrganizer",
+                        )
+
+                        loadUrl("file:///android_asset/organizer/organizer.html")
+                        webView = this
                     }
-
-                    addJavascriptInterface(
-                        object {
-                            @JavascriptInterface
-                            fun onSlotTapped(slotIndex: Int, isOpen: Boolean) {
-                                post {
-                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                    currentOnSlotTapped(slotIndex)
-                                }
-                            }
-
-                            @JavascriptInterface
-                            fun onDragStarted() {
-                                post {
-                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                }
-                            }
-                        },
-                        "AndroidOrganizer",
-                    )
-
-                    loadUrl("file:///android_asset/organizer/organizer.html")
-                    webView = this
+                } catch (t: Throwable) {
+                    android.view.View(ctx)
                 }
             },
         )

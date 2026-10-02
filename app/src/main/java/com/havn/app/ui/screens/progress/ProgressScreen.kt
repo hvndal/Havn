@@ -48,6 +48,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.havn.app.domain.model.DoseStatus
 import com.havn.app.ui.components.HavnBreathingMark
 import com.havn.app.ui.components.HavnEmptyState
+import com.havn.app.ui.components.HavnOdometerCounter
 import com.havn.app.ui.components.HavnSegmented
 import com.havn.app.ui.components.HavnSkeleton
 import com.havn.app.ui.components.havnPress
@@ -199,8 +200,8 @@ private fun HeadlineStat(stats: ProgressStats, modifier: Modifier = Modifier) {
 
     Column(modifier = modifier) {
         Row(verticalAlignment = Alignment.Bottom) {
-            Text(
-                text = "${percent.toInt()}",
+            HavnOdometerCounter(
+                value = percent.toInt(),
                 style = HavnType.Metric,
                 color = colors.textPrimary,
             )
@@ -424,13 +425,15 @@ private fun MedicationBar(
                 .clip(CircleShape)
                 .background(colors.hairline)
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(width)
-                    .height(3.dp)
-                    .clip(CircleShape)
-                    .background(accent)
-            )
+            if (width > 0.001f) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(width.coerceIn(0.001f, 1f))
+                        .height(3.dp)
+                        .clip(CircleShape)
+                        .background(accent)
+                )
+            }
         }
     }
 }

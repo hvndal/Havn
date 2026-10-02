@@ -57,6 +57,7 @@ abstract class HavnDatabase : RoomDatabase() {
                     "havn_db",
                 )
                     .addMigrations(MIGRATION_1_2)
+                    .fallbackToDestructiveMigrationOnDowngrade()
                     .build()
                     .also { INSTANCE = it }
             }

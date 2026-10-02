@@ -49,7 +49,7 @@ fun HavnSegmented(
 ) {
     if (options.isEmpty()) return
     val colors = HavnTheme.colors
-    val haptics = LocalHapticFeedback.current
+    val haptics = rememberHavnHaptics()
     val shape = RoundedCornerShape(HavnTheme.radius.pill)
 
     BoxWithConstraints(
@@ -99,7 +99,7 @@ fun HavnSegmented(
                             selected = selected,
                             role = Role.Tab,
                             onClick = {
-                                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                haptics.tick()
                                 onSelect(index)
                             },
                         ),

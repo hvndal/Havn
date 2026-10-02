@@ -88,7 +88,7 @@ fun HavnInteractiveSurface(
     val colors = HavnTheme.colors
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
-    val haptics = LocalHapticFeedback.current
+    val haptics = rememberHavnHaptics()
 
     val fill by animateColorAsState(
         targetValue = if (pressed) pressedColor else color,
@@ -123,7 +123,7 @@ fun HavnInteractiveSurface(
                 role = Role.Button,
                 onClickLabel = onClickLabel,
                 onClick = {
-                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    haptics.click()
                     onClick()
                 },
             )

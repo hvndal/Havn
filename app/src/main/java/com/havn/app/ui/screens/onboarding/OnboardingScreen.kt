@@ -474,3 +474,40 @@ private fun ColourSwatch(
         )
     }
 }
+
+@androidx.compose.ui.tooling.preview.Preview(name = "Onboarding - Light", showBackground = true)
+@Composable
+private fun IdentityPageLightPreview() {
+    com.havn.app.ui.theme.HavnTheme(themeMode = com.havn.app.ui.theme.ThemeMode.LIGHT) {
+        IdentityPage(
+            name = "Harman",
+            age = "25",
+            profiles = emptyList(),
+            isSubmitting = false,
+            error = null,
+            onNameChange = {},
+            onAgeChange = {},
+            onContinue = {},
+            onSignIn = {},
+        )
+    }
+}
+
+@androidx.compose.ui.tooling.preview.Preview(name = "Onboarding - Dark", showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun IdentityPageDarkPreview() {
+    com.havn.app.ui.theme.HavnTheme(themeMode = com.havn.app.ui.theme.ThemeMode.DARK) {
+        IdentityPage(
+            name = "Harman",
+            age = "25",
+            profiles = emptyList(),
+            isSubmitting = false,
+            error = null,
+            onNameChange = {},
+            onAgeChange = {},
+            onContinue = {},
+            onSignIn = {},
+        )
+    }
+}
+

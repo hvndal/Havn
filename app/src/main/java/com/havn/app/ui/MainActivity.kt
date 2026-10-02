@@ -54,12 +54,15 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         // Hold the system splash until both the theme and the session are
-        // known. Everything after this point can render its final appearance
-        // immediately — no flash of the wrong theme, no flash of onboarding
-        // for a user who is already signed in.
+        // known, but never longer than 1500ms so slow devices never ANR freeze.
+        val splashStartTime = System.currentTimeMillis()
         splash.setKeepOnScreenCondition {
-            viewModel.themeMode.value == null ||
-                viewModel.session.value is SessionState.Resolving
+            if (System.currentTimeMillis() - splashStartTime > 1500L) {
+                false
+            } else {
+                viewModel.themeMode.value == null ||
+                    viewModel.session.value is SessionState.Resolving
+            }
         }
 
         setContent {

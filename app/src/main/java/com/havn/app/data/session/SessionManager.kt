@@ -9,6 +9,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
@@ -71,6 +72,7 @@ class SessionManager @Inject constructor(
         resolve(activeId, onboardingDone, users)
     }
         .distinctUntilChanged()
+        .catch { emit(SessionState.SignedOut) }
         .stateIn(
             scope = appScope,
             // Eagerly, not WhileSubscribed: the session must already be

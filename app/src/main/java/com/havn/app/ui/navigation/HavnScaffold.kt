@@ -42,6 +42,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.havn.app.R
+import com.havn.app.ui.components.rememberHavnHaptics
 import com.havn.app.ui.theme.HavnMotion
 import com.havn.app.ui.theme.HavnTheme
 import com.havn.app.ui.theme.HavnType
@@ -130,7 +131,7 @@ private fun HavnNavItem(
     val colors = HavnTheme.colors
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
-    val haptics = LocalHapticFeedback.current
+    val haptics = rememberHavnHaptics()
 
     val tint by animateColorAsState(
         targetValue = if (selected) colors.accent else colors.textTertiary,
@@ -160,7 +161,7 @@ private fun HavnNavItem(
                 indication = null,
                 role = Role.Tab,
                 onClick = {
-                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    haptics.tick()
                     onClick()
                 },
             )

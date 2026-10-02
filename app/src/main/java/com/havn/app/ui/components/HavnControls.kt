@@ -1,7 +1,13 @@
 package com.havn.app.ui.components
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,6 +29,7 @@ import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerDefaults
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -362,5 +369,51 @@ fun HavnSectionHeading(
             color = HavnTheme.colors.textTertiary,
         )
         trailing?.invoke()
+    }
+}
+
+/**
+ * An analog odometer rolling number counter.
+ *
+ * Inspired by classic Braun/Swiss precision instrument counters and
+ * Android Compose Samples (Jetsnack / Jetsurvey). Numbers roll smoothly
+ * along the vertical axis with direction-aware slide and fade, settling
+ * naturally with [HavnMotion.settle].
+ */
+@Composable
+fun HavnOdometerCounter(
+    value: Int,
+    modifier: Modifier = Modifier,
+    style: androidx.compose.ui.text.TextStyle = com.havn.app.ui.theme.HavnType.Metric,
+    color: Color = HavnTheme.colors.textPrimary,
+) {
+    val haptics = rememberHavnHaptics()
+    LaunchedEffect(value) {
+        haptics.tick()
+    }
+
+    AnimatedContent(
+        targetState = value,
+        transitionSpec = {
+            if (targetState > initialState) {
+                (slideInVertically(animationSpec = HavnMotion.settle()) { height -> height } +
+                    fadeIn(animationSpec = HavnMotion.standard())) togetherWith
+                (slideOutVertically(animationSpec = HavnMotion.settle()) { height -> -height } +
+                    fadeOut(animationSpec = HavnMotion.standard()))
+            } else {
+                (slideInVertically(animationSpec = HavnMotion.settle()) { height -> -height } +
+                    fadeIn(animationSpec = HavnMotion.standard())) togetherWith
+                (slideOutVertically(animationSpec = HavnMotion.settle()) { height -> height } +
+                    fadeOut(animationSpec = HavnMotion.standard()))
+            }
+        },
+        label = "odometerTransition",
+        modifier = modifier,
+    ) { targetValue ->
+        Text(
+            text = "$targetValue",
+            style = style,
+            color = color,
+        )
     }
 }

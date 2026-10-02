@@ -37,25 +37,25 @@ object HavnMotion {
 
     // ── Springs ──────────────────────────────────────────────────────────────
     /** The press response. Snappy, settles without visible overshoot. */
-    fun <T> press(): AnimationSpec<T> = spring(
+    fun <T> press(): FiniteAnimationSpec<T> = spring(
         dampingRatio = 0.82f,
         stiffness = 900f,
     )
 
     /** Elements settling into place — cards, sheets, reveals. */
-    fun <T> settle(): AnimationSpec<T> = spring(
+    fun <T> settle(): FiniteAnimationSpec<T> = spring(
         dampingRatio = 0.86f,
         stiffness = 380f,
     )
 
     /** Larger travel: sheets, hero transitions. Slightly softer landing. */
-    fun <T> glide(): AnimationSpec<T> = spring(
+    fun <T> glide(): FiniteAnimationSpec<T> = spring(
         dampingRatio = 0.9f,
         stiffness = 220f,
     )
 
     /** The one place a little life is allowed: a completed dose. */
-    fun <T> celebrate(): AnimationSpec<T> = spring(
+    fun <T> celebrate(): FiniteAnimationSpec<T> = spring(
         dampingRatio = 0.55f,
         stiffness = 700f,
     )

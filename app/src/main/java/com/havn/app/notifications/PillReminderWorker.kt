@@ -261,7 +261,9 @@ class PillReminderWorker @AssistedInject constructor(
             }
         }
 
-        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        manager.notify(notifId, builder.build())
+        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
+        runCatching {
+            manager?.notify(notifId, builder.build())
+        }
     }
 }

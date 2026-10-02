@@ -36,8 +36,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -49,8 +52,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -68,17 +73,21 @@ import com.havn.app.ui.components.HavnButton
 import com.havn.app.ui.components.HavnButtonSize
 import com.havn.app.ui.components.HavnButtonTone
 import com.havn.app.ui.components.HavnBreathingMark
+import com.havn.app.ui.components.HavnCadenceStrip
 import com.havn.app.ui.components.HavnDoseCheck
 import com.havn.app.ui.components.HavnDoseRowSkeleton
 import com.havn.app.ui.components.HavnProgressRing
 import com.havn.app.ui.components.HavnEmptyState
 import com.havn.app.ui.components.HavnIconButton
+import com.havn.app.ui.components.HavnOdometerCounter
 import com.havn.app.ui.components.HavnOrganizerView
+import com.havn.app.ui.components.HavnSwipeToLogRow
 import com.havn.app.ui.components.HavnTextAction
 import com.havn.app.ui.components.MedIcon
 import com.havn.app.ui.components.OrganizerDataMapper
 import com.havn.app.ui.components.havnPress
 import com.havn.app.ui.components.havnReveal
+import com.havn.app.ui.components.rememberHavnHaptics
 import com.havn.app.ui.components.rememberRevealProgress
 import com.havn.app.ui.theme.HavnMotion
 import com.havn.app.ui.theme.HavnTheme
@@ -120,6 +129,7 @@ fun HomeScreen(
     var detailDose by remember { mutableStateOf<TodayDose?>(null) }
     var showProfiles by remember { mutableStateOf(false) }
     var celebrating by remember { mutableStateOf(false) }
+    val haptics = rememberHavnHaptics()
 
     // HomeViewModel has always emitted these; nothing listened, so finishing a
     // day produced no acknowledgement at all. The moment is deliberately brief
@@ -127,6 +137,7 @@ fun HomeScreen(
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             if (event is HomeEvent.DayCompleted) {
+                haptics.celebrate()
                 celebrating = true
                 delay(2600)
                 celebrating = false
@@ -185,6 +196,18 @@ fun HomeScreen(
                 }
             }
 
+            item(key = "cadence-strip") {
+                if (!uiState.isLoading && uiState.hasMedications && uiState.cadenceDays.isNotEmpty()) {
+                    Spacer(Modifier.height(HavnTheme.spacing.xl))
+                    HavnCadenceStrip(
+                        days = uiState.cadenceDays,
+                        selectedDate = uiState.selectedDate,
+                        onSelectDay = viewModel::selectDate,
+                        modifier = Modifier.padding(horizontal = gutter),
+                    )
+                }
+            }
+
             item(key = "organizer") {
                 if (uiState.hasMedications) {
                     Spacer(Modifier.height(HavnTheme.spacing.section))
@@ -197,10 +220,17 @@ fun HomeScreen(
 
             item(key = "today-header") {
                 Spacer(Modifier.height(HavnTheme.spacing.section))
+                val headerTitle = if (uiState.isTodaySelected) {
+                    "Today"
+                } else {
+                    uiState.selectedDate.format(DateTimeFormatter.ofPattern("EEEE, MMM d"))
+                }
                 SectionRule(
-                    eyebrow = "Today",
+                    eyebrow = headerTitle,
                     trailing = {
-                        if (uiState.hasMedications) {
+                        if (!uiState.isTodaySelected) {
+                            HavnTextAction(text = "Return to today", onClick = { viewModel.selectDate(LocalDate.now()) })
+                        } else if (uiState.hasMedications) {
                             HavnTextAction(text = "Manage", onClick = onManageMedications)
                         }
                     },
@@ -239,11 +269,15 @@ fun HomeScreen(
                                 modifier = Modifier.padding(horizontal = gutter),
                             )
                         }
-                        itemsIndexed(periodDoses) { index, dose ->
-                            DoseRow(
+                        itemsIndexed(
+                            items = periodDoses,
+                            key = { _, dose -> "${dose.medication.id}_${dose.slot}" },
+                        ) { index, dose ->
+                            SwipeableDoseRow(
                                 dose = dose,
                                 index = index,
                                 onToggle = { viewModel.toggleDose(dose) },
+                                onMarkStatus = { status -> viewModel.setStatus(dose, status) },
                                 onOpenDetail = { detailDose = dose },
                                 modifier = Modifier.padding(horizontal = gutter),
                             )
@@ -546,8 +580,8 @@ private fun DayMetric(
 
     Column(modifier = modifier.padding(top = HavnTheme.spacing.xxl)) {
         Row(verticalAlignment = Alignment.Bottom) {
-            Text(
-                text = "${state.taken}",
+            HavnOdometerCounter(
+                value = state.taken,
                 style = HavnType.Metric,
                 color = colors.textPrimary,
             )
@@ -723,6 +757,33 @@ private fun PeriodLabel(period: DayPeriod, modifier: Modifier = Modifier) {
                 .weight(1f)
                 .height(1.dp)
                 .background(HavnTheme.colors.hairline)
+        )
+    }
+}
+
+@Composable
+private fun SwipeableDoseRow(
+    dose: TodayDose,
+    index: Int,
+    onToggle: () -> Unit,
+    onMarkStatus: (DoseStatus) -> Unit,
+    onOpenDetail: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    HavnSwipeToLogRow(
+        isTaken = dose.isTaken,
+        isSkipped = dose.isSkipped,
+        onTake = { onMarkStatus(DoseStatus.TAKEN) },
+        onSkip = { onMarkStatus(DoseStatus.SKIPPED) },
+        onUndo = { onMarkStatus(DoseStatus.PENDING) },
+        modifier = modifier,
+    ) {
+        DoseRow(
+            dose = dose,
+            index = index,
+            onToggle = onToggle,
+            onOpenDetail = onOpenDetail,
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }
@@ -1078,3 +1139,56 @@ fun medAccent(tag: String): Color {
         else -> colors.medSage
     }
 }
+
+@androidx.compose.ui.tooling.preview.Preview(name = "Greeting & Metric - Light", showBackground = true, backgroundColor = 0xFFF9F7F3)
+@Composable
+private fun HomeGreetingLightPreview() {
+    com.havn.app.ui.theme.HavnTheme(themeMode = com.havn.app.ui.theme.ThemeMode.LIGHT) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            GreetingBlock(
+                name = "Elin",
+                state = HomeUiState(
+                    user = User(name = "Elin", age = 29, avatarColor = "#516351"),
+                    hasMedications = true,
+                    isLoading = false,
+                ),
+            )
+            DayMetric(
+                state = HomeUiState(
+                    user = User(name = "Elin", age = 29, avatarColor = "#516351"),
+                    hasMedications = true,
+                    isLoading = false,
+                ),
+                onMarkAll = {},
+                onOpenProgress = {},
+            )
+        }
+    }
+}
+
+@androidx.compose.ui.tooling.preview.Preview(name = "Greeting & Metric - Dark", showBackground = true, backgroundColor = 0xFF15170F, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun HomeGreetingDarkPreview() {
+    com.havn.app.ui.theme.HavnTheme(themeMode = com.havn.app.ui.theme.ThemeMode.DARK) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            GreetingBlock(
+                name = "Elin",
+                state = HomeUiState(
+                    user = User(name = "Elin", age = 29, avatarColor = "#516351"),
+                    hasMedications = true,
+                    isLoading = false,
+                ),
+            )
+            DayMetric(
+                state = HomeUiState(
+                    user = User(name = "Elin", age = 29, avatarColor = "#516351"),
+                    hasMedications = true,
+                    isLoading = false,
+                ),
+                onMarkAll = {},
+                onOpenProgress = {},
+            )
+        }
+    }
+}
+

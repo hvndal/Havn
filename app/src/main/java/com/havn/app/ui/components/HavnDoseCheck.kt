@@ -2,7 +2,10 @@ package com.havn.app.ui.components
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -64,7 +67,7 @@ fun HavnDoseCheck(
 
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
-    val haptics = LocalHapticFeedback.current
+    val haptics = rememberHavnHaptics()
 
     val fillProgress by animateFloatAsState(
         targetValue = if (taken) 1f else 0f,
@@ -72,11 +75,31 @@ fun HavnDoseCheck(
         label = "checkFill",
     )
     val strokeProgress = remember { Animatable(if (taken) 1f else 0f) }
+    val bloomProgress = remember { Animatable(0f) }
+    val checkBounce = remember { Animatable(1f) }
     LaunchedEffect(taken) {
         if (taken) {
-            strokeProgress.animateTo(1f, HavnMotion.enter())
+            launch {
+                checkBounce.snapTo(0.86f)
+                checkBounce.animateTo(1f, HavnMotion.celebrate())
+            }
+            launch {
+                strokeProgress.snapTo(0f)
+                strokeProgress.animateTo(
+                    targetValue = 1f,
+                    animationSpec = tween(durationMillis = 190, easing = CubicBezierEasing(0.2f, 0f, 0f, 1f))
+                )
+            }
+            launch {
+                bloomProgress.snapTo(0f)
+                bloomProgress.animateTo(
+                    targetValue = 1f,
+                    animationSpec = tween(durationMillis = 360, easing = CubicBezierEasing(0.16f, 1f, 0.3f, 1f))
+                )
+            }
         } else {
             // Leaving is faster than arriving. Undo should feel immediate.
+            bloomProgress.snapTo(0f)
             strokeProgress.animateTo(0f, HavnMotion.exit())
         }
     }
@@ -109,10 +132,11 @@ fun HavnDoseCheck(
                 enabled = enabled,
                 role = Role.Checkbox,
                 onValueChange = {
-                    haptics.performHapticFeedback(
-                        if (taken) HapticFeedbackType.TextHandleMove
-                        else HapticFeedbackType.LongPress
-                    )
+                    if (taken) {
+                        haptics.release()
+                    } else {
+                        haptics.latch()
+                    }
                     onToggle()
                 },
             )
@@ -123,13 +147,40 @@ fun HavnDoseCheck(
             modifier = Modifier
                 .size(size)
                 .graphicsLayer {
-                    scaleX = pressScale
-                    scaleY = pressScale
+                    val combinedScale = pressScale * checkBounce.value
+                    scaleX = combinedScale
+                    scaleY = combinedScale
                 }
         ) {
             val d = this.size.minDimension
             val ring = 1.5.dp.toPx()
             val center = Offset(d / 2f, d / 2f)
+
+            // Scandinavian Ink-Bloom Micro-Animation:
+            // Dual-phase: Soft capillary paper bleed aura + delicate expanding hairline ripple
+            if (bloomProgress.value > 0.001f && bloomProgress.value < 0.999f) {
+                val p = bloomProgress.value
+                val coreR = d / 2f
+
+                // 1. Soft ink bleed halo (expanding 4dp, fading softly into paper fibers)
+                val auraRadius = coreR + 4.dp.toPx() * p
+                val auraAlpha = (1f - p) * (1f - p) * 0.28f
+                drawCircle(
+                    color = accent.copy(alpha = auraAlpha),
+                    radius = auraRadius,
+                    center = center,
+                )
+
+                // 2. Crisp capillary hairline ring (expanding 7.5dp, fading cleanly)
+                val rippleRadius = coreR + 7.5.dp.toPx() * p
+                val rippleAlpha = (1f - p) * 0.40f
+                drawCircle(
+                    color = accent.copy(alpha = rippleAlpha),
+                    radius = rippleRadius,
+                    center = center,
+                    style = Stroke(width = 1.1.dp.toPx()),
+                )
+            }
 
             // Resting ring
             drawCircle(

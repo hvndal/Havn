@@ -20,8 +20,8 @@ import javax.inject.Singleton
 class ReminderScheduler @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
-    private val workManager: WorkManager = WorkManager.getInstance(context)
-    private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    private val workManager: WorkManager by lazy { WorkManager.getInstance(context) }
+    private val alarmManager by lazy { context.getSystemService(Context.ALARM_SERVICE) as AlarmManager }
     private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
     @JvmOverloads

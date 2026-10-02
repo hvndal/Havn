@@ -204,7 +204,10 @@ fun RemindersScreen(
                     )
                 }
             } else {
-                itemsIndexed(uiState.upcoming.take(8)) { index, reminder ->
+                itemsIndexed(
+                    items = uiState.upcoming.take(8),
+                    key = { _, reminder -> "${reminder.medication.id}_${reminder.slot}" },
+                ) { index, reminder ->
                     UpcomingRow(
                         reminder = reminder,
                         index = index,
@@ -232,7 +235,10 @@ fun RemindersScreen(
                     )
                     Spacer(Modifier.height(HavnTheme.spacing.lg))
                 }
-                itemsIndexed(uiState.unscheduledMedications) { index, med ->
+                itemsIndexed(
+                    items = uiState.unscheduledMedications,
+                    key = { _, med -> med.id },
+                ) { index, med ->
                     UnscheduledRow(
                         medication = med,
                         index = index,

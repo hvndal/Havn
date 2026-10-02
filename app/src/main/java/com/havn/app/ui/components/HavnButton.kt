@@ -86,7 +86,7 @@ fun HavnButton(
     val colors = HavnTheme.colors
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
-    val haptics = LocalHapticFeedback.current
+    val haptics = rememberHavnHaptics()
     val active = enabled && !loading
 
     val container: Color
@@ -167,7 +167,7 @@ fun HavnButton(
                 enabled = active,
                 role = Role.Button,
                 onClick = {
-                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    haptics.click()
                     onClick()
                 },
             )
@@ -218,7 +218,7 @@ fun HavnIconButton(
     val colors = HavnTheme.colors
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
-    val haptics = LocalHapticFeedback.current
+    val haptics = rememberHavnHaptics()
 
     val container = when (tone) {
         HavnButtonTone.Primary -> if (pressed) colors.accentPressed else colors.accent
@@ -254,7 +254,7 @@ fun HavnIconButton(
                 role = Role.Button,
                 onClickLabel = contentDescription,
                 onClick = {
-                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    haptics.click()
                     onClick()
                 },
             ),
@@ -283,7 +283,7 @@ fun HavnTextAction(
 ) {
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
-    val haptics = LocalHapticFeedback.current
+    val haptics = rememberHavnHaptics()
     val alpha by animateFloatAsState(
         targetValue = if (pressed) 0.55f else 1f,
         animationSpec = HavnMotion.press(),
@@ -299,7 +299,7 @@ fun HavnTextAction(
                 indication = null,
                 role = Role.Button,
                 onClick = {
-                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    haptics.click()
                     onClick()
                 },
             )

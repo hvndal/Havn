@@ -192,3 +192,20 @@ fun HavnBrandLogo(
         }
     }
 }
+
+@androidx.compose.ui.tooling.preview.Preview(name = "Light Mode", showBackground = true, backgroundColor = 0xFFF9F7F3)
+@Composable
+private fun HavnBrandLogoLightPreview() {
+    com.havn.app.ui.theme.HavnTheme(themeMode = com.havn.app.ui.theme.ThemeMode.LIGHT) {
+        HavnBrandLogo(iconSize = 100.dp)
+    }
+}
+
+@androidx.compose.ui.tooling.preview.Preview(name = "Dark Mode", showBackground = true, backgroundColor = 0xFF15170F, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun HavnBrandLogoDarkPreview() {
+    com.havn.app.ui.theme.HavnTheme(themeMode = com.havn.app.ui.theme.ThemeMode.DARK) {
+        HavnBrandLogo(iconSize = 100.dp)
+    }
+}
+

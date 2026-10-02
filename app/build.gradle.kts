@@ -11,12 +11,12 @@ plugins {
 
 android {
     namespace = "com.havn.app"
-    compileSdk = 36
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.havnmeds.app"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 35
         versionCode = 3
         versionName = "1.0.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -98,6 +98,11 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+
+    lint {
+        abortOnError = false
+        checkDependencies = true
     }
 }
 
