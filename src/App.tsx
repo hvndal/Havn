@@ -186,7 +186,7 @@ export function App() {
   }
 
   return (
-    <div className="relative min-h-screen w-full bg-[#FBFBFA] dark:bg-[#141613] text-[#141613] dark:text-[#EDEDEA] transition-colors duration-300 flex flex-col font-sans overflow-x-hidden">
+    <div className="relative min-h-screen w-full bg-[#FAF8F5] dark:bg-[#121511] text-[#171A15] dark:text-[#EDEDEA] transition-colors duration-500 flex flex-col font-sans overflow-x-hidden">
       <HavnAmbientField />
 
       {/* Main Content Area */}
@@ -195,10 +195,10 @@ export function App() {
           {overlayView === 'NONE' && (
             <motion.div
               key={currentTab}
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.16 }}
+              initial={{ opacity: 0, y: 8, filter: 'blur(3px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, y: -6, filter: 'blur(2px)' }}
+              transition={{ type: 'spring', stiffness: 180, damping: 20, mass: 0.7 }}
               className="w-full"
             >
               {currentTab === 'TODAY' && (
@@ -322,7 +322,10 @@ export function App() {
 
       {/* Persistent Bottom Navigation Bar */}
       {overlayView === 'NONE' && (
-        <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[#FBFBFA]/90 dark:bg-[#141613]/90 backdrop-blur-md border-t border-[#E2E1D9] dark:border-[#292E26] py-2 px-4 select-none">
+        <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[#FAF8F5]/85 dark:bg-[#121511]/85 backdrop-blur-xl border-t border-[#171A15]/[0.06] dark:border-white/[0.08] shadow-[0_-8px_32px_rgba(0,0,0,0.03)] py-2.5 px-4 select-none relative">
+          {/* Microscopic top edge sheen */}
+          <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-black/[0.04] dark:via-white/[0.08] to-transparent pointer-events-none" />
+
           <div className="max-w-md mx-auto flex items-center justify-around">
             {[
               { id: 'TODAY', label: 'Today', icon: CalendarDays },
@@ -332,18 +335,21 @@ export function App() {
             ].map(({ id, label, icon: Icon }) => {
               const isSelected = currentTab === id;
               return (
-                <button
+                <motion.button
                   key={id}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.92 }}
+                  transition={{ type: 'spring', stiffness: 380, damping: 26, mass: 0.5 }}
                   onClick={() => {
                     if (currentTab !== id) {
                       soundManager.playSoftTap();
                       setCurrentTab(id as MainTab);
                     }
                   }}
-                  className={`flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all cursor-pointer relative ${
+                  className={`flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-colors cursor-pointer relative ${
                     isSelected
-                      ? 'text-[#516351] dark:text-[#7B947B]'
-                      : 'text-[#8C9287] dark:text-[#73796E] hover:text-[#141613] dark:hover:text-[#EDEDEA]'
+                      ? 'text-[#4E614E] dark:text-[#7B947B]'
+                      : 'text-[#7A8174] dark:text-[#888E83] hover:text-[#171A15] dark:hover:text-[#EDEDEA]'
                   }`}
                 >
                   <Icon size={20} strokeWidth={isSelected ? 2.3 : 1.8} />
@@ -353,10 +359,11 @@ export function App() {
                   {isSelected && (
                     <motion.div
                       layoutId="tabDot"
-                      className="absolute -bottom-1 w-1 h-1 rounded-full bg-[#516351] dark:bg-[#7B947B]"
+                      transition={{ type: 'spring', stiffness: 380, damping: 28 }}
+                      className="absolute -bottom-1 w-3.5 h-0.5 rounded-full bg-[#4E614E] dark:bg-[#7B947B]"
                     />
                   )}
-                </button>
+                </motion.button>
               );
             })}
           </div>
