@@ -9,7 +9,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [UserEntity::class, MedicationEntity::class, DoseLogEntity::class],
-    version = 2,
+    version = 3,
     exportSchema = false,
 )
 abstract class HavnDatabase : RoomDatabase() {
@@ -49,6 +49,26 @@ abstract class HavnDatabase : RoomDatabase() {
             }
         }
 
+        /**
+         * v2 → v3: Add weeklyDaysJson and startDate to medications.
+         * Existing medications get their start date from their oldest logged dose,
+         * or fallback to current time, so no history is lost.
+         */
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE medications ADD COLUMN weeklyDaysJson TEXT NOT NULL DEFAULT '[]'")
+                db.execSQL("ALTER TABLE medications ADD COLUMN startDate INTEGER NOT NULL DEFAULT 0")
+                
+                db.execSQL("""
+                    UPDATE medications 
+                    SET startDate = COALESCE(
+                        (SELECT MIN(scheduledTime) FROM dose_logs WHERE dose_logs.medicationId = medications.id),
+                        (CAST(strftime('%s', 'now') AS INTEGER) * 1000)
+                    )
+                """.trimIndent())
+            }
+        }
+
         fun getInstance(context: Context): HavnDatabase {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -56,7 +76,7 @@ abstract class HavnDatabase : RoomDatabase() {
                     HavnDatabase::class.java,
                     "havn_db",
                 )
-                    .addMigrations(MIGRATION_1_2)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                     .fallbackToDestructiveMigrationOnDowngrade()
                     .build()
                     .also { INSTANCE = it }

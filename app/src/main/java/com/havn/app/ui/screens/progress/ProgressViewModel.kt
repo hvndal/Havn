@@ -52,8 +52,6 @@ data class ProgressStats(
     val rate: Float = 0f,
     val taken: Int = 0,
     val scheduled: Int = 0,
-    val currentStreak: Int = 0,
-    val bestStreak: Int = 0,
     val perfectDays: Int = 0,
 )
 
@@ -138,14 +136,10 @@ class ProgressViewModel @Inject constructor(
         val days = (29 downTo 0).map { back ->
             val d = today.minusDays(back.toLong())
             val dayLogs = byDate[d].orEmpty()
+            val scheduledForDay = meds.filter { it.isScheduledOn(d) }.sumOf { it.reminderTimes.size.coerceAtLeast(1) }
             DayRecord(
                 date = d,
-                // Scheduled counts are derived from today's medication set,
-                // which is an approximation for past days — a medication added
-                // last week was not "scheduled" the week before. It is clamped
-                // to the logs actually present so a day can never read as worse
-                // than what was recorded.
-                scheduled = maxOf(dailyDoses, dayLogs.size),
+                scheduled = scheduledForDay,
                 taken = dayLogs.count { it.status == DoseStatus.TAKEN },
                 skipped = dayLogs.count { it.status == DoseStatus.SKIPPED },
             )
@@ -155,21 +149,12 @@ class ProgressViewModel @Inject constructor(
         val totalTaken = counted.sumOf { it.taken }
         val totalScheduled = counted.sumOf { it.scheduled }
 
-        var current = 0
-        for (day in days.reversed()) {
-            if (day.isComplete) current++ else break
-        }
-        var best = 0
-        var run = 0
-        days.forEach { day ->
-            if (day.isComplete) { run++; if (run > best) best = run } else run = 0
-        }
-
-        val medRecords = active.map { med ->
+        val medRecords = meds.filter { it.isActive }.map { med ->
             val medLogs = logs.filter { it.medicationId == med.id }
+            val daysScheduled = days.count { med.isScheduledOn(it.date) }
             MedRecord(
                 medication = med,
-                scheduled = 30 * med.reminderTimes.size.coerceAtLeast(1),
+                scheduled = daysScheduled * med.reminderTimes.size.coerceAtLeast(1),
                 taken = medLogs.count { it.status == DoseStatus.TAKEN },
             )
         }.sortedByDescending { it.rate }
@@ -180,8 +165,6 @@ class ProgressViewModel @Inject constructor(
                 rate = if (totalScheduled == 0) 0f else totalTaken.toFloat() / totalScheduled,
                 taken = totalTaken,
                 scheduled = totalScheduled,
-                currentStreak = current,
-                bestStreak = best,
                 perfectDays = days.count { it.isComplete },
             ),
             last30 = days,
@@ -198,16 +181,15 @@ class ProgressViewModel @Inject constructor(
         logs: List<DoseLog>,
         month: YearMonth,
     ): Map<LocalDate, DayRecord> {
-        val active = meds.filter { it.isActive }
-        val daily = active.sumOf { it.reminderTimes.size.coerceAtLeast(1) }
         val byDate = logs.groupBy { it.localDate() }
         return (1..month.lengthOfMonth()).associate { day ->
             val date = month.atDay(day)
             val dayLogs = byDate[date].orEmpty()
+            val scheduledForDay = if (date.isAfter(LocalDate.now())) 0 
+                else meds.filter { it.isScheduledOn(date) }.sumOf { it.reminderTimes.size.coerceAtLeast(1) }
             date to DayRecord(
                 date = date,
-                scheduled = if (dayLogs.isEmpty() && date.isAfter(LocalDate.now())) 0
-                else maxOf(daily, dayLogs.size),
+                scheduled = scheduledForDay,
                 taken = dayLogs.count { it.status == DoseStatus.TAKEN },
                 skipped = dayLogs.count { it.status == DoseStatus.SKIPPED },
             )

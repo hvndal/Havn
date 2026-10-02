@@ -222,8 +222,6 @@ private fun HeadlineStat(stats: ProgressStats, modifier: Modifier = Modifier) {
         Spacer(Modifier.height(HavnTheme.spacing.xl))
 
         Row(horizontalArrangement = Arrangement.spacedBy(HavnTheme.spacing.xxl)) {
-            MiniStat("Streak", "${stats.currentStreak}", "days")
-            MiniStat("Best", "${stats.bestStreak}", "days")
             MiniStat("Perfect", "${stats.perfectDays}", "days")
         }
     }

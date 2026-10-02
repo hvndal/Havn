@@ -36,6 +36,7 @@ data class HomeUiState(
     val user: User? = null,
     val profiles: List<User> = emptyList(),
     val doses: List<TodayDose> = emptyList(),
+    val asNeededMeds: List<Medication> = emptyList(),
     val cadenceDays: List<CadenceDay> = emptyList(),
     val selectedDate: LocalDate = LocalDate.now(),
     val hasMedications: Boolean = false,
@@ -85,20 +86,23 @@ class HomeViewModel @Inject constructor(
                 ) { meds, pastLogs, selected ->
                     val today = LocalDate.now()
                     val todayLogs = pastLogs.filter { it.localDate() == today }
-                    val todayDoses = buildDosesForDay(meds, todayLogs)
+                    val todayDoses = buildDosesForDay(meds, todayLogs, today)
                     val cadence = buildCadenceDays(meds, pastLogs, todayDoses)
 
                     val activeDoses = if (selected == today) {
                         todayDoses
                     } else {
                         val selectedLogs = pastLogs.filter { it.localDate() == selected }
-                        buildDosesForDay(meds, selectedLogs)
+                        buildDosesForDay(meds, selectedLogs, selected)
                     }
+                    
+                    val asNeeded = meds.filter { it.isActive && it.repeatType == com.havn.app.domain.model.RepeatType.AS_NEEDED }
 
                     HomeUiState(
                         user = session.user,
                         profiles = session.allProfiles,
                         doses = activeDoses,
+                        asNeededMeds = asNeeded,
                         cadenceDays = cadence,
                         selectedDate = selected,
                         hasMedications = meds.any { it.isActive },
@@ -171,10 +175,11 @@ class HomeViewModel @Inject constructor(
     private fun buildDosesForDay(
         meds: List<Medication>,
         logs: List<DoseLog>,
+        date: LocalDate,
     ): List<TodayDose> {
         val bySlot = logs.associateBy { it.medicationId to it.scheduledSlot }
         return meds
-            .filter { it.isActive }
+            .filter { it.isScheduledOn(date) }
             .flatMap { med ->
                 val slots = med.reminderTimes.ifEmpty { listOf("") }
                 slots.map { slot ->
@@ -227,6 +232,16 @@ class HomeViewModel @Inject constructor(
             pending.forEach { repository.markDoseTaken(it.medication, date, it.slot) }
             soundManager.playSoftChime()
             _events.tryEmit(HomeEvent.DayCompleted)
+        }
+    }
+
+    fun logAsNeeded(med: Medication) {
+        viewModelScope.launch {
+            val date = selectedDate.value
+            val timeString = java.time.LocalTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"))
+            repository.setDoseStatus(med, date, timeString, DoseStatus.TAKEN)
+            soundManager.playSoftChime()
+            _events.tryEmit(HomeEvent.DoseTaken(med.name))
         }
     }
 

@@ -224,6 +224,10 @@ class HavnRepository @Inject constructor(
             Json.decodeFromString<List<String>>(reminderTimesJson)
         }.getOrDefault(emptyList()).sorted(),
         repeatType = runCatching { RepeatType.valueOf(repeatType) }.getOrDefault(RepeatType.DAILY),
+        weeklyDays = runCatching {
+            Json.decodeFromString<List<Int>>(weeklyDaysJson)
+        }.getOrDefault(emptyList()),
+        startDate = startDate,
         colorTag = colorTag,
         iconType = runCatching { MedIconType.valueOf(iconType) }.getOrDefault(MedIconType.CAPSULE),
         isActive = isActive,
@@ -237,6 +241,8 @@ class HavnRepository @Inject constructor(
         dosage = dosage,
         reminderTimesJson = Json.encodeToString(reminderTimes),
         repeatType = repeatType.name,
+        weeklyDaysJson = Json.encodeToString(weeklyDays),
+        startDate = startDate,
         colorTag = colorTag,
         iconType = iconType.name,
         isActive = isActive,

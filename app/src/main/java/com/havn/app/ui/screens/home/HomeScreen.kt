@@ -284,6 +284,44 @@ fun HomeScreen(
                         }
                     }
 
+                    if (uiState.asNeededMeds.isNotEmpty()) {
+                        item(key = "as-needed-header") {
+                            Spacer(Modifier.height(HavnTheme.spacing.section))
+                            Text(
+                                text = "As needed",
+                                style = HavnType.Eyebrow,
+                                color = HavnTheme.colors.textSecondary,
+                                modifier = Modifier.padding(horizontal = gutter).padding(bottom = HavnTheme.spacing.sm),
+                            )
+                        }
+                        
+                        items(
+                            items = uiState.asNeededMeds,
+                            key = { med -> "as-needed-${med.id}" }
+                        ) { med ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = gutter, vertical = HavnTheme.spacing.sm),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(text = med.name, style = MaterialTheme.typography.bodyLarge, color = HavnTheme.colors.textPrimary)
+                                    Text(text = med.dosage, style = MaterialTheme.typography.bodyMedium, color = HavnTheme.colors.textTertiary)
+                                }
+                                HavnButton(
+                                    text = "Log dose",
+                                    onClick = { 
+                                        // A new dose log is created with current time as the slot
+                                        viewModel.logAsNeeded(med)
+                                    },
+                                    tone = HavnButtonTone.Secondary,
+                                    size = HavnButtonSize.Small,
+                                )
+                            }
+                        }
+                    }
+
                     item(key = "add-cta") {
                         Spacer(Modifier.height(HavnTheme.spacing.xl))
                         HavnButton(

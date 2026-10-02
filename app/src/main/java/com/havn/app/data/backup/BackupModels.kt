@@ -49,6 +49,8 @@ data class BackupMedication(
     val dosage: String = "",
     @SerialName("reminder_times") val reminderTimes: List<String> = emptyList(),
     @SerialName("repeat_type") val repeatType: String = "DAILY",
+    @SerialName("weekly_days") val weeklyDays: List<Int> = emptyList(),
+    @SerialName("start_date") val startDate: Long = 0L,
     @SerialName("color_tag") val colorTag: String = "sage",
     @SerialName("icon_type") val iconType: String = "CAPSULE",
     @SerialName("is_active") val isActive: Boolean = true,

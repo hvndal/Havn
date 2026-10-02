@@ -26,7 +26,7 @@ interface UserDao {
 
 @Dao
 interface MedicationDao {
-    @Query("SELECT * FROM medications WHERE userId = :userId AND isActive = 1 ORDER BY id ASC")
+    @Query("SELECT * FROM medications WHERE userId = :userId ORDER BY id ASC")
     fun getMedicationsForUser(userId: Long): Flow<List<MedicationEntity>>
 
     @Query("SELECT * FROM medications WHERE userId = :userId AND isActive = 1 ORDER BY id ASC")

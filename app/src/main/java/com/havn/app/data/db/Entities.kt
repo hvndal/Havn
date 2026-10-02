@@ -24,6 +24,8 @@ data class MedicationEntity(
     val dosage: String,
     val reminderTimesJson: String = "[]", // JSON ["07:30", "21:00"]
     val repeatType: String = "DAILY",
+    val weeklyDaysJson: String = "[]", // JSON [1, 3, 5]
+    val startDate: Long = 0L,
     val colorTag: String = "sage",
     val iconType: String = "CAPSULE",
     val isActive: Boolean = true,

@@ -72,6 +72,10 @@ class BackupManager @Inject constructor(
                             listJson.decodeFromString<List<String>>(med.reminderTimesJson)
                         }.getOrDefault(emptyList()),
                         repeatType = med.repeatType,
+                        weeklyDays = runCatching {
+                            listJson.decodeFromString<List<Int>>(med.weeklyDaysJson)
+                        }.getOrDefault(emptyList()),
+                        startDate = med.startDate,
                         colorTag = med.colorTag,
                         iconType = med.iconType,
                         isActive = med.isActive,
@@ -211,6 +215,8 @@ class BackupManager @Inject constructor(
                         dosage = med.dosage,
                         reminderTimesJson = listJson.encodeToString(med.reminderTimes),
                         repeatType = med.repeatType,
+                        weeklyDaysJson = listJson.encodeToString(med.weeklyDays),
+                        startDate = med.startDate,
                         colorTag = med.colorTag,
                         iconType = med.iconType,
                         isActive = med.isActive,

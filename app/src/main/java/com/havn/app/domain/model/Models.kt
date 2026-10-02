@@ -19,11 +19,35 @@ data class Medication(
     /** Sorted "HH:mm" times. Empty means "any time today". */
     val reminderTimes: List<String> = emptyList(),
     val repeatType: RepeatType = RepeatType.DAILY,
+    val weeklyDays: List<Int> = emptyList(), // 1=Mon, 7=Sun
+    val startDate: Long = 0L,
     val colorTag: String = "sage",
     val iconType: MedIconType = MedIconType.CAPSULE,
     val isActive: Boolean = true,
     val notes: String = "",
-)
+) {
+    /**
+     * One schedule rule used everywhere.
+     * As Needed medications are never "scheduled" for a day, they just exist.
+     * Daily and Weekly medications are scheduled on or after their start date.
+     */
+    fun isScheduledOn(date: java.time.LocalDate): Boolean {
+        if (!isActive) return false
+        if (repeatType == RepeatType.AS_NEEDED) return false
+        
+        val startLocalDate = java.time.Instant.ofEpochMilli(startDate)
+            .atZone(java.time.ZoneId.systemDefault())
+            .toLocalDate()
+            
+        if (date.isBefore(startLocalDate)) return false
+        
+        return when (repeatType) {
+            RepeatType.DAILY -> true
+            RepeatType.WEEKLY -> date.dayOfWeek.value in weeklyDays
+            else -> false
+        }
+    }
+}
 
 data class DoseLog(
     val id: Long = 0,
