@@ -719,7 +719,7 @@ private fun OrganizerHero(
             HavnOrganizerView(
                 doses = doses,
                 selectedPeriod = currentPeriod,
-                onSlotTapped = { },
+                onSlotTapped = { onOpen() },
                 modifier = Modifier.fillMaxSize(),
             )
         }
