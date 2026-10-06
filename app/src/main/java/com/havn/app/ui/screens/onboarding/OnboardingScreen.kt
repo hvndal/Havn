@@ -50,6 +50,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.havn.app.domain.model.User
 import com.havn.app.ui.components.HavnAmbientField
 import com.havn.app.ui.components.HavnBrandLogo
+import com.havn.app.domain.model.DayPeriod
+import com.havn.app.domain.model.MedIconType
+import com.havn.app.domain.model.Medication
+import com.havn.app.domain.model.TodayDose
+import com.havn.app.ui.components.HavnOrganizerView
 import com.havn.app.ui.components.HavnButton
 import com.havn.app.ui.components.HavnButtonSize
 import com.havn.app.ui.components.HavnButtonTone
@@ -154,6 +159,28 @@ fun OnboardingScreen(
     }
 }
 
+/** A plausible morning for the welcome illustration. Never persisted. */
+private val SAMPLE_DOSES: List<TodayDose> = listOf(
+    Triple(MedIconType.CAPSULE, "sage", "08:00"),
+    Triple(MedIconType.TABLET, "sand", "08:00"),
+    Triple(MedIconType.LIQUID, "amber", "08:30"),
+    Triple(MedIconType.TABLET, "clay", "13:00"),
+    Triple(MedIconType.CAPSULE, "slate", "21:30"),
+).mapIndexed { i, (type, tag, slot) ->
+    TodayDose(
+        medication = Medication(
+            id = -(i + 1L),
+            userId = 0,
+            name = "",
+            dosage = "",
+            colorTag = tag,
+            iconType = type,
+        ),
+        doseLog = null,
+        slot = slot,
+    )
+}
+
 @Composable
 private fun IdentityPage(
     name: String,
@@ -179,16 +206,28 @@ private fun IdentityPage(
             .imePadding()
             .padding(horizontal = gutter),
     ) {
-        Spacer(Modifier.height(HavnTheme.spacing.xxxl))
+        Spacer(Modifier.height(HavnTheme.spacing.xl))
 
         HavnBrandLogo(
-            iconSize = 56.dp,
+            iconSize = 36.dp,
             showWordmark = false,
             showTagline = false,
             modifier = Modifier.havnReveal(reveal),
         )
 
-        Spacer(Modifier.height(HavnTheme.spacing.xxl))
+        // The first thing a new user sees is the product: the organiser,
+        // with a morning's worth of doses waiting under an open lid.
+        HavnOrganizerView(
+            doses = SAMPLE_DOSES,
+            selectedPeriod = DayPeriod.MORNING,
+            onSlotTapped = { },
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(1.45f)
+                .havnReveal(reveal),
+        )
+
+        Spacer(Modifier.height(HavnTheme.spacing.lg))
 
         HavnTextReveal(
             text = if (profiles.isEmpty()) "Welcome." else "Welcome back.",
