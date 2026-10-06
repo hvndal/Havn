@@ -33,6 +33,7 @@ class AlarmReceiver : BroadcastReceiver() {
     
     @Inject lateinit var repository: HavnRepository
     @Inject lateinit var userPrefs: UserPreferences
+    @Inject lateinit var alarmScheduler: HavnAlarmScheduler
 
     companion object {
         const val ACTION_MARK_TAKEN = "com.havn.app.ACTION_MARK_TAKEN"
@@ -48,6 +49,8 @@ class AlarmReceiver : BroadcastReceiver() {
         const val EXTRA_TIME = "time"
         const val EXTRA_TIME_MILLIS = "time_millis"
         const val EXTRA_SLOT = "slot"
+        const val EXTRA_IS_SNOOZE = "is_snooze"
+        private const val SNOOZE_MS = 15 * 60_000L
 
         const val BRAND_ACCENT = 0xFF516351.toInt()
 
@@ -145,17 +148,22 @@ class AlarmReceiver : BroadcastReceiver() {
         updateHavnWidget(context)
     }
 
-    private suspend fun handleSnooze(context: Context, intent: Intent) {
-        // Will implement exact alarm + 15 mins
+    /**
+     * Re-nudges the same slot in 15 minutes. The re-fire goes through
+     * [handleDoseAlarm], which re-reads the logs, so anything taken in the
+     * meantime is left out (and nothing fires if all of it was).
+     */
+    private fun handleSnooze(context: Context, intent: Intent) {
         val notifId = intent.getIntExtra(EXTRA_NOTIF_ID, -1)
+        val slot = intent.getStringExtra(EXTRA_SLOT) ?: return
         dismiss(context, notifId)
-        // Snooze is simplified for now: just dismiss. Real snooze requires rescheduling an exact alarm 15m out.
+        val time = runCatching { LocalTime.parse(slot) }.getOrNull() ?: return
+        val slotMillis = LocalDate.now().atTime(time)
+            .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        alarmScheduler.scheduleSnooze(slotMillis, System.currentTimeMillis() + SNOOZE_MS)
     }
-    
-    private suspend fun handleSnoozeAll(context: Context, intent: Intent) {
-        val notifId = intent.getIntExtra(EXTRA_NOTIF_ID, -1)
-        dismiss(context, notifId)
-    }
+
+    private fun handleSnoozeAll(context: Context, intent: Intent) = handleSnooze(context, intent)
 
     private suspend fun handleDoseAlarm(context: Context, intent: Intent) {
         val timeMillis = intent.getLongExtra(EXTRA_TIME_MILLIS, -1L)
@@ -177,24 +185,35 @@ class AlarmReceiver : BroadcastReceiver() {
             timeStr in med.reminderTimes
         }
 
-        if (slotMeds.isEmpty()) return
+        // Doses already logged in the app (or from an earlier nudge) are not
+        // nudged again.
+        val handled = repository.getDoseLogsForDay(activeUserId, slot.toLocalDate()).first()
+            .filter { it.status != com.havn.app.domain.model.DoseStatus.PENDING }
+            .map { it.medicationId to it.scheduledSlot }
+            .toSet()
+        val pending = slotMeds.filter { (it.id to timeStr) !in handled }
+
+        // Keep the 14-day window rolling even if the app isn't opened.
+        if (!intent.getBooleanExtra(EXTRA_IS_SNOOZE, false)) alarmScheduler.rebuildAlarms()
+
+        if (pending.isEmpty()) return
 
         val displayTime = slot.toLocalTime().format(DateTimeFormatter.ofPattern("h:mm a")).replace("AM", "am").replace("PM", "pm")
 
         val title: String
         val body: String
-        val medIds = slotMeds.map { it.id }.toLongArray()
+        val medIds = pending.map { it.id }.toLongArray()
 
-        if (slotMeds.size == 1) {
-            val med = slotMeds.first()
+        if (pending.size == 1) {
+            val med = pending.first()
             title = med.name
             body = buildString {
                 if (med.dosage.isNotBlank()) append(med.dosage).append(" · ")
                 append(displayTime)
             }
         } else {
-            title = "${slotMeds.size} doses at $displayTime"
-            body = slotMeds.joinToString(" · ") { it.name }
+            title = "${pending.size} doses at $displayTime"
+            body = pending.joinToString(" · ") { it.name }
         }
 
         val notifId = (timeMillis / 60000).toInt().absoluteValue
@@ -222,7 +241,7 @@ class AlarmReceiver : BroadcastReceiver() {
             .setContentTitle(title)
             .setContentText(body)
             .setStyle(NotificationCompat.BigTextStyle().bigText(body))
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setContentIntent(openAppPendingIntent)
             .setAutoCancel(true)

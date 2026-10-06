@@ -50,7 +50,7 @@ class UserPreferences @Inject constructor(
 
     val activeUserId: Flow<Long> = data.map { it[ACTIVE_USER_ID] ?: NO_USER }
     val onboardingDone: Flow<Boolean> = data.map { it[ONBOARDING_DONE] ?: false }
-    val themePref: Flow<String> = data.map { it[THEME_PREF] ?: "SYSTEM" }
+    val themePref: Flow<String> = data.map { it[THEME_PREF] ?: "LIGHT" }
     val reminderSound: Flow<String> = data.map { it[REMINDER_SOUND] ?: "CHIME" }
     val reminderVibration: Flow<Boolean> = data.map { it[REMINDER_VIBRATION] ?: true }
     val interfaceSound: Flow<Boolean> = data.map { it[INTERFACE_SOUND] ?: true }

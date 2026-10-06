@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Launcher icon -->
-    <color name="ic_launcher_background">#F9F7F3</color>
+    <color name="ic_launcher_background">#FBFAF7</color>
     <color name="ic_launcher_foreground">#516351</color>
 
     <!--
@@ -9,8 +9,8 @@
       frame. A values-night variant exists alongside this one, so a dark-mode
       user no longer gets a flash of ivory on every cold start.
     -->
-    <color name="window_background">#F9F7F3</color>
-    <color name="splash_background">#F9F7F3</color>
+    <color name="window_background">#FBFAF7</color>
+    <color name="splash_background">#FBFAF7</color>
 
     <color name="brand_sage">#516351</color>
 </resources>

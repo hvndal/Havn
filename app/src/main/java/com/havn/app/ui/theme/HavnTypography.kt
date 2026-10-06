@@ -6,8 +6,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.googlefonts.Font
-import androidx.compose.ui.text.googlefonts.GoogleFont
+import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.sp
 import com.havn.app.R
@@ -29,23 +30,26 @@ import com.havn.app.R
 //  comes from scale, colour and space — not from bolder text.
 // ─────────────────────────────────────────────────────────────────────────────
 
-val provider = GoogleFont.Provider(
-    providerAuthority = "com.google.android.gms.fonts",
-    providerPackage = "com.google.android.gms",
-    certificates = R.array.com_google_android_gms_fonts_certs
+// Bundled (OFL), not downloaded: no font swap on first launch and no
+// dependency on Google Play services being present.
+@OptIn(ExperimentalTextApi::class)
+private fun hanken(weight: FontWeight) = Font(
+    R.font.hanken_grotesk,
+    weight,
+    variationSettings = FontVariation.Settings(FontVariation.weight(weight.weight)),
 )
 
 val HankenGrotesk = FontFamily(
-    Font(GoogleFont("Hanken Grotesk"), provider, FontWeight.Light),
-    Font(GoogleFont("Hanken Grotesk"), provider, FontWeight.Normal),
-    Font(GoogleFont("Hanken Grotesk"), provider, FontWeight.Medium),
-    Font(GoogleFont("Hanken Grotesk"), provider, FontWeight.SemiBold),
+    hanken(FontWeight.Light),
+    hanken(FontWeight.Normal),
+    hanken(FontWeight.Medium),
+    hanken(FontWeight.SemiBold),
 )
 
 /** Display serif. Single weight by design — it is never asked to be bold. */
 val EditorialSerif = FontFamily(
-    Font(GoogleFont("Instrument Serif"), provider, FontWeight.Normal),
-    Font(GoogleFont("Instrument Serif"), provider, FontWeight.Normal, FontStyle.Italic),
+    Font(R.font.instrument_serif, FontWeight.Normal),
+    Font(R.font.instrument_serif_italic, FontWeight.Normal, FontStyle.Italic),
 )
 
 /**

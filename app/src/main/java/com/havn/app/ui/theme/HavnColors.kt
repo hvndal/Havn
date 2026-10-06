@@ -16,11 +16,11 @@ import androidx.compose.ui.graphics.Color
 // ── Paper (light canvas ladder) ──────────────────────────────────────────────
 // A warm, slightly desaturated paper stock. Each step is a *small* lift so
 // surfaces separate by hairline and shadow rather than by obvious grey jumps.
-val Paper00 = Color(0xFFFCFBF8) // raised sheet — cards, sheets
-val Paper05 = Color(0xFFF9F7F3) // canvas
-val Paper10 = Color(0xFFF3F1EB) // recessed wells, inputs
-val Paper20 = Color(0xFFEBE8E1) // pressed / selected fill
-val Paper30 = Color(0xFFDFDBD2) // strong fill
+val Paper00 = Color(0xFFFFFFFF) // raised sheet — cards, sheets
+val Paper05 = Color(0xFFFBFAF7) // canvas
+val Paper10 = Color(0xFFF4F3EF) // recessed wells, inputs
+val Paper20 = Color(0xFFEDECE7) // pressed / selected fill
+val Paper30 = Color(0xFFE3E1DB) // strong fill
 val Paper40 = Color(0xFFCBC6BB) // hairline on tinted ground
 
 // ── Ink (light foreground ladder) ────────────────────────────────────────────

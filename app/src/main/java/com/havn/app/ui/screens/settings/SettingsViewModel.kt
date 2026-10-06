@@ -25,7 +25,7 @@ import javax.inject.Inject
 data class SettingsUiState(
     val activeUser: User? = null,
     val profiles: List<User> = emptyList(),
-    val theme: ThemeMode = ThemeMode.SYSTEM,
+    val theme: ThemeMode = ThemeMode.LIGHT,
     val interfaceSound: Boolean = true,
     val isLoading: Boolean = true,
 )

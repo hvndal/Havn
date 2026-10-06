@@ -87,7 +87,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            HavnTheme(themeMode = themeMode ?: ThemeMode.SYSTEM) {
+            HavnTheme(themeMode = themeMode ?: ThemeMode.LIGHT) {
                 HavnNavGraph(session = session)
             }
         }

@@ -10,8 +10,6 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.VIBRATE" />
 
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-
     <!--
       • INTERNET was needed only because the 3D organizer loaded three.js from a
         CDN, which also meant the app's signature screen silently failed to

@@ -104,10 +104,10 @@ val HavnLightTokens = HavnColorTokens(
     dangerSoft = DangerSoft,
     onDangerSoft = Color(0xFF52140F),
 
-    ambientA = Color(0xFFE6EDE2),
-    ambientB = Color(0xFFF7E9DE),
+    ambientA = Color(0xFFEEF3EC),
+    ambientB = Color(0xFFF9F2EB),
     scrim = Color(0x6615170F),
-    shadowTint = Color(0xFF3F4439),
+    shadowTint = Color(0xFF6C7166),
     glow = Color(0x00000000), // light mode earns depth from shadow, not glow
 
     medSage = Sage,

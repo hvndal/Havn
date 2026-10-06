@@ -24,7 +24,7 @@ object HavnNotificationChannels {
     const val GROUP_ID = "havn_reminders"
 
     /** Time-critical: an actual dose is due. */
-    const val DOSE = "havn_dose_v2"
+    const val DOSE = "havn_dose_v3"
 
     /** Ahead-of-time nudge, 15 minutes before a dose. Quieter by design. */
     const val PRE_DOSE = "havn_pre_dose_v2"
@@ -40,14 +40,25 @@ object HavnNotificationChannels {
             NotificationChannelGroup(GROUP_ID, "Reminders")
         )
 
+        // A soft two-note felt-marimba cue, bundled. Channel sound is fixed
+        // at creation, which is why the dose channel id moved to v3.
+        val nudge = android.net.Uri.parse(
+            "android.resource://${context.packageName}/${com.havn.app.R.raw.havn_nudge}"
+        )
+        val nudgeAttrs = android.media.AudioAttributes.Builder()
+            .setUsage(android.media.AudioAttributes.USAGE_NOTIFICATION)
+            .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .build()
+
         val channels = listOf(
             NotificationChannel(
                 DOSE,
                 "Dose reminders",
-                NotificationManager.IMPORTANCE_HIGH,
+                NotificationManager.IMPORTANCE_DEFAULT,
             ).apply {
-                description = "When a scheduled dose is due."
+                description = "A gentle nudge when a scheduled dose is due."
                 group = GROUP_ID
+                setSound(nudge, nudgeAttrs)
                 enableVibration(true)
                 vibrationPattern = longArrayOf(0, 140, 90, 140)
                 setShowBadge(true)
@@ -59,6 +70,7 @@ object HavnNotificationChannels {
             ).apply {
                 description = "A quiet heads-up 15 minutes before a dose."
                 group = GROUP_ID
+                setSound(nudge, nudgeAttrs)
                 enableVibration(false)
                 setShowBadge(false)
             },
@@ -69,6 +81,7 @@ object HavnNotificationChannels {
             ).apply {
                 description = "One summary at the end of the day if doses are outstanding."
                 group = GROUP_ID
+                setSound(nudge, nudgeAttrs)
                 enableVibration(true)
                 vibrationPattern = longArrayOf(0, 120)
                 setShowBadge(true)
@@ -81,6 +94,7 @@ object HavnNotificationChannels {
         // appearing in system settings alongside the new ones.
         listOf(
             "havn_daily_ritual",
+            "havn_dose_v2",
             "havn_channel_silent",
             "havn_channel_marimba",
         ).forEach { legacy ->

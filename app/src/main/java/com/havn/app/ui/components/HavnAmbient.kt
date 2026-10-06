@@ -55,7 +55,7 @@ fun HavnAmbientField(
 
     // Dark mode needs a lower ceiling: the same alpha that reads as a whisper
     // on paper reads as a smear on ink.
-    val ceiling = if (colors.isDark) 0.5f else 0.85f
+    val ceiling = if (colors.isDark) 0.5f else 0.6f
 
     Canvas(modifier = modifier.fillMaxSize()) {
         val w = size.width

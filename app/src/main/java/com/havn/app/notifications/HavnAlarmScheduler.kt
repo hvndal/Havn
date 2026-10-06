@@ -60,12 +60,6 @@ class HavnAlarmScheduler @Inject constructor(
         cancelAllCurrentlyScheduled()
         val newScheduled = mutableListOf<Long>()
 
-        val canScheduleExact = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            alarmManager.canScheduleExactAlarms()
-        } else {
-            true
-        }
-
         for (slot in futureSlots) {
             val epochMillis = slot.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
             val requestCode = (epochMillis / 60000).toInt()
@@ -81,23 +75,29 @@ class HavnAlarmScheduler @Inject constructor(
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            if (canScheduleExact) {
-                alarmManager.setExactAndAllowWhileIdle(
-                    AlarmManager.RTC_WAKEUP,
-                    epochMillis,
-                    pendingIntent
-                )
-            } else {
-                alarmManager.setAndAllowWhileIdle(
-                    AlarmManager.RTC_WAKEUP,
-                    epochMillis,
-                    pendingIntent
-                )
-            }
+            // A nudge, not an alarm clock: inexact but Doze-safe, and needs no
+            // special "Alarms & reminders" permission. Usually lands within
+            // a few minutes of the set time.
+            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, epochMillis, pendingIntent)
             newScheduled.add(epochMillis)
         }
         
         prefs.saveScheduledAlarms(newScheduled)
+    }
+
+    /** One-off re-nudge for [slotMillis], firing at [atMillis]. */
+    fun scheduleSnooze(slotMillis: Long, atMillis: Long) {
+        val intent = Intent(context, AlarmReceiver::class.java).apply {
+            action = AlarmReceiver.ACTION_DOSE_ALARM
+            putExtra(AlarmReceiver.EXTRA_TIME_MILLIS, slotMillis)
+            putExtra(AlarmReceiver.EXTRA_IS_SNOOZE, true)
+        }
+        // Offset request code so a snooze never replaces the slot's own alarm.
+        val pending = PendingIntent.getBroadcast(
+            context, (slotMillis / 60000).toInt() + 1_000_000, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, atMillis, pending)
     }
 
     private suspend fun cancelAllCurrentlyScheduled() {
