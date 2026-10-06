@@ -299,9 +299,10 @@ private fun CompactWidgetLayout(state: WidgetState) {
                     .cornerRadius(18.dp),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(
-                    text = if (state.isCompletedForToday) "✓" else "💊",
-                    style = TextStyle(fontSize = 15.sp),
+                WidgetGlyph(
+                    res = if (state.isCompletedForToday) com.havn.app.R.drawable.ic_check else com.havn.app.R.drawable.ic_med_capsule,
+                    tint = if (state.isCompletedForToday) WidgetPalette.onAccentSoft else WidgetPalette.accent,
+                    size = 17.dp,
                 )
             }
 
@@ -332,7 +333,7 @@ private fun CompactWidgetLayout(state: WidgetState) {
                 val nextPill = state.nextPendingPill
                 if (state.isCompletedForToday) {
                     Text(
-                        text = "All ${state.totalCount} pills taken today ✓",
+                        text = "All ${state.totalCount} doses taken today",
                         style = TextStyle(
                             color = WidgetPalette.accentDeep,
                             fontSize = 12.sp,
@@ -387,7 +388,7 @@ private fun CompactWidgetLayout(state: WidgetState) {
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "✓ Take",
+                        text = "Take",
                         style = TextStyle(
                             color = WidgetPalette.onAccent,
                             fontSize = 12.sp,
@@ -404,7 +405,7 @@ private fun CompactWidgetLayout(state: WidgetState) {
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Done ✓",
+                        text = "Done",
                         style = TextStyle(
                             color = WidgetPalette.onAccentSoft,
                             fontSize = 11.sp,
@@ -477,7 +478,7 @@ private fun StandardWidgetLayout(state: WidgetState, size: DpSize) {
                             .padding(horizontal = 8.dp, vertical = 3.dp)
                     ) {
                         Text(
-                            text = if (state.isCompletedForToday) "All Done ✓" else "${state.takenCount}/${state.totalCount} Taken",
+                            text = if (state.isCompletedForToday) "All done" else "${state.takenCount}/${state.totalCount} Taken",
                             style = TextStyle(
                                 color = if (state.isCompletedForToday) WidgetPalette.onAccentSoft else WidgetPalette.accent,
                                 fontSize = 10.sp,
@@ -586,13 +587,12 @@ private fun ActivePillsList(state: WidgetState, maxItems: Int) {
 
 @Composable
 private fun WidgetPillRow(item: WidgetPillItem) {
-    val pillEmoji = when (item.iconType.lowercase()) {
-        "capsule" -> "💊"
-        "tablet" -> "⚪"
-        "liquid" -> "💧"
-        "injection" -> "💉"
-        "powder" -> "🧪"
-        else -> "💊"
+    val glyph = when (item.iconType.lowercase()) {
+        "tablet" -> com.havn.app.R.drawable.ic_med_tablet
+        "liquid" -> com.havn.app.R.drawable.ic_med_liquid
+        "injection" -> com.havn.app.R.drawable.ic_med_injection
+        "powder" -> com.havn.app.R.drawable.ic_med_powder
+        else -> com.havn.app.R.drawable.ic_med_capsule
     }
 
     Box(
@@ -614,12 +614,10 @@ private fun WidgetPillRow(item: WidgetPillItem) {
                     .cornerRadius(13.dp),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(
-                    text = if (item.isTaken) "✓" else pillEmoji,
-                    style = TextStyle(
-                        fontSize = 12.sp,
-                        color = if (item.isTaken) WidgetPalette.onAccentSoft else WidgetPalette.textPrimary
-                    ),
+                WidgetGlyph(
+                    res = if (item.isTaken) com.havn.app.R.drawable.ic_check else glyph,
+                    tint = if (item.isTaken) WidgetPalette.onAccentSoft else WidgetPalette.accent,
+                    size = 14.dp,
                 )
             }
 
@@ -664,7 +662,7 @@ private fun WidgetPillRow(item: WidgetPillItem) {
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Taken ✓",
+                        text = "Taken",
                         style = TextStyle(
                             color = WidgetPalette.onAccentSoft,
                             fontSize = 10.sp,
@@ -716,12 +714,14 @@ private fun CompletedDayCard(state: WidgetState) {
             modifier = GlanceModifier.fillMaxWidth()
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "🌿 ",
-                    style = TextStyle(fontSize = 16.sp)
+                WidgetGlyph(
+                    res = com.havn.app.R.drawable.ic_check,
+                    tint = WidgetPalette.accent,
+                    size = 16.dp,
                 )
+                Spacer(GlanceModifier.width(6.dp))
                 Text(
-                    text = "All pills taken for today!",
+                    text = "Everything taken today",
                     style = TextStyle(
                         color = WidgetPalette.accentDeep,
                         fontSize = 13.sp,
@@ -775,4 +775,15 @@ private fun EmptyMedicationsCard() {
 
 class HavnWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = HavnWidget()
+}
+
+/** A brand glyph tinted for the widget — replaces the emoji the widget used to draw. */
+@Composable
+private fun WidgetGlyph(res: Int, tint: ColorProvider, size: androidx.compose.ui.unit.Dp) {
+    Image(
+        provider = ImageProvider(res),
+        contentDescription = null,
+        colorFilter = ColorFilter.tint(tint),
+        modifier = GlanceModifier.size(size),
+    )
 }

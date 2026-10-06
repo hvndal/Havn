@@ -6,9 +6,9 @@ Welcome to **Hävn**, a premium Scandinavian-minimalist medication organiser and
 
 - **Package / Application ID**: `com.havnmeds.app`
 - **Namespace**: `com.havn.app`
-- **Target SDK**: API 36 (Android 16 / Upside Down Cake +)
+- **Target SDK**: API 35 (Android 15)
 - **Min SDK**: API 26 (Android 8.0 Oreo)
-- **Version**: `1.0.2` (versionCode `3`)
+- **Version**: `1.1.0` (versionCode `4`)
 - **UI Framework**: 100% Declarative Jetpack Compose + Material 3 + Custom Organiser Shader Canvas
 - **Database**: Room 2.6.x (offline local-first SQLite, zero cloud data transfer)
 - **DI**: Dagger Hilt
@@ -63,7 +63,7 @@ bash build-release.sh
 
 ## Google Play Publishing Checklist
 
-1. **Upload Artifact**: `release-output/Havn-1.0.2.aab`
+1. **Upload Artifact**: `release-output/Havn-1.1.0.aab`
 2. **Graphics**:
    - App Icon: `play-store/graphics/icon-512.png`
    - Feature Graphic: `play-store/graphics/feature-graphic-1024x500.png`

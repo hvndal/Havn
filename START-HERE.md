@@ -11,7 +11,7 @@ Havn/
 ├── START-HERE.md          ← This guide
 ├── GEMINI.md / AGENTS.md  ← AI assistant & agent documentation
 ├── build-release.sh       ← One-command build script (Linux/macOS/Codespaces)
-├── app/ …                 ← Fixed Native Android app (v1.0.2, Target SDK 36)
+├── app/ …                 ← Fixed Native Android app (v1.1.0, Target SDK 35)
 ├── play-store/
 │   ├── graphics/          ← icon-512.png, feature-graphic-1024×500.png, screenshots/
 │   └── listing/           ← Store text, privacy policy, Play Console answers
