@@ -15,7 +15,10 @@ class BootReceiver : BroadcastReceiver() {
     @Inject lateinit var alarmScheduler: HavnAlarmScheduler
 
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action == Intent.ACTION_BOOT_COMPLETED || 
+        // MY_PACKAGE_REPLACED: an app update clears every pending alarm, so
+        // reminders must be rebuilt without waiting for the user to open Hävn.
+        if (intent.action == Intent.ACTION_BOOT_COMPLETED ||
+            intent.action == Intent.ACTION_MY_PACKAGE_REPLACED || 
             intent.action == Intent.ACTION_TIMEZONE_CHANGED || 
             intent.action == Intent.ACTION_TIME_CHANGED) {
             

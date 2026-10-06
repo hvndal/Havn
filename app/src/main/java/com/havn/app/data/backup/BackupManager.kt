@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.core.content.FileProvider
+import androidx.room.withTransaction
 import com.havn.app.BuildConfig
 import com.havn.app.data.db.DoseLogEntity
 import com.havn.app.data.db.HavnDatabase
@@ -36,6 +37,7 @@ import javax.inject.Singleton
 class BackupManager @Inject constructor(
     @ApplicationContext private val context: Context,
     private val database: HavnDatabase,
+    private val alarmScheduler: dagger.Lazy<com.havn.app.notifications.HavnAlarmScheduler>,
 ) {
 
     private val json = Json {
@@ -170,8 +172,13 @@ class BackupManager @Inject constructor(
      * user's to clean up; lost history is not.
      */
     suspend fun restore(source: Uri): RestoreResult = withContext(Dispatchers.IO) {
+        // Bounded read: a real backup is a few hundred KB; anything past the cap
+        // is not a Hävn file and must not be pulled into memory whole.
         val text = runCatching {
-            context.contentResolver.openInputStream(source)?.bufferedReader()?.use { it.readText() }
+            context.contentResolver.openInputStream(source)?.use { input ->
+                val bytes = input.readNBytesCompat(MAX_BACKUP_BYTES + 1)
+                if (bytes.size > MAX_BACKUP_BYTES) null else String(bytes, Charsets.UTF_8)
+            }
         }.getOrNull() ?: return@withContext RestoreResult.Failure("Couldn't read that file.")
 
         val backup = runCatching {
@@ -192,6 +199,10 @@ class BackupManager @Inject constructor(
         var medCount = 0
         var doseCount = 0
 
+        // All or nothing: a malformed record half-way through must not leave
+        // orphaned profiles or medications behind.
+        val committed = runCatching {
+        database.withTransaction {
         backup.profiles.forEach { profile ->
             val userId = database.userDao().insertUser(
                 UserEntity(
@@ -243,6 +254,15 @@ class BackupManager @Inject constructor(
                 doseCount += logs.size
             }
         }
+        }
+        }
+        if (committed.isFailure) {
+            return@withContext RestoreResult.Failure("That backup couldn't be imported. Nothing was changed.")
+        }
+
+        // Restored medications need their reminders and the widget refreshed.
+        alarmScheduler.get().rebuildAlarms()
+        com.havn.app.widget.updateHavnWidget(context)
 
         RestoreResult.Success(
             profiles = backup.profiles.size,
@@ -253,6 +273,7 @@ class BackupManager @Inject constructor(
 
     companion object {
         const val MIME_TYPE = "application/json"
+        private const val MAX_BACKUP_BYTES = 10 * 1024 * 1024
 
         /**
          * What the system file picker will accept. Some providers report a
@@ -261,4 +282,16 @@ class BackupManager @Inject constructor(
          */
         val IMPORT_MIME_TYPES = arrayOf("application/json", "text/plain", "application/octet-stream")
     }
+}
+
+/** InputStream.readNBytes is API 33+; this reads up to [limit] bytes on any API. */
+private fun java.io.InputStream.readNBytesCompat(limit: Int): ByteArray {
+    val out = java.io.ByteArrayOutputStream()
+    val buf = ByteArray(8192)
+    while (out.size() < limit) {
+        val n = read(buf, 0, minOf(buf.size, limit - out.size()))
+        if (n < 0) break
+        out.write(buf, 0, n)
+    }
+    return out.toByteArray()
 }

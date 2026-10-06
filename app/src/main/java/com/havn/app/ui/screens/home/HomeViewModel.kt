@@ -129,7 +129,13 @@ class HomeViewModel @Inject constructor(
         val today = LocalDate.now()
         val startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
         val activeMeds = meds.filter { it.isActive }
-        val dailyDoseCount = activeMeds.sumOf { it.reminderTimes.size.coerceAtLeast(1) }
+        // Per date, not per week: weekly meds count only on their days, a
+        // future start date is respected, and as-needed meds never count.
+        fun dosesOn(date: LocalDate) = activeMeds
+            .filter { it.isScheduledOn(date) }
+            .sumOf { it.reminderTimes.size.coerceAtLeast(1) }
+        val asNeededIds = meds.filter { it.repeatType == com.havn.app.domain.model.RepeatType.AS_NEEDED }
+            .map { it.id }.toSet()
         val byDate = logs.groupBy { it.localDate() }
 
         return (0L..6L).map { offset ->
@@ -149,17 +155,17 @@ class HomeViewModel @Inject constructor(
             } else if (isFuture) {
                 CadenceDay(
                     date = date,
-                    scheduled = dailyDoseCount,
+                    scheduled = dosesOn(date),
                     taken = 0,
                     skipped = 0,
                     isToday = false,
                     isFuture = true,
                 )
             } else {
-                val dayLogs = byDate[date].orEmpty()
+                val dayLogs = byDate[date].orEmpty().filter { it.medicationId !in asNeededIds }
                 CadenceDay(
                     date = date,
-                    scheduled = maxOf(dailyDoseCount, dayLogs.size),
+                    scheduled = maxOf(dosesOn(date), dayLogs.size),
                     taken = dayLogs.count { it.status == DoseStatus.TAKEN },
                     skipped = dayLogs.count { it.status == DoseStatus.SKIPPED },
                     isToday = false,

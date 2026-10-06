@@ -191,10 +191,10 @@ class RemindersViewModel @Inject constructor(
     }
 
     fun sendTestNotification() {
-        // Will implement in receiver or directly here
+        // A dedicated action: the dose path only posts for doses actually due
+        // at that minute, so it stayed silent whenever the button was tapped.
         val intent = Intent(context, AlarmReceiver::class.java).apply {
-            action = AlarmReceiver.ACTION_DOSE_ALARM
-            putExtra(AlarmReceiver.EXTRA_TIME_MILLIS, System.currentTimeMillis())
+            action = AlarmReceiver.ACTION_TEST
         }
         context.sendBroadcast(intent)
     }

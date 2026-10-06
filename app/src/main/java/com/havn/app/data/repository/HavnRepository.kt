@@ -67,6 +67,9 @@ class HavnRepository @Inject constructor(
     }
 
     suspend fun deleteMedication(med: Medication) {
+        // Its history goes with it; otherwise the logs linger as orphans that
+        // still count in Progress and in backups.
+        doseLogDao.deleteAllForMedication(med.id)
         medicationDao.deleteMedication(med.toEntity())
         updateHavnWidget(context)
     }

@@ -107,4 +107,7 @@ interface DoseLogDao {
 
     @Query("DELETE FROM dose_logs WHERE userId = :userId")
     suspend fun deleteAllForUser(userId: Long)
+
+    @Query("DELETE FROM dose_logs WHERE medicationId = :medicationId")
+    suspend fun deleteAllForMedication(medicationId: Long)
 }

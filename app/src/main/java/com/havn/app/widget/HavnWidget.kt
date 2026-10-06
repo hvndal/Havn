@@ -27,6 +27,11 @@ import com.havn.app.data.db.DoseLogEntity
 import com.havn.app.data.db.HavnDatabase
 import com.havn.app.data.prefs.UserPreferences
 import com.havn.app.ui.MainActivity
+import com.havn.app.data.repository.HavnRepository
+import com.havn.app.domain.model.DoseStatus
+import com.havn.app.domain.model.RepeatType
+import com.havn.app.domain.model.TodayDose
+import com.havn.app.notifications.AlarmReceiver
 import kotlinx.coroutines.flow.first
 import kotlinx.serialization.json.Json
 import java.time.LocalDate
@@ -42,6 +47,8 @@ data class WidgetPillItem(
     val scheduledTimeStr: String,
     val iconType: String,
     val isTaken: Boolean,
+    /** "HH:mm", or empty for an any-time dose. */
+    val slot: String = "",
 )
 
 data class WidgetState(
@@ -63,194 +70,119 @@ suspend fun updateHavnWidget(context: Context) {
     }
 }
 
+/** The widget runs outside Hilt's graph; this is its door into it. */
+@dagger.hilt.EntryPoint
+@dagger.hilt.InstallIn(dagger.hilt.components.SingletonComponent::class)
+interface WidgetEntryPoint {
+    fun repository(): HavnRepository
+}
+
+private fun repositoryOf(context: Context): HavnRepository =
+    dagger.hilt.android.EntryPointAccessors
+        .fromApplication(context.applicationContext, WidgetEntryPoint::class.java)
+        .repository()
+
+/**
+ * Today's doses for the active profile, built exactly as the Today screen
+ * builds them: only medications scheduled today (weekly days and start date
+ * respected, as-needed excluded), and one entry per reminder time, so a
+ * twice-daily medication shows — and logs — its morning and evening doses
+ * separately.
+ */
 suspend fun loadWidgetState(context: Context): WidgetState {
+    val today = LocalDate.now()
+    val dateFormatted = today.format(DateTimeFormatter.ofPattern("EEE, MMM d", Locale.US))
     return runCatching {
-        val prefs = UserPreferences(context)
-        val activeUserId = prefs.activeUserId.first()
-        val db = HavnDatabase.getInstance(context)
-        val users = db.userDao().getAllUsersSync()
+        val repo = repositoryOf(context)
+        val activeUserId = UserPreferences(context).activeUserId.first()
+        val users = repo.getAllUsers().first()
         val activeUser = users.find { it.id == activeUserId } ?: users.firstOrNull()
+            ?: return@runCatching WidgetState(dateStr = dateFormatted, hasMedications = false)
 
-        val today = LocalDate.now()
-        val dateFormatted = today.format(DateTimeFormatter.ofPattern("EEE, MMM d", Locale.US))
-
-        if (activeUser == null) {
-            return@runCatching WidgetState(dateStr = dateFormatted, hasMedications = false)
-        }
-
-        val meds = db.medicationDao().getActiveMedicationsForUserSync(activeUser.id)
+        val meds = repo.getMedicationsForUser(activeUser.id).first()
+            .filter { it.isActive && it.repeatType != RepeatType.AS_NEEDED && it.isScheduledOn(today) }
         if (meds.isEmpty()) {
-            return@runCatching WidgetState(
-                userName = activeUser.name,
-                dateStr = dateFormatted,
-                hasMedications = false,
-            )
+            return@runCatching WidgetState(userName = activeUser.name, dateStr = dateFormatted, hasMedications = false)
         }
 
-        val zone = ZoneId.systemDefault()
-        val dayStart = today.atStartOfDay(zone).toInstant().toEpochMilli()
-        val dayEnd = today.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli()
-        val logs = db.doseLogDao().getDoseLogsForDaySync(activeUser.id, dayStart, dayEnd)
-        val logMap = logs.associateBy { it.medicationId }
+        val taken = repo.getDoseLogsForDay(activeUser.id, today).first()
+            .filter { it.status == DoseStatus.TAKEN }
+            .map { it.medicationId to it.scheduledSlot }
+            .toSet()
 
-        val json = Json { ignoreUnknownKeys = true }
-
-        val pillItems = meds.map { med ->
-            val times = runCatching {
-                json.decodeFromString<List<String>>(med.reminderTimesJson)
-            }.getOrDefault(emptyList())
-
-            val rawTime = times.firstOrNull() ?: "08:00"
-            val formattedTime = runCatching {
-                val parsed = LocalTime.parse(rawTime)
-                parsed.format(DateTimeFormatter.ofPattern("h:mm a", Locale.US))
-            }.getOrDefault(rawTime)
-
-            val log = logMap[med.id]
-            val isTaken = log?.status == "TAKEN"
-
-            WidgetPillItem(
-                id = med.id,
-                name = med.name,
-                dosage = med.dosage,
-                scheduledTimeStr = formattedTime,
-                iconType = med.iconType,
-                isTaken = isTaken
-            )
-        }.sortedWith(
-            compareBy<WidgetPillItem> { it.isTaken }
-                .thenBy { it.scheduledTimeStr }
-        )
-
-        val total = pillItems.size
-        val taken = pillItems.count { it.isTaken }
+        val pillItems = meds.flatMap { med ->
+            med.reminderTimes.ifEmpty { listOf("") }.map { slot ->
+                val dose = TodayDose(medication = med, doseLog = null, slot = slot)
+                WidgetPillItem(
+                    id = med.id,
+                    name = med.name,
+                    dosage = med.dosage,
+                    scheduledTimeStr = dose.displayTime(),
+                    iconType = med.iconType.name,
+                    isTaken = (med.id to slot) in taken,
+                    slot = slot,
+                )
+            }
+        }.sortedWith(compareBy<WidgetPillItem> { it.isTaken }.thenBy { it.slot.ifEmpty { "99:99" } })
 
         WidgetState(
             userName = activeUser.name,
             dateStr = dateFormatted,
             items = pillItems,
-            totalCount = total,
-            takenCount = taken,
+            totalCount = pillItems.size,
+            takenCount = pillItems.count { it.isTaken },
             hasMedications = true,
         )
-    }.getOrDefault(
-        WidgetState(dateStr = LocalDate.now().format(DateTimeFormatter.ofPattern("EEE, MMM d", Locale.US)))
-    )
+    }.getOrDefault(WidgetState(dateStr = dateFormatted))
+}
+
+/**
+ * Logs through the repository (so the slot is recorded and the reminder for
+ * it stands down) and clears the matching status-bar notification.
+ */
+private suspend fun setFromWidget(context: Context, medId: Long, slot: String, status: DoseStatus) {
+    val repo = repositoryOf(context)
+    val med = repo.getMedicationById(medId) ?: return
+    val today = LocalDate.now()
+    repo.setDoseStatus(med, today, slot, status)
+    if (status == DoseStatus.TAKEN) {
+        AlarmReceiver.slotMillis(today, slot)?.let { millis ->
+            (context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager)
+                ?.cancel(AlarmReceiver.doseNotificationId(millis, med.userId))
+        }
+    }
+    HavnWidget().updateAll(context)
 }
 
 class MarkDoseTakenActionCallback : ActionCallback {
-    override suspend fun onAction(
-        context: Context,
-        glanceId: GlanceId,
-        parameters: ActionParameters
-    ) {
+    override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
         val medId = parameters[MedicationIdKey] ?: return
-        val db = HavnDatabase.getInstance(context)
-        val today = LocalDate.now()
-        val zone = ZoneId.systemDefault()
-        val start = today.atStartOfDay(zone).toInstant().toEpochMilli()
-        val end = today.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli()
-
-        val med = db.medicationDao().getMedicationById(medId) ?: return
-        val existing = db.doseLogDao().getDoseLogForMedToday(medId, start, end)
-        val now = System.currentTimeMillis()
-
-        if (existing != null) {
-            db.doseLogDao().updateDoseLog(existing.copy(status = "TAKEN", takenAt = now))
-        } else {
-            db.doseLogDao().insertDoseLog(
-                DoseLogEntity(
-                    medicationId = med.id,
-                    userId = med.userId,
-                    scheduledTime = start,
-                    takenAt = now,
-                    status = "TAKEN"
-                )
-            )
-        }
-
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
-        notificationManager?.cancel(medId.toInt())
-
-        HavnWidget().updateAll(context)
+        setFromWidget(context, medId, parameters[SlotKey].orEmpty(), DoseStatus.TAKEN)
     }
 
     companion object {
         val MedicationIdKey = ActionParameters.Key<Long>("medication_id")
+        val SlotKey = ActionParameters.Key<String>("slot")
     }
 }
 
 class MarkAllDosesTakenActionCallback : ActionCallback {
-    override suspend fun onAction(
-        context: Context,
-        glanceId: GlanceId,
-        parameters: ActionParameters
-    ) {
-        val db = HavnDatabase.getInstance(context)
-        val prefs = UserPreferences(context)
-        val activeUserId = prefs.activeUserId.first()
-        val users = db.userDao().getAllUsersSync()
-        val activeUser = users.find { it.id == activeUserId } ?: users.firstOrNull() ?: return
-
-        val meds = db.medicationDao().getActiveMedicationsForUserSync(activeUser.id)
-        val today = LocalDate.now()
-        val zone = ZoneId.systemDefault()
-        val start = today.atStartOfDay(zone).toInstant().toEpochMilli()
-        val end = today.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli()
-
-        val existingLogs = db.doseLogDao().getDoseLogsForDaySync(activeUser.id, start, end)
-        val logMap = existingLogs.associateBy { it.medicationId }
-        val now = System.currentTimeMillis()
-
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
-
-        for (med in meds) {
-            val log = logMap[med.id]
-            if (log != null) {
-                if (log.status != "TAKEN") {
-                    db.doseLogDao().updateDoseLog(log.copy(status = "TAKEN", takenAt = now))
-                }
-            } else {
-                db.doseLogDao().insertDoseLog(
-                    DoseLogEntity(
-                        medicationId = med.id,
-                        userId = activeUser.id,
-                        scheduledTime = start,
-                        takenAt = now,
-                        status = "TAKEN"
-                    )
-                )
-            }
-            notificationManager?.cancel(med.id.toInt())
+    override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
+        loadWidgetState(context).items.filterNot { it.isTaken }.forEach {
+            setFromWidget(context, it.id, it.slot, DoseStatus.TAKEN)
         }
-
-        HavnWidget().updateAll(context)
     }
 }
 
 class MarkDoseUntakenActionCallback : ActionCallback {
-    override suspend fun onAction(
-        context: Context,
-        glanceId: GlanceId,
-        parameters: ActionParameters
-    ) {
+    override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
         val medId = parameters[MedicationIdKey] ?: return
-        val db = HavnDatabase.getInstance(context)
-        val today = LocalDate.now()
-        val zone = ZoneId.systemDefault()
-        val start = today.atStartOfDay(zone).toInstant().toEpochMilli()
-        val end = today.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli()
-
-        val existing = db.doseLogDao().getDoseLogForMedToday(medId, start, end)
-        if (existing != null) {
-            db.doseLogDao().updateDoseLog(existing.copy(status = "PENDING", takenAt = null))
-        }
-
-        HavnWidget().updateAll(context)
+        setFromWidget(context, medId, parameters[SlotKey].orEmpty(), DoseStatus.PENDING)
     }
 
     companion object {
         val MedicationIdKey = ActionParameters.Key<Long>("medication_id")
+        val SlotKey = ActionParameters.Key<String>("slot")
     }
 }
 
@@ -382,7 +314,10 @@ private fun CompactWidgetLayout(state: WidgetState) {
                         .padding(horizontal = 12.dp, vertical = 7.dp)
                         .clickable(
                             actionRunCallback<MarkDoseTakenActionCallback>(
-                                actionParametersOf(MarkDoseTakenActionCallback.MedicationIdKey to nextActionPill.id)
+                                actionParametersOf(
+                                    MarkDoseTakenActionCallback.MedicationIdKey to nextActionPill.id,
+                                    MarkDoseTakenActionCallback.SlotKey to nextActionPill.slot,
+                                )
                             )
                         ),
                     contentAlignment = Alignment.Center
@@ -656,7 +591,10 @@ private fun WidgetPillRow(item: WidgetPillItem) {
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                         .clickable(
                             actionRunCallback<MarkDoseUntakenActionCallback>(
-                                actionParametersOf(MarkDoseUntakenActionCallback.MedicationIdKey to item.id)
+                                actionParametersOf(
+                                    MarkDoseUntakenActionCallback.MedicationIdKey to item.id,
+                                    MarkDoseUntakenActionCallback.SlotKey to item.slot,
+                                )
                             )
                         ),
                     contentAlignment = Alignment.Center
@@ -679,7 +617,10 @@ private fun WidgetPillRow(item: WidgetPillItem) {
                         .padding(horizontal = 10.dp, vertical = 5.dp)
                         .clickable(
                             actionRunCallback<MarkDoseTakenActionCallback>(
-                                actionParametersOf(MarkDoseTakenActionCallback.MedicationIdKey to item.id)
+                                actionParametersOf(
+                                    MarkDoseTakenActionCallback.MedicationIdKey to item.id,
+                                    MarkDoseTakenActionCallback.SlotKey to item.slot,
+                                )
                             )
                         ),
                     contentAlignment = Alignment.Center

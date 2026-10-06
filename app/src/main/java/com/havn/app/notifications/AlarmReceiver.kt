@@ -41,6 +41,9 @@ class AlarmReceiver : BroadcastReceiver() {
         const val ACTION_SNOOZE = "com.havn.app.ACTION_SNOOZE"
         const val ACTION_SNOOZE_ALL = "com.havn.app.ACTION_SNOOZE_ALL"
         const val ACTION_DOSE_ALARM = "com.havn.app.ACTION_DOSE_ALARM"
+        const val ACTION_PRE_DOSE = "com.havn.app.ACTION_PRE_DOSE"
+        const val ACTION_EVENING_CHECK = "com.havn.app.ACTION_EVENING_CHECK"
+        const val ACTION_TEST = "com.havn.app.ACTION_TEST"
 
         const val EXTRA_MED_ID = "med_id"
         const val EXTRA_MED_IDS = "med_ids"
@@ -53,6 +56,23 @@ class AlarmReceiver : BroadcastReceiver() {
         private const val SNOOZE_MS = 15 * 60_000L
 
         const val BRAND_ACCENT = 0xFF5E6E5D.toInt()
+
+        // Notification-ID bands, so a dose, its early nudge, an evening
+        // summary and a test can never overwrite one another.
+        private const val PRE_DOSE_BAND = 300_000_000
+        private const val EVENING_ID = 7_000_001
+        private const val TEST_ID = 7_000_002
+
+        /**
+         * The status-bar ID for one profile's doses at one minute. Shared with
+         * the widget so logging a dose there clears the same notification.
+         */
+        fun doseNotificationId(slotMillis: Long, userId: Long): Int =
+            ((slotMillis / 60_000) * 31 + userId).toInt().absoluteValue % 200_000_000
+
+        fun slotMillis(date: LocalDate, slot: String): Long? =
+            runCatching { LocalTime.parse(slot) }.getOrNull()
+                ?.let { date.atTime(it).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() }
 
         fun markTakenIntent(context: Context, medId: Long, userId: Long, notifId: Int, slot: String): PendingIntent = PendingIntent.getBroadcast(
             context, notifId + 50_000,
@@ -113,6 +133,9 @@ class AlarmReceiver : BroadcastReceiver() {
                     ACTION_SNOOZE -> handleSnooze(context, intent)
                     ACTION_SNOOZE_ALL -> handleSnoozeAll(context, intent)
                     ACTION_DOSE_ALARM -> handleDoseAlarm(context, intent)
+                    ACTION_PRE_DOSE -> handlePreDose(context, intent)
+                    ACTION_EVENING_CHECK -> handleEveningCheck(context)
+                    ACTION_TEST -> showTest(context)
                 }
             } finally {
                 pendingResult.finish()
@@ -165,59 +188,137 @@ class AlarmReceiver : BroadcastReceiver() {
 
     private fun handleSnoozeAll(context: Context, intent: Intent) = handleSnooze(context, intent)
 
-    private suspend fun handleDoseAlarm(context: Context, intent: Intent) {
-        val timeMillis = intent.getLongExtra(EXTRA_TIME_MILLIS, -1L)
-        if (timeMillis <= 0) return
-
-        val slot = Instant.ofEpochMilli(timeMillis).atZone(ZoneId.systemDefault()).toLocalDateTime()
-        val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
-        val timeStr = slot.toLocalTime().format(timeFormatter)
-
-        val activeUserId = userPrefs.activeUserId.first()
-        if (activeUserId < 0) return
-        
-        // Use default sounds for now, as we removed the custom settings
-        val soundPref = "CHIME"
-        val vibrationPref = true
-
-        val meds = repository.getMedicationsForUser(activeUserId).first().filter { it.isActive && it.isScheduledOn(slot.toLocalDate()) }
-        val slotMeds = meds.filter { med ->
-            timeStr in med.reminderTimes
-        }
-
-        // Doses already logged in the app (or from an earlier nudge) are not
-        // nudged again.
-        val handled = repository.getDoseLogsForDay(activeUserId, slot.toLocalDate()).first()
+    /** Doses due at [slot] for one profile that nobody has logged yet. */
+    private suspend fun pendingAt(userId: Long, slot: java.time.LocalDateTime): List<com.havn.app.domain.model.Medication> {
+        val timeStr = slot.toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm"))
+        val date = slot.toLocalDate()
+        val due = repository.getMedicationsForUser(userId).first()
+            .filter { it.isActive && it.isScheduledOn(date) && timeStr in it.reminderTimes }
+        if (due.isEmpty()) return emptyList()
+        // Doses already logged in the app, the widget or an earlier nudge are
+        // not nudged again.
+        val handled = repository.getDoseLogsForDay(userId, date).first()
             .filter { it.status != com.havn.app.domain.model.DoseStatus.PENDING }
             .map { it.medicationId to it.scheduledSlot }
             .toSet()
-        val pending = slotMeds.filter { (it.id to timeStr) !in handled }
+        return due.filter { (it.id to timeStr) !in handled }
+    }
+
+    private fun slotOf(millis: Long) =
+        Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDateTime()
+
+    private fun displayTime(t: LocalTime) =
+        t.format(DateTimeFormatter.ofPattern("h:mm a")).replace("AM", "am").replace("PM", "pm")
+
+    private suspend fun handleDoseAlarm(context: Context, intent: Intent) {
+        val timeMillis = intent.getLongExtra(EXTRA_TIME_MILLIS, -1L)
+        if (timeMillis <= 0) return
+        val slot = slotOf(timeMillis)
+        val timeStr = slot.toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm"))
 
         // Keep the 14-day window rolling even if the app isn't opened.
         if (!intent.getBooleanExtra(EXTRA_IS_SNOOZE, false)) alarmScheduler.rebuildAlarms()
 
-        if (pending.isEmpty()) return
-
-        val displayTime = slot.toLocalTime().format(DateTimeFormatter.ofPattern("h:mm a")).replace("AM", "am").replace("PM", "pm")
-
-        val title: String
-        val body: String
-        val medIds = pending.map { it.id }.toLongArray()
-
-        if (pending.size == 1) {
-            val med = pending.first()
-            title = med.name
-            body = buildString {
-                if (med.dosage.isNotBlank()) append(med.dosage).append(" · ")
-                append(displayTime)
+        // Every profile on the device, not only the one open in the app.
+        val users = repository.getAllUsers().first()
+        for (user in users) {
+            val pending = pendingAt(user.id, slot)
+            if (pending.isEmpty()) continue
+            val who = if (users.size > 1) "${user.name} · " else ""
+            val time = displayTime(slot.toLocalTime())
+            val (title, body) = if (pending.size == 1) {
+                val med = pending.first()
+                "$who${med.name}" to buildString {
+                    if (med.dosage.isNotBlank()) append(med.dosage).append(" · ")
+                    append(time)
+                }
+            } else {
+                "$who${pending.size} doses at $time" to pending.joinToString(" · ") { it.name }
             }
-        } else {
-            title = "${pending.size} doses at $displayTime"
-            body = pending.joinToString(" · ") { it.name }
+            showNotification(
+                context, doseNotificationId(timeMillis, user.id), title, body,
+                pending.map { it.id }.toLongArray(), user.id, "CHIME", true, timeStr,
+            )
         }
+    }
 
-        val notifId = (timeMillis / 60000).toInt().absoluteValue
-        showNotification(context, notifId, title, body, medIds, activeUserId, soundPref, vibrationPref, timeStr)
+    /** The optional heads-up 15 minutes before a dose. Informational only. */
+    private suspend fun handlePreDose(context: Context, intent: Intent) {
+        val slotMillis = intent.getLongExtra(EXTRA_TIME_MILLIS, -1L)
+        if (slotMillis <= 0) return
+        val slot = slotOf(slotMillis)
+        val users = repository.getAllUsers().first()
+        for (user in users) {
+            val pending = pendingAt(user.id, slot)
+            if (pending.isEmpty()) continue
+            val who = if (users.size > 1) "${user.name} · " else ""
+            post(
+                context,
+                HavnNotificationChannels.PRE_DOSE,
+                (doseNotificationId(slotMillis, user.id) % 100_000_000) + PRE_DOSE_BAND,
+                "${who}In 15 minutes",
+                pending.joinToString(" · ") { it.name } + " at " + displayTime(slot.toLocalTime()),
+            )
+        }
+    }
+
+    /** One quiet summary in the evening, only if something is still open. */
+    private suspend fun handleEveningCheck(context: Context) {
+        alarmScheduler.rebuildAlarms()
+        val now = java.time.LocalDateTime.now()
+        val today = now.toLocalDate()
+        val lines = mutableListOf<String>()
+        val users = repository.getAllUsers().first()
+        for (user in users) {
+            val logs = repository.getDoseLogsForDay(user.id, today).first()
+                .filter { it.status != com.havn.app.domain.model.DoseStatus.PENDING }
+                .map { it.medicationId to it.scheduledSlot }
+                .toSet()
+            val open = repository.getMedicationsForUser(user.id).first()
+                .filter { it.isActive && it.repeatType != com.havn.app.domain.model.RepeatType.AS_NEEDED && it.isScheduledOn(today) }
+                .flatMap { med ->
+                    med.reminderTimes
+                        .filter { t -> runCatching { LocalTime.parse(t) }.getOrNull()?.let { !today.atTime(it).isAfter(now) } == true }
+                        .filter { t -> (med.id to t) !in logs }
+                        .map { med.name }
+                }
+            if (open.isEmpty()) continue
+            val who = if (users.size > 1) "${user.name}: " else ""
+            lines += who + open.distinct().joinToString(", ")
+        }
+        if (lines.isEmpty()) return
+        post(context, HavnNotificationChannels.EVENING, EVENING_ID, "A few doses are still open", lines.joinToString("\n"))
+    }
+
+    /** "Test reminder" in Settings: always posts, regardless of schedule. */
+    private fun showTest(context: Context) {
+        post(
+            context, HavnNotificationChannels.DOSE, TEST_ID,
+            "Hävn test reminder",
+            "This is how a dose reminder will look and sound.",
+        )
+    }
+
+    private fun post(context: Context, channel: String, id: Int, title: String, body: String) {
+        HavnNotificationChannels.ensureCreated(context)
+        val open = PendingIntent.getActivity(
+            context, id,
+            Intent(context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            },
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        val n = NotificationCompat.Builder(context, channel)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setColor(BRAND_ACCENT)
+            .setContentTitle(title)
+            .setContentText(body)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(body))
+            .setCategory(NotificationCompat.CATEGORY_REMINDER)
+            .setContentIntent(open)
+            .setAutoCancel(true)
+            .build()
+        (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).notify(id, n)
     }
 
     private fun showNotification(
