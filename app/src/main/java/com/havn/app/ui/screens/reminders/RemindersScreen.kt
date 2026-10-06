@@ -297,41 +297,43 @@ fun RemindersScreen(
                                 color = colors.textPrimary,
                             )
                             Text(
-                                text = "Managed in Android settings",
+                                text = "Sound, vibration and Do Not Disturb live in Android settings",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = colors.textTertiary,
                             )
                         }
+                        Spacer(Modifier.width(HavnTheme.spacing.md))
+                        Text(
+                            text = "Open",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = colors.accent,
+                        )
                     }
-                }
-
-                Spacer(Modifier.height(HavnTheme.spacing.xl))
-
-                Column(Modifier.padding(horizontal = gutter)) {
-                    Text(
-                        text = "ALERT STYLE",
-                        style = HavnType.Eyebrow,
-                        color = colors.textTertiary,
-                    )
-                    Spacer(Modifier.height(HavnTheme.spacing.md))
-                    HavnButton(
-                        text = "Preview sound",
-                        onClick = viewModel::previewSound,
-                        tone = HavnButtonTone.Secondary,
-                        size = HavnButtonSize.Medium,
-                        fillWidth = true,
-                    )
                 }
 
                 Spacer(Modifier.height(HavnTheme.spacing.xxl))
 
-                HavnButton(
-                    text = "Send a test reminder",
-                    onClick = viewModel::sendTestNotification,
-                    tone = HavnButtonTone.Secondary,
-                    size = HavnButtonSize.Medium,
+                // Two ways to hear it: the sound alone, or a real reminder
+                // through the whole notification path.
+                Row(
                     modifier = Modifier.padding(horizontal = gutter),
-                )
+                    horizontalArrangement = Arrangement.spacedBy(HavnTheme.spacing.md),
+                ) {
+                    HavnButton(
+                        text = "Play sound",
+                        onClick = viewModel::previewSound,
+                        tone = HavnButtonTone.Secondary,
+                        size = HavnButtonSize.Medium,
+                        modifier = Modifier.weight(1f),
+                    )
+                    HavnButton(
+                        text = "Test reminder",
+                        onClick = viewModel::sendTestNotification,
+                        tone = HavnButtonTone.Secondary,
+                        size = HavnButtonSize.Medium,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
             }
         }
     }

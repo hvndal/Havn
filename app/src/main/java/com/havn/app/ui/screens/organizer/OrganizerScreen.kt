@@ -3,6 +3,7 @@ package com.havn.app.ui.screens.organizer
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -214,13 +215,13 @@ private fun PeriodChip(
 ) {
     val colors = HavnTheme.colors
     val background by animateColorAsState(
-        targetValue = if (selected) colors.accent else colors.surfaceSunken,
+        targetValue = if (selected) colors.accentSoft else colors.surface,
         animationSpec = HavnMotion.standard(),
         label = "chipBg",
     )
     val content by animateColorAsState(
         targetValue = when {
-            selected -> colors.onAccent
+            selected -> colors.accent
             isNow -> colors.accent
             else -> colors.textTertiary
         },
@@ -232,6 +233,13 @@ private fun PeriodChip(
         modifier = modifier
             .clip(RoundedCornerShape(HavnTheme.radius.md))
             .background(background)
+            // Outlined, not filled: the open lid on the box above already
+            // carries the selection, so the chip only needs to agree with it.
+            .border(
+                width = if (selected) 1.5.dp else 1.dp,
+                color = if (selected) colors.accent else colors.hairline,
+                shape = RoundedCornerShape(HavnTheme.radius.md),
+            )
             .havnPress(scaleDown = 0.94f, onClickLabel = period.label, onClick = onClick)
             .padding(vertical = HavnTheme.spacing.md),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -283,7 +291,8 @@ private fun OrganizerDoseRow(
                 .size(40.dp)
                 .graphicsLayer { alpha = contentAlpha }
                 .clip(CircleShape)
-                .background(accent.copy(alpha = if (colors.isDark) 0.18f else 0.12f)),
+                .background(colors.surface)
+                .border(1.dp, colors.hairlineStrong, CircleShape),
             contentAlignment = Alignment.Center,
         ) {
             MedIcon(type = dose.medication.iconType, size = 20.dp, tint = accent)
