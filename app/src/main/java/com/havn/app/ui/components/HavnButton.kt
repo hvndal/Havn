@@ -147,10 +147,12 @@ fun HavnButton(
                 // shadow looks like a mistake.
                 if (tone == HavnButtonTone.Primary && active) {
                     Modifier.shadow(
-                        elevation = if (pressed) 2.dp else 10.dp,
+                        // A low, tight shadow: the button sits on the page
+                        // rather than glowing above it.
+                        elevation = if (pressed) 0.dp else 4.dp,
                         shape = shape,
-                        ambientColor = colors.accent.copy(alpha = 0.35f),
-                        spotColor = colors.accent.copy(alpha = 0.28f),
+                        ambientColor = colors.accent.copy(alpha = 0.18f),
+                        spotColor = colors.accent.copy(alpha = 0.22f),
                     )
                 } else Modifier
             )

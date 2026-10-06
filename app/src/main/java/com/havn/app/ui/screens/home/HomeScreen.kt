@@ -10,6 +10,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -182,6 +183,18 @@ fun HomeScreen(
                 )
             }
 
+            // The product leads: the box itself, straight after the greeting,
+            // so the first thing on screen is the thing the app is about.
+            item(key = "organizer") {
+                if (uiState.hasMedications) {
+                    Spacer(Modifier.height(HavnTheme.spacing.lg))
+                    OrganizerHero(
+                        doses = uiState.doses,
+                        onOpen = onOpenOrganizer,
+                    )
+                }
+            }
+
             item(key = "metric") {
                 if (uiState.isLoading) {
                     Spacer(Modifier.height(HavnTheme.spacing.xl))
@@ -203,16 +216,6 @@ fun HomeScreen(
                         selectedDate = uiState.selectedDate,
                         onSelectDay = viewModel::selectDate,
                         modifier = Modifier.padding(horizontal = gutter),
-                    )
-                }
-            }
-
-            item(key = "organizer") {
-                if (uiState.hasMedications) {
-                    Spacer(Modifier.height(HavnTheme.spacing.section))
-                    OrganizerHero(
-                        doses = uiState.doses,
-                        onOpen = onOpenOrganizer,
                     )
                 }
             }
@@ -686,72 +689,30 @@ private fun DayMetric(
 }
 
 /**
- * The 3D organizer, full-bleed.
+ * The organiser, full-bleed and unframed.
  *
- * It was previously boxed in a 4:3 card with a rounded clip, a 1dp border, a
- * drop shadow and an overlaid caption chip — five layers of chrome around the
- * most distinctive asset in the product. Here it runs edge to edge and is the
- * UI, with the surrounding page providing the frame.
+ * No card, no caption, no count row beneath it: the box carries its own
+ * period labels, its lids show what is waiting, and the part of the day that
+ * is now stands open. Anything more would be chrome around the product.
  */
 @Composable
 private fun OrganizerHero(
     doses: List<TodayDose>,
     onOpen: () -> Unit,
 ) {
-    val colors = HavnTheme.colors
-    val gutter = HavnTheme.spacing.gutter
     val currentPeriod = remember { DayPeriod.current() }
-
-    Column {
-        SectionRule(
-            eyebrow = "Organizer",
-            trailing = { HavnTextAction(text = "Open", onClick = onOpen) },
-            modifier = Modifier.padding(horizontal = gutter),
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(1.3f)
+            .havnPress(scaleDown = 0.995f, onClickLabel = "Open organizer", onClick = onOpen),
+    ) {
+        HavnOrganizerView(
+            doses = doses,
+            selectedPeriod = currentPeriod,
+            onSlotTapped = { onOpen() },
+            modifier = Modifier.fillMaxSize(),
         )
-        Spacer(Modifier.height(HavnTheme.spacing.lg))
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(1.25f)
-                .havnPress(scaleDown = 0.995f, onClickLabel = "Open organizer", onClick = onOpen),
-        ) {
-            HavnOrganizerView(
-                doses = doses,
-                selectedPeriod = currentPeriod,
-                onSlotTapped = { onOpen() },
-                modifier = Modifier.fillMaxSize(),
-            )
-        }
-
-        Spacer(Modifier.height(HavnTheme.spacing.lg))
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = gutter),
-            horizontalArrangement = Arrangement.spacedBy(HavnTheme.spacing.xl),
-        ) {
-            DayPeriod.entries.forEach { period ->
-                val count = doses.count { it.period == period }
-                val isNow = period == currentPeriod
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = period.label.uppercase(),
-                        style = HavnType.EyebrowQuiet,
-                        color = if (isNow) colors.accent else colors.textTertiary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    Spacer(Modifier.height(HavnTheme.spacing.xs))
-                    Text(
-                        text = if (count == 0) "—" else "$count",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = if (isNow) colors.textPrimary else colors.textSecondary,
-                    )
-                }
-            }
-        }
     }
 }
 
@@ -874,7 +835,10 @@ private fun DoseRow(
             modifier = Modifier
                 .size(42.dp)
                 .clip(CircleShape)
-                .background(accent.copy(alpha = if (colors.isDark) 0.18f else 0.12f)),
+                // White disc with a hairline: the medication's colour lives in
+                // the glyph alone, so a list of five meds stays calm.
+                .background(colors.surface)
+                .border(1.dp, colors.hairlineStrong, CircleShape),
             contentAlignment = Alignment.Center,
         ) {
             MedIcon(
@@ -939,10 +903,20 @@ private fun TodayEmptyState(
     } else {
         HavnEmptyState(
             eyebrow = "Getting started",
-            headline = "Your shelf is empty",
+            headline = "Your organiser is empty",
             body = "Add your first medication and Hävn will keep the schedule, " +
                 "the reminders and the record.",
-            illustration = { HavnBreathingMark() },
+            // The empty box itself, lids closed — the product, waiting.
+            illustration = {
+                HavnOrganizerView(
+                    doses = emptyList(),
+                    selectedPeriod = DayPeriod.current(),
+                    onSlotTapped = { onAddMedication() },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1.5f),
+                )
+            },
             action = {
                 HavnButton(
                     text = "Add a medication",

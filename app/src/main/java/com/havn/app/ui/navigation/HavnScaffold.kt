@@ -90,12 +90,19 @@ private fun HavnBottomBar(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(24.dp)
+                .height(16.dp)
                 .background(
                     Brush.verticalGradient(
                         listOf(Color.Transparent, colors.canvas)
                     )
                 )
+        )
+        // One hairline marks the bar's edge — a printed rule, not a panel.
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(colors.hairline)
         )
         Row(
             modifier = Modifier
