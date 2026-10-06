@@ -5,8 +5,10 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -277,7 +279,7 @@ private class BoxGeometry(w: Float, h: Float) {
     val depth = min(h * 0.22f, width * 0.24f)
     val frontHeight = min(h * 0.20f, width * 0.2f)
     /** How tall a fully raised lid draws on screen. */
-    val rise = depth * 1.45f
+    val rise = depth * 1.1f
 
     val back = h * 0.40f
     val front = back + depth
@@ -431,7 +433,7 @@ private fun DrawScope.drawContents(
         val u = if (rows == 1) 0.58f else 0.40f + 0.36f * row / (rows - 1)
         val depthScale = 0.86f + 0.14f * u
         val center = Offset(g.x(fx, u), g.yAt(u))
-        val size = compW * 0.30f * depthScale * if (cols == 3) 0.82f else 1f
+        val size = compW * 0.40f * depthScale * if (cols == 3) 0.74f else 1f
         val seed = (dose.medication.id * 31 + dose.slot.hashCode()).toInt()
         val tilt = -38f + (abs(seed) % 50)
         val tint = tagColors[dose.medication.colorTag] ?: fallback
@@ -560,4 +562,51 @@ private fun roundedPolygon(
     }
     path.close()
     return path
+}
+
+/**
+ * One dose, large, resting in a small linen tray — the same drawing the
+ * organiser uses, so what you pick while adding a medication is exactly what
+ * later appears in the box. Form and colour changes cross-fade.
+ */
+@Composable
+fun HavnPillSpecimen(
+    type: MedIconType,
+    colorTag: String,
+    modifier: Modifier = Modifier,
+) {
+    val colors = HavnTheme.colors
+    val tint by androidx.compose.animation.animateColorAsState(
+        targetValue = medAccent(colorTag),
+        animationSpec = com.havn.app.ui.theme.HavnMotion.standard(),
+        label = "specimenTint",
+    )
+    androidx.compose.animation.Crossfade(
+        targetState = type,
+        animationSpec = com.havn.app.ui.theme.HavnMotion.standard(),
+        label = "specimenForm",
+        modifier = modifier.semantics { contentDescription = "Preview: ${type.name.lowercase()}" },
+    ) { form ->
+        Canvas(Modifier.fillMaxSize()) {
+            val stroke = (size.minDimension / 70f).coerceAtLeast(1.5f)
+            val r = size.minDimension * 0.22f
+            val tray = roundedPolygon(
+                listOf(
+                    Offset(0f, 0f), Offset(size.width, 0f),
+                    Offset(size.width, size.height), Offset(0f, size.height),
+                ),
+                radius = r,
+            )
+            drawPath(tray, if (colors.isDark) colors.linen else lerp(colors.linen, Color.White, 0.45f))
+            drawPath(tray, colors.accent.copy(alpha = 0.55f), style = Stroke(stroke))
+            val c = Offset(size.width / 2f, size.height / 2f)
+            val s = size.minDimension * 0.62f
+            drawOval(
+                colors.shadowTint.copy(alpha = if (colors.isDark) 0.45f else 0.14f),
+                topLeft = c + Offset(-s * 0.42f, s * 0.12f),
+                size = Size(s * 0.84f, s * 0.26f),
+            )
+            drawPill(form, c, s, -28f, tint, ghost = null, stroke = stroke * 1.2f)
+        }
+    }
 }

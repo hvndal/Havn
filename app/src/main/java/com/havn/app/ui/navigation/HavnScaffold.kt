@@ -59,18 +59,31 @@ fun HavnScaffold(
     val navInset = WindowInsets.navigationBars.asPaddingValues()
         .calculateBottomPadding()
 
+    // The bar belongs to the four tabs only. Pushed screens (manage, add,
+    // edit, reminders) have their own back button and bottom-pinned actions,
+    // which the bar used to sit on top of.
+    val isTab = bottomNavItems.any { it.screen.route == currentRoute }
+
     Box(modifier = Modifier.fillMaxSize()) {
         // Content runs full-bleed *under* the bar rather than being inset by a
         // Scaffold. That is what lets the home hero and the organizer reach the
         // bottom edge; screens apply the padding to their scroll content, so
         // the last row can still scroll clear of the bar.
-        content(PaddingValues(bottom = BarHeight + navInset))
+        content(PaddingValues(bottom = if (isTab) BarHeight + navInset else navInset))
 
-        HavnBottomBar(
-            currentRoute = currentRoute,
-            onNavigate = onNavigate,
+        androidx.compose.animation.AnimatedVisibility(
+            visible = isTab,
+            enter = androidx.compose.animation.slideInVertically(HavnMotion.enter()) { it } +
+                androidx.compose.animation.fadeIn(HavnMotion.standard()),
+            exit = androidx.compose.animation.slideOutVertically(HavnMotion.exit()) { it } +
+                androidx.compose.animation.fadeOut(HavnMotion.exit()),
             modifier = Modifier.align(Alignment.BottomCenter),
-        )
+        ) {
+            HavnBottomBar(
+                currentRoute = currentRoute,
+                onNavigate = onNavigate,
+            )
+        }
     }
 }
 

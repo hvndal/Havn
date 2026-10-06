@@ -20,3 +20,18 @@ jobs:
         with:
           name: havn-debug-apk
           path: app/build/outputs/apk/debug/*.apk
+      # Unit tests include a Robolectric launch test that boots the real app,
+      # walks every screen and renders each one to app/build/screenshots.
+      - name: Unit tests (launch, migration, schedule)
+        run: ./gradlew --no-daemon testDebugUnitTest
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: havn-screenshots
+          path: app/build/screenshots/*.png
+          if-no-files-found: ignore
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: havn-test-report
+          path: app/build/reports/tests/

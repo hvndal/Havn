@@ -580,6 +580,8 @@ private fun FocusLine(state: HomeUiState) {
             "Nothing scheduled yet." to colors.textTertiary
         state.allDone ->
             "Every dose is logged. Nothing left today." to colors.accent
+        next != null && next.time != null && next.time.isBefore(LocalTime.now()) ->
+            "Still open: ${next.medication.name}, due ${next.displayTime()}." to colors.textPrimary
         next != null && next.slot.isNotBlank() ->
             "Next: ${next.medication.name} at ${next.displayTime()}." to colors.textSecondary
         next != null ->
@@ -700,7 +702,20 @@ private fun OrganizerHero(
     doses: List<TodayDose>,
     onOpen: () -> Unit,
 ) {
-    val currentPeriod = remember { DayPeriod.current() }
+    // Open the compartment that needs the user: the current part of the day
+    // if anything is waiting there, else the earliest one still holding an
+    // overdue dose, else the next one coming up. An open, empty lid while the
+    // morning's pills sit untaken would show the wrong thing.
+    val currentPeriod = remember(doses) {
+        val now = DayPeriod.current()
+        val pending = doses.filter { it.isPending }.map { it.period }.toSet()
+        when {
+            now in pending -> now
+            pending.any { it < now } -> pending.filter { it < now }.min()
+            pending.isNotEmpty() -> pending.min()
+            else -> now
+        }
+    }
     Box(
         modifier = Modifier
             .fillMaxWidth()

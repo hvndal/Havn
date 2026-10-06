@@ -121,17 +121,29 @@ fun AddMedicationScreen(
 
             Spacer(Modifier.height(HavnTheme.spacing.xl))
 
-            Column(Modifier.padding(horizontal = gutter)) {
-                Text(
-                    text = if (uiState.isEditing) "EDITING" else "NEW",
-                    style = HavnType.Eyebrow,
-                    color = colors.textTertiary,
-                )
-                Spacer(Modifier.height(HavnTheme.spacing.sm))
-                Text(
-                    text = if (uiState.isEditing) "Edit medication" else "Add a medication",
-                    style = MaterialTheme.typography.displaySmall,
-                    color = colors.textPrimary,
+            Row(
+                modifier = Modifier.padding(horizontal = gutter),
+                verticalAlignment = Alignment.Bottom,
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        text = if (uiState.isEditing) "EDITING" else "NEW",
+                        style = HavnType.Eyebrow,
+                        color = colors.textTertiary,
+                    )
+                    Spacer(Modifier.height(HavnTheme.spacing.sm))
+                    Text(
+                        text = if (uiState.isEditing) "Edit medication" else "Add a medication",
+                        style = MaterialTheme.typography.displaySmall,
+                        color = colors.textPrimary,
+                    )
+                }
+                Spacer(Modifier.width(HavnTheme.spacing.lg))
+                // The dose itself, live: form and colour update as they're picked.
+                com.havn.app.ui.components.HavnPillSpecimen(
+                    type = uiState.iconType,
+                    colorTag = uiState.colorTag,
+                    modifier = Modifier.size(84.dp),
                 )
             }
 

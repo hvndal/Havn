@@ -366,8 +366,10 @@ private fun PermissionCard(
 
     HavnSurface(
         modifier = modifier.fillMaxWidth(),
-        color = colors.warningSoft,
-        border = null,
+        // White with a hairline, like every other card — a calm ask, not a
+        // warning banner. The olive button carries the call to action.
+        color = colors.surface,
+        border = androidx.compose.foundation.BorderStroke(1.dp, colors.hairlineStrong),
         elevation = HavnTheme.elevation.none,
         contentPadding = HavnTheme.spacing.xl,
     ) {
@@ -375,7 +377,7 @@ private fun PermissionCard(
             text = if (blocked) "Notifications are switched off"
             else "Reminders need permission",
             style = MaterialTheme.typography.titleMedium,
-            color = colors.onWarningSoft,
+            color = colors.textPrimary,
         )
         Spacer(Modifier.height(HavnTheme.spacing.sm))
         Text(
@@ -387,7 +389,7 @@ private fun PermissionCard(
                     "optional early nudge, and one evening summary."
             },
             style = MaterialTheme.typography.bodyMedium,
-            color = colors.onWarningSoft.copy(alpha = 0.85f),
+            color = colors.textSecondary,
         )
         Spacer(Modifier.height(HavnTheme.spacing.xl))
         HavnButton(
