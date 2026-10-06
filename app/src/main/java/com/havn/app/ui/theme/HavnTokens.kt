@@ -67,9 +67,12 @@ data class HavnColorTokens(
     val medAmber: Color,
     val medSlate: Color,
     val medSand: Color,
+
+    // The organiser's second material — the warm half of the icon's shell.
+    val linen: Color,
 )
 
-/** Light: warm paper, ink, and a grounded sage. */
+/** Light: a white page, olive ink, and almost nothing else. */
 val HavnLightTokens = HavnColorTokens(
     isDark = false,
 
@@ -79,7 +82,7 @@ val HavnLightTokens = HavnColorTokens(
     surfaceSunken = Paper10,
     surfacePressed = Paper20,
 
-    hairline = Paper20,
+    hairline = Color(0xFFECEDE9),
     hairlineStrong = Paper30,
 
     textPrimary = Ink00,
@@ -104,10 +107,11 @@ val HavnLightTokens = HavnColorTokens(
     dangerSoft = DangerSoft,
     onDangerSoft = Color(0xFF52140F),
 
-    ambientA = Color(0xFFEEF3EC),
-    ambientB = Color(0xFFF9F2EB),
-    scrim = Color(0x6615170F),
-    shadowTint = Color(0xFF6C7166),
+    // The ambient field is now a breath of colour on white, not a wash.
+    ambientA = Color(0xFFF1F4EF),
+    ambientB = Color(0xFFF7F3EC),
+    scrim = Color(0x551B241A),
+    shadowTint = Color(0xFF5E6E5D),
     glow = Color(0x00000000), // light mode earns depth from shadow, not glow
 
     medSage = Sage,
@@ -115,6 +119,8 @@ val HavnLightTokens = HavnColorTokens(
     medAmber = Amber,
     medSlate = AccentSlate,
     medSand = AccentSand,
+
+    linen = Linen,
 )
 
 /**
@@ -167,6 +173,8 @@ val HavnDarkTokens = HavnColorTokens(
     medAmber = AmberLift,
     medSlate = AccentSlateLift,
     medSand = AccentSandLift,
+
+    linen = Color(0xFF1F231E),
 )
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -213,10 +221,12 @@ data class HavnRadius(
 @Immutable
 data class HavnElevation(
     val none: Dp = 0.dp,
-    val rest: Dp = 2.dp,
-    val raised: Dp = 8.dp,
-    val floating: Dp = 16.dp,
-    val overlay: Dp = 28.dp,
+    // Flat by default: on a white page a resting card is a hairline, not a
+    // shadow. Shadow is reserved for things that genuinely float.
+    val rest: Dp = 0.dp,
+    val raised: Dp = 6.dp,
+    val floating: Dp = 14.dp,
+    val overlay: Dp = 24.dp,
 )
 
 val LocalHavnColors = staticCompositionLocalOf { HavnLightTokens }

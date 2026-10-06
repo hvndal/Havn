@@ -490,7 +490,7 @@ private fun ProfileAvatar(
     val colors = HavnTheme.colors
     val tint = remember(user?.avatarColor) {
         runCatching { Color(android.graphics.Color.parseColor(user?.avatarColor ?: "#516351")) }
-            .getOrDefault(Color(0xFF516351))
+            .getOrDefault(Color(0xFF5E6E5D))
     }
 
     Box(

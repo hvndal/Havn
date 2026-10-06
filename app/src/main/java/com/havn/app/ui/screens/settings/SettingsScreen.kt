@@ -497,7 +497,7 @@ private fun ProfileRow(
     val colors = HavnTheme.colors
     val tint = remember(profile.avatarColor) {
         runCatching { Color(android.graphics.Color.parseColor(profile.avatarColor)) }
-            .getOrDefault(Color(0xFF516351))
+            .getOrDefault(Color(0xFF5E6E5D))
     }
 
     Row(
@@ -595,7 +595,7 @@ private fun AddProfileDialog(
                     AVATAR_COLORS.forEach { hex ->
                         val tint = runCatching {
                             Color(android.graphics.Color.parseColor(hex))
-                        }.getOrDefault(Color(0xFF516351))
+                        }.getOrDefault(Color(0xFF5E6E5D))
                         Box(
                             modifier = Modifier
                                 .size(if (hex == color) 34.dp else 28.dp)

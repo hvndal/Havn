@@ -159,6 +159,7 @@ private fun HavnColorTokens.animated(): HavnColorTokens {
         medAmber = c(medAmber, "medAmber"),
         medSlate = c(medSlate, "medSlate"),
         medSand = c(medSand, "medSand"),
+        linen = c(linen, "linen"),
     )
 }
 

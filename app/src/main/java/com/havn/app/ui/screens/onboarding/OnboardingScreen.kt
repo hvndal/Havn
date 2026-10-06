@@ -302,7 +302,7 @@ private fun ProfileRow(
     )
     val tint = remember(profile.avatarColor) {
         runCatching { Color(android.graphics.Color.parseColor(profile.avatarColor)) }
-            .getOrDefault(Color(0xFF516351))
+            .getOrDefault(Color(0xFF5E6E5D))
     }
 
     Row(
@@ -444,7 +444,7 @@ private fun ColourSwatch(
     val colors = HavnTheme.colors
     val tint = remember(hex) {
         runCatching { Color(android.graphics.Color.parseColor(hex)) }
-            .getOrDefault(Color(0xFF516351))
+            .getOrDefault(Color(0xFF5E6E5D))
     }
     // The ring grows rather than the swatch: changing the swatch's own size
     // would reflow the row and make its neighbours twitch on every selection.

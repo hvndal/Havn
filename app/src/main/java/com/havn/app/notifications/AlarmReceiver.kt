@@ -52,7 +52,7 @@ class AlarmReceiver : BroadcastReceiver() {
         const val EXTRA_IS_SNOOZE = "is_snooze"
         private const val SNOOZE_MS = 15 * 60_000L
 
-        const val BRAND_ACCENT = 0xFF516351.toInt()
+        const val BRAND_ACCENT = 0xFF5E6E5D.toInt()
 
         fun markTakenIntent(context: Context, medId: Long, userId: Long, notifId: Int, slot: String): PendingIntent = PendingIntent.getBroadcast(
             context, notifId + 50_000,

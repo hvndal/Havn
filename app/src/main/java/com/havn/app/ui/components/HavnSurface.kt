@@ -54,8 +54,8 @@ fun HavnSurface(
             .shadow(
                 elevation = elevation,
                 shape = shape,
-                ambientColor = colors.shadowTint.copy(alpha = if (colors.isDark) 0.9f else 0.10f),
-                spotColor = colors.shadowTint.copy(alpha = if (colors.isDark) 0.9f else 0.08f),
+                ambientColor = colors.shadowTint.copy(alpha = if (colors.isDark) 0.9f else 0.07f),
+                spotColor = colors.shadowTint.copy(alpha = if (colors.isDark) 0.9f else 0.05f),
             )
             .clip(shape)
             .background(color)
@@ -110,8 +110,8 @@ fun HavnInteractiveSurface(
             .shadow(
                 elevation = elevation,
                 shape = shape,
-                ambientColor = colors.shadowTint.copy(alpha = if (colors.isDark) 0.9f else 0.10f),
-                spotColor = colors.shadowTint.copy(alpha = if (colors.isDark) 0.9f else 0.08f),
+                ambientColor = colors.shadowTint.copy(alpha = if (colors.isDark) 0.9f else 0.07f),
+                spotColor = colors.shadowTint.copy(alpha = if (colors.isDark) 0.9f else 0.05f),
             )
             .clip(shape)
             .background(fill)

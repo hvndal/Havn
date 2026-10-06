@@ -14,20 +14,27 @@ import androidx.compose.ui.graphics.Color
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ── Paper (light canvas ladder) ──────────────────────────────────────────────
-// A warm, slightly desaturated paper stock. Each step is a *small* lift so
-// surfaces separate by hairline and shadow rather than by obvious grey jumps.
-val Paper00 = Color(0xFFFFFFFF) // raised sheet — cards, sheets
-val Paper05 = Color(0xFFFBFAF7) // canvas
-val Paper10 = Color(0xFFF4F3EF) // recessed wells, inputs
-val Paper20 = Color(0xFFEDECE7) // pressed / selected fill
-val Paper30 = Color(0xFFE3E1DB) // strong fill
-val Paper40 = Color(0xFFCBC6BB) // hairline on tinted ground
+// Pure white, taken straight from the launcher icon. Surfaces no longer step
+// up in tone — on a white page they separate by hairline alone, the way a
+// printed Scandinavian spread does. The few greys that remain are neutral with
+// the faintest olive cast so they sit with the brand instead of reading blue.
+val Paper00 = Color(0xFFFFFFFF) // canvas, cards, sheets
+val Paper05 = Color(0xFFFFFFFF) // canvas
+val Paper10 = Color(0xFFF5F6F3) // recessed wells, inputs
+val Paper20 = Color(0xFFEEEFEB) // pressed / selected fill
+val Paper30 = Color(0xFFE2E4DE) // strong fill, deliberate rule
+val Paper40 = Color(0xFFC9CDC5) // hairline on tinted ground
+
+// Linen — the warm half of the organiser shell in the icon. Used sparingly,
+// only where the product itself (the pill box) needs a second material.
+val Linen     = Color(0xFFEDE8DF)
+val LinenDeep = Color(0xFFD9D2C4)
 
 // ── Ink (light foreground ladder) ────────────────────────────────────────────
-val Ink00 = Color(0xFF15170F) // primary text — warm near-black, not pure
-val Ink40 = Color(0xFF3F4439) // secondary text
-val Ink60 = Color(0xFF6C7166) // tertiary text / metadata
-val Ink80 = Color(0xFFA0A499) // disabled, placeholder
+val Ink00 = Color(0xFF1B241A) // primary text — the H in the icon
+val Ink40 = Color(0xFF454D44) // secondary text
+val Ink60 = Color(0xFF737A71) // tertiary text / metadata
+val Ink80 = Color(0xFFA9AEA6) // disabled, placeholder
 
 // ── Forest (dark canvas ladder) ──────────────────────────────────────────────
 // Dark mode is its own art direction: a warm green-black, like ink on slate.
@@ -46,11 +53,13 @@ val Bone60 = Color(0xFF8B9084) // tertiary
 val Bone80 = Color(0xFF5E6359) // disabled
 
 // ── Sage — the brand ─────────────────────────────────────────────────────────
-val Sage         = Color(0xFF516351) // core brand (light accents)
-val SageDeep     = Color(0xFF32402F) // pressed accent, dark text on pale sage
-val SageInk      = Color(0xFF1C2A1C) // text on light sage fills
-val SageSoft     = Color(0xFFE2EBDE) // pale fill, light mode
-val SageMuted    = Color(0xFF8DA08C) // mid tone, works in both themes
+// The olive outline of the launcher icon. Every accent in the app is this one
+// pigment, so the app and its icon read as the same object.
+val Sage         = Color(0xFF5E6E5D) // core brand (light accents)
+val SageDeep     = Color(0xFF3E4B3D) // pressed accent, dark text on pale sage
+val SageInk      = Color(0xFF233022) // text on light sage fills
+val SageSoft     = Color(0xFFEEF1EC) // pale fill, light mode — a tint, not a colour
+val SageMuted    = Color(0xFF9AA698) // mid tone, works in both themes
 
 // Dark-mode brand: sage lifts and desaturates so it reads as *light* on ink.
 // A 0xFF516351 accent on Forest05 is unreadable; this is the corrected tone.
