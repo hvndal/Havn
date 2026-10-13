@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Original illustration: a steaming cup on a saucer. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="96dp" android:height="96dp"
+    android:viewportWidth="96" android:viewportHeight="96">
+    <path android:fillColor="#FFDD00" android:pathData="M48,48m-46,0a46,46 0,1 1,92 0a46,46 0,1 1,-92 0"/>
+    <path android:fillColor="#00000000" android:strokeColor="#1B241A" android:strokeWidth="3"
+        android:strokeLineCap="round" android:pathData="M38,20c-4,4 4,8 0,12M48,16c-4,5 4,10 0,15M58,20c-4,4 4,8 0,12"/>
+    <path android:fillColor="#FFFFFF" android:strokeColor="#1B241A" android:strokeWidth="3"
+        android:pathData="M28,38h40l-4,28c-0.6,4 -3.4,6 -7,6H39c-3.6,0 -6.4,-2 -7,-6z"/>
+    <path android:fillColor="#00000000" android:strokeColor="#1B241A" android:strokeWidth="3"
+        android:pathData="M67,44h4c4,0 6,3 5,7c-1,4 -4,6 -8,6h-3"/>
+    <path android:fillColor="#6B4226" android:pathData="M31.5,43h33l-0.8,6h-31.4z"/>
+    <path android:fillColor="#E8622C" android:pathData="M48,63c-5,-3 -8,-5.5 -8,-8.5c0,-2 1.6,-3.5 3.5,-3.5c1.9,0 3.3,1 4.5,2.6c1.2,-1.6 2.6,-2.6 4.5,-2.6c1.9,0 3.5,1.5 3.5,3.5c0,3 -3,5.5 -8,8.5z"/>
+    <path android:fillColor="#00000000" android:strokeColor="#1B241A" android:strokeWidth="3"
+        android:strokeLineCap="round" android:pathData="M22,77h52"/>
+</vector>

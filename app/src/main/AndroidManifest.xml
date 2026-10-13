@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <attribution
+        android:tag="default"
+        android:label="@string/app_name" />
+
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!--
+      • INTERNET was needed only because the 3D organizer loaded three.js from a
+        CDN, which also meant the app's signature screen silently failed to
+        render offline. three.js is now bundled in assets, so Hävn requests no
+        network access at all — which matches what it tells users on the
+        onboarding screen ("everything stays on this device").
+
+      • SCHEDULE_EXACT_ALARM is used to fire reminders on time (Android 12+), 
+        but relies on user consent via settings. If denied, alarms fall back 
+        to inexact Doze-safe triggers. USE_EXACT_ALARM remains excluded to avoid 
+        Play Store friction since this is not a strict alarm clock app.
+    -->
+
+    <application
+        android:name=".HavnApplication"
+        android:allowBackup="false"
+        android:fullBackupContent="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:usesCleartextTraffic="false"
+        android:theme="@style/Theme.Havn"
+        android:hardwareAccelerated="true">
+
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="uiMode|orientation|screenSize|screenLayout|keyboardHidden|density|fontScale|smallestScreenSize"
+            android:theme="@style/Theme.Havn.Splash">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Hands a single export file to the share sheet. Scoped to the
+             exports cache folder only (res/xml/file_paths.xml). -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <!-- WorkManager is initialised on demand via HavnApplication -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
+
+        <!-- BOOT_COMPLETED is a protected broadcast (only the system can send
+             it), and the receiver checks the action before acting. -->
+        <receiver
+            android:name=".notifications.BootReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.TIME_SET" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Handles "Mark taken" and "In 15 min" from a reminder notification -->
+        <receiver
+            android:name=".notifications.AlarmReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name=".widget.HavnWidgetReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/havn_widget_info" />
+        </receiver>
+
+    </application>
+
+</manifest>

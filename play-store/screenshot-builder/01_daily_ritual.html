@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Hävn — Daily Ritual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..800;1,9..144,300..800&family=Hanken+Grotesk:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0..1,0" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+  body {
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    background: #FBF9F5;
+    background: radial-gradient(ellipse at 50% 12%, rgba(141,160,140,0.22) 0%, rgba(251,249,245,0) 62%), #FBF9F5;
+    font-family: 'Hanken Grotesk', -apple-system, sans-serif;
+    color: #191C1A;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+
+  /* Ambient texture */
+  .grain {
+    position: absolute;
+    inset: 0;
+    opacity: 0.035;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    z-index: 99;
+  }
+
+  /* Header Section */
+  .header-section {
+    width: 960px;
+    margin-top: 54px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    z-index: 10;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 22px;
+    background: rgba(81, 99, 81, 0.08);
+    border: 1.5px solid rgba(81, 99, 81, 0.22);
+    border-radius: 999px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    color: #516351;
+    text-transform: uppercase;
+  }
+
+  .badge-icon {
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  .headline {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 48px;
+    font-weight: 600;
+    line-height: 1.14;
+    letter-spacing: -0.02em;
+    color: #191C1A;
+    margin-top: 18px;
+    max-width: 900px;
+  }
+
+  .subtitle {
+    font-size: 22px;
+    font-weight: 400;
+    color: #585F55;
+    margin-top: 10px;
+    letter-spacing: -0.01em;
+  }
+
+  /* Phone Mockup */
+  .phone-chassis {
+    position: absolute;
+    bottom: -80px;
+    width: 820px;
+    height: 1540px;
+    background: #181B19;
+    border-radius: 64px 64px 0 0;
+    padding: 14px 14px 0 14px;
+    box-shadow:
+      0 40px 100px -15px rgba(27, 36, 29, 0.35),
+      0 12px 36px rgba(0, 0, 0, 0.15),
+      inset 0 1px 2px rgba(255, 255, 255, 0.25);
+    display: flex;
+    flex-direction: column;
+    z-index: 5;
+  }
+
+  .phone-screen {
+    width: 100%;
+    height: 100%;
+    background: #FBF9F5;
+    border-radius: 52px 52px 0 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  /* Status Bar */
+  .status-bar {
+    height: 52px;
+    padding: 0 36px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 15px;
+    font-weight: 600;
+    color: #191C1A;
+    background: transparent;
+    z-index: 20;
+    margin-top: 4px;
+  }
+
+  .camera-punch {
+    width: 14px;
+    height: 14px;
+    background: #101211;
+    border-radius: 50%;
+    position: absolute;
+    left: 50%;
+    top: 20px;
+    transform: translateX(-50%);
+    box-shadow: inset 0 0 2px rgba(255,255,255,0.2);
+  }
+
+  .status-icons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+  }
+
+  /* App Screen Body */
+  .screen-content {
+    flex: 1;
+    padding: 12px 28px 24px 28px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* App Top Bar */
+  .app-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .app-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .app-logo-text {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: #191C1A;
+  }
+
+  .profile-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #FFFFFF;
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 999px;
+    padding: 4px 14px 4px 6px;
+    box-shadow: 0 2px 8px rgba(81,99,81,0.06);
+  }
+
+  .profile-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #516351;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .profile-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #191C1A;
+  }
+
+  /* Bottom Navigation */
+  .bottom-nav {
+    height: 84px;
+    background: #FFFFFF;
+    border-top: 1px solid rgba(0,0,0,0.06);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 24px;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.02);
+  }
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: #747872;
+  }
+
+  .nav-item.active {
+    color: #516351;
+  }
+
+  .nav-item .material-symbols-outlined {
+    font-size: 26px;
+  }
+
+  .nav-item.active .material-symbols-outlined {
+    font-variation-settings: 'FILL' 1;
+  }
+
+  .nav-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  /* Cards */
+  .ui-card {
+    background: #FFFFFF;
+    border-radius: 24px;
+    padding: 20px;
+    border: 1px solid rgba(0,0,0,0.05);
+    box-shadow: 0 4px 20px rgba(81,99,81,0.04);
+  }
+
+  .dose-item {
+    background: #FFFFFF;
+    border-radius: 20px;
+    padding: 16px 18px;
+    border: 1px solid rgba(0,0,0,0.05);
+    box-shadow: 0 2px 10px rgba(81,99,81,0.03);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+
+  .dose-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .check-circle {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #516351;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    box-shadow: 0 4px 12px rgba(81,99,81,0.25);
+  }
+
+  .take-button {
+    background: #516351;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 999px;
+    padding: 10px 22px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    margin-left: auto;
+    box-shadow: 0 4px 16px rgba(81,99,81,0.25);
+  }
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+  <div class="header-section">
+    <div class="badge">
+      <span class="badge-icon">✦</span>
+      <span>Daily Ritual</span>
+    </div>
+    <h1 class="headline">A calm, effortless view of every dose.</h1>
+    <p class="subtitle">Organized by morning, afternoon, evening and night.</p>
+  </div>
+
+  <div class="phone-chassis">
+    <div class="phone-screen">
+      <div class="camera-punch"></div>
+      <div class="status-bar">
+        <span>09:41</span>
+        <div class="status-icons">
+          <span>5G</span>
+          <span class="material-symbols-outlined" style="font-size:18px">wifi</span>
+          <span class="material-symbols-outlined" style="font-size:18px">battery_full</span>
+        </div>
+      </div>
+
+      <div class="screen-content">
+        <!-- App Bar -->
+        <div class="app-bar">
+          <div class="app-logo">
+            <svg width="26" height="26" viewBox="0 0 120 120" fill="none">
+              <path d="M60 16C40.1178 16 24 32.1178 24 52V76H96V52C96 32.1178 79.8822 16 60 16Z" stroke="#516351" stroke-width="8" stroke-linecap="round"/>
+              <circle cx="60" cy="42" r="10" fill="#8da08c"/>
+              <line x1="36" y1="76" x2="84" y2="76" stroke="#516351" stroke-width="7" stroke-linecap="round"/>
+            </svg>
+            <span class="app-logo-text">Hävn</span>
+          </div>
+          <div class="profile-pill">
+            <div class="profile-avatar">H</div>
+            <span class="profile-name">Henrik</span>
+            <span class="material-symbols-outlined" style="font-size:16px;color:#747872">notifications_none</span>
+          </div>
+        </div>
+
+        <!-- Greeting -->
+        <div style="margin-bottom: 20px;">
+          <h2 style="font-family:'Fraunces',serif; font-size:32px; font-weight:500; color:#191C1A; line-height:1.15">God morgen, Henrik</h2>
+          <p style="font-size:15px; color:#585F55; margin-top:4px">Monday, 24 October · All doses on schedule</p>
+        </div>
+
+        <!-- Metric Hero Card -->
+        <div class="ui-card" style="display:flex; align-items:center; gap:24px; margin-bottom: 22px; background:linear-gradient(135deg, #FFFFFF 0%, #F5F7F4 100%);">
+          <!-- Circular Progress Ring -->
+          <div style="position:relative; width:110px; height:110px; flex-shrink:0;">
+            <svg width="110" height="110" viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="50" fill="none" stroke="#E3E8E2" stroke-width="12" />
+              <circle cx="60" cy="60" r="50" fill="none" stroke="#516351" stroke-width="12"
+                      stroke-dasharray="314.159" stroke-dashoffset="78.5" stroke-linecap="round"
+                      transform="rotate(-90 60 60)" />
+            </svg>
+            <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+              <span style="font-family:'Fraunces',serif; font-size:26px; font-weight:700; color:#191C1A; line-height:1">75%</span>
+              <span style="font-size:10px; font-weight:700; color:#516351; letter-spacing:0.06em; margin-top:2px">TODAY</span>
+            </div>
+          </div>
+
+          <div style="flex:1;">
+            <div style="display:inline-flex; align-items:center; gap:6px; background:#E2EBDE; padding:4px 12px; border-radius:999px; margin-bottom:8px">
+              <span class="material-symbols-outlined" style="font-size:14px; color:#516351; font-variation-settings:'FILL' 1">eco</span>
+              <span style="font-size:12px; font-weight:700; color:#516351; letter-spacing:0.04em">14 DAY STREAK</span>
+            </div>
+            <h3 style="font-size:17px; font-weight:600; color:#191C1A">3 of 4 doses logged</h3>
+            <p style="font-size:13px; color:#585F55; margin-top:2px">Next dose due at 21:00 (Evening)</p>
+          </div>
+        </div>
+
+        <!-- Schedule Section Header -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding:0 4px;">
+          <span style="font-size:12px; font-weight:700; letter-spacing:0.12em; color:#516351; text-transform:uppercase">Today's Schedule</span>
+          <span style="font-size:12px; font-weight:600; color:#747872">4 Medications</span>
+        </div>
+
+        <!-- Dose 1 -->
+        <div class="dose-item">
+          <div class="dose-icon" style="background:#F7EFD8;">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="#E2C381">
+              <rect x="5" y="9" width="14" height="6" rx="3" transform="rotate(-45 12 12)" stroke="#B3934B" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div>
+            <h4 style="font-size:16px; font-weight:600; color:#191C1A">Vitamin D3 + K2</h4>
+            <p style="font-size:13px; color:#585F55">2,000 IU · 1 capsule · 08:30 AM</p>
+          </div>
+          <div class="check-circle">
+            <span class="material-symbols-outlined" style="font-size:20px; font-weight:700">check</span>
+          </div>
+        </div>
+
+        <!-- Dose 2 -->
+        <div class="dose-item">
+          <div class="dose-icon" style="background:#FFEADB;">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="#FEB28F">
+              <ellipse cx="12" cy="12" rx="7" ry="5" stroke="#D27950" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div>
+            <h4 style="font-size:16px; font-weight:600; color:#191C1A">Omega-3 EPA/DHA</h4>
+            <p style="font-size:13px; color:#585F55">1,000 mg · 2 softgels · 08:30 AM</p>
+          </div>
+          <div class="check-circle">
+            <span class="material-symbols-outlined" style="font-size:20px; font-weight:700">check</span>
+          </div>
+        </div>
+
+        <!-- Dose 3 -->
+        <div class="dose-item">
+          <div class="dose-icon" style="background:#E2EBDE;">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="#8DA08C">
+              <circle cx="12" cy="12" r="7" stroke="#516351" stroke-width="1.5"/>
+              <line x1="8" y1="12" x2="16" y2="12" stroke="#516351" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div>
+            <h4 style="font-size:16px; font-weight:600; color:#191C1A">Magnesium Glycinate</h4>
+            <p style="font-size:13px; color:#585F55">200 mg · 1 tablet · 13:30 PM</p>
+          </div>
+          <div class="check-circle">
+            <span class="material-symbols-outlined" style="font-size:20px; font-weight:700">check</span>
+          </div>
+        </div>
+
+        <!-- Dose 4 (Evening - Upcoming) -->
+        <div class="dose-item" style="border:1.5px solid rgba(81,99,81,0.3); background:#FCFBF8;">
+          <div class="dose-icon" style="background:#EFECE6;">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="#8A4F33">
+              <rect x="5" y="9" width="14" height="6" rx="3" transform="rotate(45 12 12)" stroke="#673922" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <h4 style="font-size:16px; font-weight:600; color:#191C1A">Ashwagandha</h4>
+              <span style="background:#FFDF9C; color:#735B23; font-size:10px; font-weight:700; padding:2px 6px; border-radius:4px">DUE 21:00</span>
+            </div>
+            <p style="font-size:13px; color:#585F55">600 mg · 1 capsule · Rest & calm</p>
+          </div>
+          <button class="take-button">Take</button>
+        </div>
+
+      </div>
+
+      <!-- Bottom Nav -->
+      <div class="bottom-nav">
+        <div class="nav-item active">
+          <span class="material-symbols-outlined">calendar_today</span>
+          <span class="nav-label">Today</span>
+        </div>
+        <div class="nav-item">
+          <span class="material-symbols-outlined">view_in_ar</span>
+          <span class="nav-label">Organizer</span>
+        </div>
+        <div class="nav-item">
+          <span class="material-symbols-outlined">monitoring</span>
+          <span class="nav-label">Progress</span>
+        </div>
+        <div class="nav-item">
+          <span class="material-symbols-outlined">tune</span>
+          <span class="nav-label">Settings</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

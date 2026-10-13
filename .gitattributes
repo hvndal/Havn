@@ -1,0 +1,20 @@
+# Normalise line endings. Without this, every file committed from Windows
+# shows as fully rewritten to a collaborator on macOS or Linux, which makes
+# diffs and blame useless.
+* text=auto eol=lf
+
+# Windows-only scripts must keep CRLF or cmd.exe will not run them.
+*.bat text eol=crlf
+
+# Never touched by text normalisation.
+*.png binary
+*.jpg binary
+*.webp binary
+*.zip binary
+*.jar binary
+*.keystore binary
+*.jks binary
+gradle/wrapper/gradle-wrapper.jar binary
+
+# Vendored library — exclude from language stats and diffs.
+app/src/main/assets/organizer/three.min.js linguist-vendored -diff

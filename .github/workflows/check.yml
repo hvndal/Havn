@@ -1,0 +1,41 @@
+name: Build check
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+jobs:
+  debug:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+      - run: chmod +x gradlew && ./gradlew --no-daemon assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: havn-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+      # Unit tests include a Robolectric launch test that boots the real app,
+      # walks every screen and renders each one to app/build/screenshots.
+      - name: Unit tests (launch, migration, schedule)
+        run: ./gradlew --no-daemon testDebugUnitTest
+      # Release-only issues (R8, dependency skew) must surface here, not on Play.
+      # Unsigned in CI: no keystore secrets are needed for this check.
+      - name: Release build + lint + androidTest compile
+        run: ./gradlew --no-daemon assembleRelease lintRelease assembleDebugAndroidTest
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: havn-screenshots
+          path: app/build/screenshots/*.png
+          if-no-files-found: ignore
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: havn-test-report
+          path: app/build/reports/tests/

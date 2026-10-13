@@ -1,0 +1,8 @@
+{
+  "name": "Hävn",
+  "description": "PILL ORGANISER. REMEMBER. LIVE BETTER.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

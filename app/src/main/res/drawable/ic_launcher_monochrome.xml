@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Themed-icon layer for Android 13+. The launcher tints this single-colour
+  silhouette with the user's wallpaper palette, so it must read as one solid
+  shape — no fills, no multi-tone detail.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108"
+    android:tint="#FFFFFF">
+
+    <path
+        android:pathData="M35,31 h38 a9,9 0 0 1 9,9 v28 a9,9 0 0 1 -9,9 h-38 a9,9 0 0 1 -9,-9 v-28 a9,9 0 0 1 9,-9 z"
+        android:strokeColor="#FFFFFF" android:strokeWidth="3.4" />
+    <path android:pathData="M54,31 V77" android:strokeColor="#FFFFFF" android:strokeWidth="3" />
+    <path android:pathData="M26,46.3 H54" android:strokeColor="#FFFFFF" android:strokeWidth="3" />
+    <path android:pathData="M26,61.6 H54" android:strokeColor="#FFFFFF" android:strokeWidth="3" />
+    <path android:pathData="M63,45 V63" android:strokeColor="#FFFFFF" android:strokeWidth="3.2" android:strokeLineCap="round" />
+    <path android:pathData="M73,45 V63" android:strokeColor="#FFFFFF" android:strokeWidth="3.2" android:strokeLineCap="round" />
+    <path android:pathData="M63,54 H73" android:strokeColor="#FFFFFF" android:strokeWidth="3.2" android:strokeLineCap="round" />
+</vector>

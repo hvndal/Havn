@@ -1,0 +1,44 @@
+# ── Build output ─────────────────────────────────────────────────────────────
+/build
+/app/build
+.gradle/
+/captures
+.externalNativeBuild
+.cxx
+*.apk
+*.aab
+
+# ── Machine-local config ─────────────────────────────────────────────────────
+# Contains the absolute Android SDK path for this machine.
+local.properties
+
+# ── Secrets ──────────────────────────────────────────────────────────────────
+# Signing material. A keystore is a credential: whoever holds it can publish
+# an update that Android accepts as coming from this developer.
+*.keystore
+*.jks
+*.p12
+*.pfx
+keystore.properties
+
+# API keys and service credentials.
+.env
+.env.*
+!.env.example
+secrets.properties
+google-services.json
+service-account*.json
+*.pem
+*.key
+
+# ── IDE / OS ─────────────────────────────────────────────────────────────────
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+
+# ── Local scratch ────────────────────────────────────────────────────────────
+/havn.zip
+
+# Local release builds (build-release.sh)
+/release-output/
