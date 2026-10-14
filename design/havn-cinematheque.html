@@ -1,4 +1,4 @@
-<title>Hävn Cinematheque</title>
+<title>Hävn Medication Reminder</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="Hävn design direction: a glass capsule with seven day shelves, studio light, film grain and film-paced motion.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -350,7 +350,7 @@ figcaption b{display:block;color:var(--ink);font-weight:600;font-size:11px;lette
 
 <nav class="nav" aria-label="Reels">
   <div class="wrap">
-    <a class="nav-mark" href="#top">Hävn <span class="muted" style="font-weight:500">Cinematheque</span></a>
+    <a class="nav-mark" href="#top">Hävn <span class="muted" style="font-weight:500">Medication Reminder</span></a>
     <div class="nav-reels lbl">
       <a href="#brief">R1 Brief</a><a href="#object">R2 Object</a><a href="#colour">R3 Colour</a><a href="#type">R4 Type</a><a href="#shaders">R5 Light</a><a href="#motion">R6 Motion</a><a href="#assets">R7 Assets</a><a href="#frames">R8 Frames</a><a href="#handoff">R9 Build</a>
     </div>
@@ -359,7 +359,7 @@ figcaption b{display:block;color:var(--ink);font-weight:600;font-size:11px;lette
 
 <header class="hero" id="top">
   <canvas id="hero-cv" class="hero-cv" role="img" aria-label="Live render of a clear glass capsule with seven shelves of pills, standing on a warm grey studio sweep"></canvas>
-  <div class="hero-top"><div class="wrap"><span class="lbl">Hävn — design direction, October 2026</span><span class="lbl">R0 / Title card</span></div></div>
+  <div class="hero-top"><div class="wrap"><span class="lbl">Hävn Medication Reminder — design, October 2026</span><span class="lbl">R0 / Title card</span></div></div>
   <div class="hero-in">
     <div class="wrap hero-grid">
       <div class="hero-copy">
@@ -676,6 +676,7 @@ figcaption b{display:block;color:var(--ink);font-weight:600;font-size:11px;lette
           <tr><td>Ghost ring</td><td>400 after 400</td><td>Projector</td><td>Same Animatable, ring alpha = <span class="inline">((p − 0.57) / 0.43).coerceIn(0f, 1f)</span></td></tr>
           <tr><td>Count</td><td>360</td><td>Projector</td><td><span class="inline">AnimatedContent</span> with a 100% vertical offset, no fade</td></tr>
           <tr><td>Shelf focus</td><td>900</td><td>Dolly</td><td>Camera scale and translation on the capsule <span class="inline">graphicsLayer</span></td></tr>
+          <tr><td>Opening type (M-07)</td><td>600 hold / 700</td><td>Dolly</td><td>Every launch: F00 holds 600 ms, then the big type scales 1 → 0.2 toward the Today headline while fading, and Today dissolves in under it. Reduced motion: straight to Today.</td></tr>
           <tr><td>Title card</td><td>900 / 1600 / 1200</td><td>Projector</td><td>First launch only, then never again</td></tr>
           <tr><td>Ambient drift</td><td>26 s loop</td><td>Sine</td><td>Glint phase on Capsule; stops when the screen is not visible</td></tr>
           <tr><td>Grain</td><td>24 fps</td><td>Stepped</td><td><span class="inline">frame = floor(seconds × 24)</span></td></tr>
@@ -755,11 +756,25 @@ figcaption b{display:block;color:var(--ink);font-weight:600;font-size:11px;lette
     <header class="reel-head g12">
       <p class="lbl">R8 / Frames</p>
       <div class="rh">
-        <h2 class="reel-title">Ten frames.</h2>
-        <p class="reel-dek">Each screen reads like a magazine page or a title card: one object, one statement, the schedule set as credits. Shown at 360 × 760 dp with the example schedule, Wednesday 14 October at 13:00. F01 and F09 are Late show; the rest are Matinée.</p>
+        <h2 class="reel-title">Eleven frames.</h2>
+        <p class="reel-dek">Each screen reads like a magazine page or a title card: one object, one statement, the schedule set as credits. Shown at 360 × 760 dp with the example schedule, Wednesday 14 October at 13:00. F01 and F09 are Late show; the rest are Matinée. F00 is the opening: every time the app opens, the next time and what is left are set enormous, hold, then the type dissolves down into Today (M-07).</p>
       </div>
     </header>
     <div class="frames">
+
+      <!-- F00 Opening type -->
+      <figure class="frame"><div class="frame-cap"><span class="lbl">F00 Opening</span><span class="muted">Every launch</span></div>
+        <div class="pbox"><div class="phone mat" style="background:#EEE9E0">
+          <div class="ph-head"><span class="ph-lbl">H-01 / Today</span><span class="ph-lbl">Wed 14.10</span></div>
+          <div class="abs" style="top:46px;padding:0 0 0 4px">
+            <p style="font-size:262px;line-height:.76;font-weight:600;letter-spacing:-.075em;font-feature-settings:'tnum'">13<br>:00</p>
+          </div>
+          <div class="abs" style="top:462px;padding:0 6px">
+            <p style="font-size:118px;line-height:.8;font-weight:600;letter-spacing:-.07em">Three<br>left.</p>
+          </div>
+          <div class="abs" style="bottom:26px;padding:0 20px;display:flex;justify-content:space-between"><span class="ph-lbl">Iron — 65 mg — due now</span><span class="ph-lbl" style="color:var(--p-2)">M-07</span></div>
+        </div></div>
+      </figure>
 
       <!-- F01 Title card -->
       <figure class="frame"><div class="frame-cap"><span class="lbl">F01 Title card</span><span class="muted">First launch</span></div>

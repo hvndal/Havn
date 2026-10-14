@@ -1,4 +1,4 @@
-# Hävn Cinematheque — design direction
+# Hävn Medication Reminder — design direction
 
 The pill box becomes a **glass capsule with seven shelves**, one per day, shot
 like a product on a studio sweep. Paper, ink and the olive from the icon. One
@@ -19,7 +19,7 @@ bitmaps match the design exactly.
 | R5 Light | Four AGSL shaders with live WebGL previews |
 | R6 Motion | Curves, six playable motion studies, the timing table |
 | R7 Assets | Pill specimens, glass layers, grain, icons, widget stub |
-| R8 Frames | Ten app screens at 360 × 760 dp |
+| R8 Frames | Eleven app screens at 360 × 760 dp |
 | R9 Build | The order to implement it (expanded below) |
 
 ```
@@ -291,3 +291,12 @@ put them beside F02–F09. Done means:
 - No spring, overshoot or slide in any transition.
 - A taken dose leaves a ring; a missed dose stays; Monday is the top shelf.
 - Body text contrast ≥ 4.5 : 1 in both themes.
+
+### Opening type (F00, M-07)
+
+Every time the app opens, before Today: the next dose time and what is left,
+set huge (`13 / :00` at 262 sp, bleeding off the right edge, `Three left.` at 118 sp, SemiBold, −7 % tracking,
+tabular). Hold 600 ms, then scale the type 1 → 0.2 towards the Today headline
+over 700 ms with `Dolly` easing while it fades, and dissolve Today in beneath.
+No slide, no bounce. Reduced motion skips straight to Today. Nothing due today:
+show `All done.` instead of the time.
