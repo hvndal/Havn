@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Renders every Hävn design asset from design/havn-cinematheque.html, using the
+// Renders every Hävn design asset from design/havn-medication-reminder.html, using the
 // same WebGL model as the design file, and writes them to design/assets/ (and the
 // AGSL sources to design/shaders/).
 //
@@ -17,7 +17,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const designDir = path.resolve(here, '..');
 const assetsDir = path.join(designDir, 'assets');
-const page = pathToFileURL(path.join(designDir, 'havn-cinematheque.html')).href + '#export';
+const page = pathToFileURL(path.join(designDir, 'havn-medication-reminder.html')).href + '#export';
 const only = process.argv[2] || '';
 
 async function loadPlaywright() {

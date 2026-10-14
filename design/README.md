@@ -5,7 +5,7 @@ like a product on a studio sweep. Paper, ink and the olive from the icon. One
 type family. Cuts and dissolves at film pace, 24 fps grain, glass glint, a light
 leak for the title card.
 
-Everything visual lives in one file: **`havn-cinematheque.html`**. Open it in any
+Everything visual lives in one file: **`havn-medication-reminder.html`**. Open it in any
 desktop browser with WebGL 2. Every capsule, pill and shader in it is a live
 render from the same model that produced the assets in `assets/`, so the app's
 bitmaps match the design exactly.
@@ -24,7 +24,7 @@ bitmaps match the design exactly.
 
 ```
 design/
-├── havn-cinematheque.html   the design file (also holds the AGSL sources)
+├── havn-medication-reminder.html   the design file (also holds the AGSL sources)
 ├── shaders/                 grain.agsl · sweep.agsl · glint.agsl · leak.agsl
 ├── assets/
 │   ├── capsule/             glass tint + light layers, shadow, mask, capsule_layout.json
