@@ -1,0 +1,31 @@
+// Hävn — S-03 Glint
+// A slow band of studio light that travels across the glass, masked to the
+// capsule silhouette so it only ever lives on the glass.
+// Drive `phase` from scroll (Today) or a 26 s loop (Capsule). Never fast.
+//
+// Use as a RenderEffect on the capsule layer:
+//   RenderEffect.createRuntimeShaderEffect(shader, "glass")
+//   shader.setInputShader("mask", BitmapShader(capsuleMask, CLAMP, CLAMP))
+//
+// Inputs
+//   glass  the capsule layer being drawn
+//   mask   capsule_mask.png, same size and position as the capsule
+//   size   draw size in px
+//   phase  0–1, position of the band across the capsule
+
+uniform shader glass;
+uniform shader mask;
+uniform float2 size;
+uniform float phase;
+
+half4 main(float2 fragCoord) {
+    half4 c = glass.eval(fragCoord);
+    float m = mask.eval(fragCoord).a;
+    float2 uv = fragCoord / size;
+    float x = uv.x * 0.85 + uv.y * 0.35;               // a 22° diagonal
+    float centre = phase * 1.7 - 0.35;
+    float wide = exp(-pow((x - centre) / 0.030, 2.0));
+    float thin = 0.35 * exp(-pow((x - centre + 0.08) / 0.012, 2.0));
+    c.rgb += half3(1.0, 0.975, 0.94) * half((wide + thin) * 0.5 * m);
+    return c;
+}

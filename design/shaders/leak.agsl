@@ -1,0 +1,26 @@
+// Hävn — S-04 Leak
+// A warm light leak that blooms and dies during one dissolve: the title card
+// into Today, and the end card after the day's last dose. Apply it as a
+// RenderEffect on the screen container while Compose runs the crossfade.
+//
+// Inputs
+//   content   the screen
+//   size      draw size in px
+//   progress  0 → 1 over the 1200 ms dissolve (Projector easing)
+
+uniform shader content;
+uniform float2 size;
+uniform float progress;
+
+half4 main(float2 fragCoord) {
+    half4 c = content.eval(fragCoord);
+    float aspect = size.x / size.y;
+    float2 p = fragCoord / size.y;
+    float2 src = float2(aspect * (1.05 - progress * 0.45), 0.12 + progress * 0.25);
+    float glow = (1.0 - smoothstep(0.0, 0.75, distance(p, src)))
+               * sin(3.14159 * clamp(progress, 0.0, 1.0));
+    half3 leak = half3(1.0, 0.58, 0.28) * half(glow * 0.65)
+               + half3(1.0, 0.85, 0.60) * half(pow(glow, 3.0) * 0.4);
+    c.rgb = 1.0 - (1.0 - c.rgb) * (1.0 - leak);       // screen blend
+    return c;
+}

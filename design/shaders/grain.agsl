@@ -1,0 +1,29 @@
+// Hävn — S-01 Grain
+// Film grain at 24 fps. Draw it over a whole screen with Overlay blending:
+//   drawRect(ShaderBrush(shader), blendMode = BlendMode.Overlay)
+// It returns mid-grey plus noise, so where the noise is zero Overlay leaves
+// the picture untouched.
+//
+// Uniforms
+//   size    draw size in px
+//   frame   whole frame number at 24 fps: floor(seconds * 24)
+//   amount  0.10 on Matinée, 0.14 on Late show
+//   grainPx grain size in px, 1.5 at xxhdpi
+
+uniform float2 size;
+uniform float frame;
+uniform float amount;
+uniform float grainPx;
+
+float hash12(float2 p) {
+    float3 p3 = fract(float3(p.xyx) * 0.1031);
+    p3 += dot(p3, p3.yzx + 33.33);
+    return fract((p3.x + p3.y) * p3.z);
+}
+
+half4 main(float2 fragCoord) {
+    float2 cell = floor(fragCoord / grainPx);
+    float n = hash12(cell + mod(frame, 240.0) * float2(17.0, 59.4));
+    float g = 0.5 + (n - 0.5) * amount;
+    return half4(half3(g), 1.0);
+}
