@@ -2,15 +2,18 @@
 
 Welcome to **Hävn**, a premium Scandinavian-minimalist medication organiser and reminder app built natively with modern Android Jetpack Compose.
 
+For comprehensive technical rules, LocalLifecycleOwner guardrails, and architectural conventions, see [LLM_README.md](file:///c:/Users/herma/Downloads/Nouveau%20dossier%20(8)/LLM_README.md).
+
 ## Project Overview
 
 - **Package / Application ID**: `com.havnmeds.app`
 - **Namespace**: `com.havn.app`
-- **Target SDK**: API 35 (Android 15)
+- **Target SDK**: API 36 (Android 15 / 16 preview compliant)
+- **Compile SDK**: API 36
 - **Min SDK**: API 26 (Android 8.0 Oreo)
-- **Version**: `1.1.0` (versionCode `4`)
-- **UI Framework**: 100% Declarative Jetpack Compose + Material 3 + Custom Organiser Shader Canvas
-- **Database**: Room 2.6.x (offline local-first SQLite, zero cloud data transfer)
+- **Version**: `1.1.3` (versionCode `21`)
+- **UI Framework**: 100% Declarative Jetpack Compose + Material 3 + Custom Organiser Canvas
+- **Database**: Room 2.6.x (offline local-first SQLite, zero cloud data transfer, zero INTERNET permission)
 - **DI**: Dagger Hilt
 - **Widget**: Android Glance AppWidget (`HavnWidget`)
 
@@ -21,6 +24,7 @@ Welcome to **Hävn**, a premium Scandinavian-minimalist medication organiser and
 ```
 Havn/
 ├── START-HERE.md          # Quick start guide for building and publishing
+├── LLM_README.md          # Detailed pair-programming manual & gotchas for all LLMs
 ├── GEMINI.md              # Project instructions for AI pair programmers & agents
 ├── AGENTS.md              # Duplicate pointer for multi-agent workflows
 ├── build-release.sh       # One-command automated build script for Linux/macOS/Codespaces
@@ -29,15 +33,16 @@ Havn/
 │   │   ├── java/com/havn/app/     # Native Kotlin source code
 │   │   ├── assets/organizer/      # Three.js 3D organizer model
 │   │   └── res/                   # Drawables, icons, layout, themes
+│   └── src/test/                  # Robolectric UI walkthrough & database migration tests
 ├── play-store/            # Google Play Store publishing assets
 │   ├── graphics/          # 512×512 app icon, 1024×500 feature graphic, screenshots/
 │   └── listing/           # Store descriptions, privacy policy, Play Console answers
-└── release-output/        # Output directory for production .aab and mapping files
+└── release-output/        # Output directory for production .aab, .apk, and mapping files
 ```
 
 ---
 
-## Build Commands
+## Build & Test Commands
 
 ### On Windows (PowerShell / Command Prompt)
 
@@ -45,6 +50,9 @@ Havn/
 # Set JDK 17 (from Android Studio JBR)
 $env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
 $env:ANDROID_HOME = "$env:LOCALAPPDATA\Android\Sdk"
+
+# Run tests & verify full screen rendering
+.\gradlew.bat testDebugUnitTest
 
 # Build release bundle (.aab)
 .\gradlew.bat bundleRelease
@@ -63,7 +71,7 @@ bash build-release.sh
 
 ## Google Play Publishing Checklist
 
-1. **Upload Artifact**: `release-output/Havn-1.1.0.aab`
+1. **Upload Artifact**: `release-output/Havn-1.1.3.aab`
 2. **Graphics**:
    - App Icon: `play-store/graphics/icon-512.png`
    - Feature Graphic: `play-store/graphics/feature-graphic-1024x500.png`
