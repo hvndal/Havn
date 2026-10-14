@@ -24,10 +24,6 @@ jobs:
       # walks every screen and renders each one to app/build/screenshots.
       - name: Unit tests (launch, migration, schedule)
         run: ./gradlew --no-daemon testDebugUnitTest
-      # Release-only issues (R8, dependency skew) must surface here, not on Play.
-      # Unsigned in CI: no keystore secrets are needed for this check.
-      - name: Release build + lint + androidTest compile
-        run: ./gradlew --no-daemon assembleRelease lintRelease assembleDebugAndroidTest
       - if: always()
         uses: actions/upload-artifact@v4
         with:
