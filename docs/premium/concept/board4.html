@@ -1,0 +1,105 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css">
+<style>
+.lock { background: radial-gradient(120% 70% at 30% 10%, #F3EEE5 0%, #DCD3C3 45%, #9EA391 100%); }
+.lock .clock { text-align:center; font: 400 92px/1 Serif; color:#fff; margin-top: 70px; text-shadow: 0 2px 20px rgba(0,0,0,.12); letter-spacing:-2px; }
+.lock .date { text-align:center; font: 500 15px Sans; color: rgba(255,255,255,.95); margin-top: 6px; }
+.notif { margin: 34px 14px 0; background: rgba(255,255,255,.9); border-radius: 26px; padding: 16px 16px 12px; box-shadow: 0 10px 30px -12px rgba(0,0,0,.25); backdrop-filter: blur(10px); }
+.nh { display:flex; align-items:center; gap:8px; font: 500 12px Sans; color: var(--ink3); }
+.nh img { width: 18px; height: 18px; }
+.nb { display:flex; gap: 12px; margin-top: 10px; }
+.nb .tx { flex:1; } .nb h5 { font: 600 15px Sans; } .nb p { font: 400 13.5px/1.4 Sans; color: var(--ink2); margin-top: 3px; }
+.nb canvas { width: 64px; height: 64px; border-radius: 14px; background: #F2EEE6; }
+.prog { display:flex; gap:3px; margin-top: 12px; } .prog i { flex:1; height: 4px; border-radius: 2px; background: #E2E4DE; } .prog i.on { background: var(--olive); }
+.na { display:flex; gap: 8px; margin-top: 12px; } .na span { flex:1; text-align:center; padding: 10px 0; border-radius: 99px; font: 600 13px Sans; background: #EEF1EC; color: var(--olive); } .na span.p { background: var(--olive); color:#fff; }
+.home { background: linear-gradient(170deg, #E8E4DC 0%, #CFD3C6 100%); }
+.wgrid { padding: 70px 18px 0; display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.w { background: rgba(255,255,255,.94); border-radius: 26px; padding: 14px; box-shadow: 0 8px 24px -14px rgba(0,0,0,.3); }
+.w.big { grid-column: span 2; display:flex; flex-direction:column; }
+.w .lab { font: 600 10px Sans; letter-spacing: 1.4px; color: var(--ink3); }
+.w .nx { font: 400 24px/1.1 Serif; margin-top: 4px; }
+.w .sm { font: 500 12px Sans; color: var(--ink3); margin-top: 3px; }
+.w .take { margin-top: 10px; align-self:flex-start; padding: 8px 16px; border-radius: 99px; background: var(--olive); color:#fff; font: 600 12px Sans; }
+.icons { display:grid; grid-template-columns: repeat(4,1fr); gap: 18px; padding: 26px 30px; }
+.icons i { aspect-ratio:1; border-radius: 16px; background: rgba(255,255,255,.55); }
+.ringw { display:grid; place-items:center; height: 150px; position:relative; }
+.ringw .num { position:absolute; text-align:center; } .ringw .num b { font: 400 40px/1 Serif; display:block; } .ringw .num span { font: 500 11px Sans; color: var(--ink3); }
+.specs { display:flex; flex-direction:column; gap: 18px; width: 560px; }
+</style></head><body>
+<div class="board-title">Beyond the app — and the system behind the feel</div>
+<div class="board-sub">The notification and widgets carry the same object: a rendered miniature of today's box, the same five-segment line, the same two actions. On the right, the motion, haptic and sound tokens every screen draws from — one vocabulary, so the whole app feels made by one hand.</div>
+<div class="row">
+  <div class="col"><div class="cap">F · Lock screen reminder</div>
+  <div class="phone lock">
+    <div class="status" style="color:#fff"><span></span><span><i></i><i></i></span></div>
+    <div class="clock">8:00</div><div class="date">Tuesday, 14 October</div>
+    <div class="notif">
+      <div class="nh"><img src="logo.svg">Hävn · now</div>
+      <div class="nb"><div class="tx"><h5>Morning · 2 doses</h5><p>Metformin 500 mg<br>Vitamin D 1000 IU</p></div><canvas id="nimg"></canvas></div>
+      <div class="prog"><i class="on"></i><i></i><i></i><i></i><i></i></div>
+      <div class="na"><span class="p">Taken</span><span>In 15 min</span></div>
+    </div>
+  </div>
+  <div class="note"><b>Rich, calm, actionable.</b> Large icon = a bitmap of the open compartment rendered by the same Canvas code. Segment bar via <span class="mono">Notification.ProgressStyle</span> on Android 16 (fallback: plain text “1 of 5 today”). One sound, short vibration; never a full-screen alert.</div>
+  </div>
+
+  <div class="col"><div class="cap">G · Home screen widgets</div>
+  <div class="phone home">
+    <div class="status"><span>8:14</span><span><i></i><i></i></span></div>
+    <div class="wgrid">
+      <div class="w big"><div class="lab">HÄVN · MORNING</div><canvas id="wbox"></canvas>
+        <div style="display:flex;align-items:flex-end;justify-content:space-between"><div><div class="nx">Vitamin D</div><div class="sm">8:00 · 1 of 2 left</div></div><div class="take">Take</div></div></div>
+      <div class="w"><div class="lab">TODAY</div><div class="ringw"><canvas id="ring"></canvas><div class="num"><b>3</b><span>of 5</span></div></div></div>
+      <div class="w"><div class="lab">NEXT</div><div class="nx" style="margin-top:22px">13:00</div><div class="sm">Lisinopril 10 mg</div><canvas id="wp" style="margin-top:14px"></canvas></div>
+    </div>
+    <div class="icons"><i></i><i></i><i></i><i></i></div>
+  </div>
+  <div class="note"><b>Widgets show the object, not a list.</b> Glance can't draw a Canvas, so render the box to a bitmap (same renderer, 2× density) and pass it as <span class="mono">ImageProvider(bitmap)</span>. “Take” logs the exact slot through the repository and refreshes all widgets.</div>
+  </div>
+
+  <div class="specs">
+    <div class="spec"><h4>Motion tokens</h4><table>
+      <tr><td>press</td><td>spring · damping 0.70 · stiffness 600 · scale 0.97</td></tr>
+      <tr><td>lift</td><td>spring · damping 0.72 · stiffness 380 · arc flight 700 ms ease-in-out cubic</td></tr>
+      <tr><td>lid</td><td>open: spring 0.62 / 300 to 108° · close: same spring with contact bounce ≤ 6°</td></tr>
+      <tr><td>settle</td><td>spring · damping 0.85 · stiffness 220 (lists, sheets)</td></tr>
+      <tr><td>reveal</td><td>320 ms · cubic(0.16, 1, 0.3, 1) · 12 dp rise · 45 ms stagger, cap 360 ms</td></tr>
+      <tr><td>shared</td><td>380 ms · bounds spring 0.85 / 260 · content cross-fade 160 ms</td></tr>
+      <tr><td>count</td><td>odometer roll 240 ms per digit</td></tr>
+      <tr><td>reduce</td><td>all of the above → 0 ms cross-fades when animator scale is 0</td></tr>
+    </table></div>
+    <div class="spec"><h4>Haptic palette</h4><table>
+      <tr><td>tick</td><td>PRIMITIVE_TICK 0.35 — touch a pill, scrub periods <span class="mono">· fallback CLOCK_TICK</span></td></tr>
+      <tr><td>click</td><td>PRIMITIVE_CLICK 0.7 — dose recorded <span class="mono">· fallback CONFIRM</span></td></tr>
+      <tr><td>thud</td><td>PRIMITIVE_THUD 0.5 (API 31+) — lid contact <span class="mono">· fallback CONTEXT_CLICK</span></td></tr>
+      <tr><td>day</td><td>QUICK_RISE 0.4 → 60 ms → CLICK 0.6 → TICK 0.3 — day complete</td></tr>
+      <tr><td>reject</td><td>LOW_TICK ×2, 40 ms apart — undo / not allowed</td></tr>
+    </table></div>
+    <div class="spec"><h4>Sound palette (felt marimba, −18 LUFS, mono, 48 kHz)</h4><table>
+      <tr><td>sfx_tap</td><td>existing · UI taps, ≤ 60 ms</td></tr>
+      <tr><td>sfx_lift <span class="mono">new</span></td><td>soft breath + wood “tok” at A5, 120 ms, low-passed 6 kHz</td></tr>
+      <tr><td>sfx_take</td><td>existing · dose recorded</td></tr>
+      <tr><td>sfx_lid</td><td>existing · felt click on lid contact</td></tr>
+      <tr><td>sfx_day <span class="mono">new</span></td><td>D5 · F♯5 · A5 arpeggio, 90 ms apart, 1.4 s tail</td></tr>
+      <tr><td>havn_nudge</td><td>existing · notification channel sound</td></tr>
+    </table></div>
+  </div>
+</div>
+<script src="box.js"></script>
+<script>
+document.fonts.ready.then(() => {
+  let c = setupCanvas('nimg', 64, 64);
+  c.save(); c.translate(-8, -62); c.scale(0.44, 0.44);
+  drawBox(c, 780, 620, { lids:[108,0,0,0], selected:0, current:0, top:0.4, labels:false, pills:[[{type:'tablet',tag:'sand'},{type:'capsule',tag:'sage'}],[],[],[]] });
+  c.restore();
+  c = setupCanvas('wbox', 330, 180);
+  drawBox(c, 660, 360, { inset:0.14, lids:[108,0,0,0], selected:0, current:0, top:0.40, labels:false, marks:[null,1,null,1], pills:[[{type:'capsule',tag:'sage',taken:true},{type:'tablet',tag:'sand'}],[{type:'oval',tag:'clay'}],[],[{type:'capsule',tag:'slate'}]] });
+  c = setupCanvas('ring', 120, 120);
+  const segs = 5, gap = 0.12;
+  for (let i = 0; i < segs; i++) {
+    const a0 = -Math.PI/2 + i * 2*Math.PI/segs + gap/2, a1 = a0 + 2*Math.PI/segs - gap;
+    c.beginPath(); c.arc(120, 120, 100, a0, a1); c.lineWidth = 12; c.lineCap = 'round'; c.strokeStyle = i < 3 ? '#5E6E5D' : '#E2E4DE'; c.stroke();
+  }
+  c = setupCanvas('wp', 40, 30); pill(c, 'oval', 40, 30, 60, -20, MED.light.clay, {});
+  document.body.dataset.ready = 1;
+});
+</script></body></html>

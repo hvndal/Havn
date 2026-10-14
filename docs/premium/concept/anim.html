@@ -1,0 +1,102 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css">
+<style>
+body { padding: 0; background: #E9E8E3; }
+#wrap { display:flex; gap: 36px; padding: 36px 44px; background:#E9E8E3; align-items:center; }
+.phone { box-shadow: 0 30px 60px -24px rgba(27,36,26,.3), 0 0 0 10px #F8F8F6, 0 0 0 11px #DADBD5; }
+.top { display:flex; align-items:center; padding: 8px 0 22px; }
+.word { font: 400 18px Serif; letter-spacing: 3px; }
+.av { margin-left:auto; width:36px; height:36px; border-radius:50%; background: var(--oliveSoft); color: var(--olive); display:grid; place-items:center; font: 600 14px Sans; }
+.hello { font: 400 38px/1.05 Serif; letter-spacing:-0.6px; margin-top: 12px; }
+.hello em { font-family: SerifI; font-style: normal; }
+.lede { font: 400 15px/1.45 Sans; color: var(--ink2); margin-top: 10px; height: 22px; position: relative; }
+.lede span { position:absolute; left:0; top:0; white-space:nowrap; }
+.stage { position: relative; height: 262px; margin-top: 18px; }
+#cv { position:absolute; left:0; top:-6px; z-index:2; }
+.hint { display:flex; justify-content:center; font: 500 12px Sans; color: var(--ink3); }
+.seg { display:flex; gap:4px; margin-top: 22px; }
+.seg i { flex:1; height:3px; border-radius:2px; background: var(--hair); transition: none; }
+.seg i.on { background: var(--olive); }
+.meta { display:flex; justify-content:space-between; margin-top: 10px; font: 500 12px Sans; color: var(--ink3); }
+.meta b { color: var(--ink); font-weight:600; display:inline-block; }
+.r { display:flex; align-items:center; gap:14px; padding: 11px 0; border-top: 1px solid var(--hair); margin-top: 18px; }
+.r .t { width: 46px; font: 600 13px Sans; color: var(--ink2); } .r .n { flex:1; font: 500 15px Sans; } .r .n small { display:block; font: 400 12px Sans; color: var(--ink3); margin-top:2px; }
+.panel { width: 300px; }
+.panel h2 { font: 400 30px/1.1 Serif; letter-spacing: -0.4px; }
+.panel .sub { font: 400 13px/1.5 Sans; color: var(--ink3); margin: 8px 0 20px; }
+.ev { display:flex; align-items:center; gap:10px; padding: 9px 12px; border-radius: 12px; margin-bottom: 6px; font: 500 13px Sans; color: var(--ink3); background: rgba(255,255,255,.4); }
+.ev .ms { font: 600 11px Sans; width: 46px; color: var(--ink4); }
+.ev .kind { font: 600 10px Sans; letter-spacing: 1.2px; padding: 3px 7px; border-radius: 99px; background: #fff; }
+.ev.on { background:#fff; color: var(--ink); box-shadow: 0 6px 16px -8px rgba(27,36,26,.3); }
+.ev.on .kind.h { background: var(--olive); color:#fff; } .ev.on .kind.s { background:#B98A2E; color:#fff; } .ev.on .kind.v { background: var(--ink); color:#fff; }
+.clock { font: 600 12px Sans; color: var(--olive); margin-top: 16px; letter-spacing: 1px; }
+</style></head><body>
+<div id="wrap">
+  <div class="phone" id="phone">
+    <div class="status"><span>8:12</span><span><i></i><i></i></span></div>
+    <div class="pad">
+      <div class="top"><span class="word">HÄVN</span><span class="av">E</span></div>
+      <div class="eyebrow">Tuesday · 14 October</div>
+      <div class="hello">Good morning, <em>Elin</em>.</div>
+      <div class="lede" id="lede"></div>
+    </div>
+    <div class="stage"><canvas id="cv"></canvas></div>
+    <div class="hint">Tap a pill to take it</div>
+    <div class="pad">
+      <div class="seg" id="seg"><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="meta"><span><b id="cnt">1</b> of 5 today</span><span>Next · <b>13:00</b> Lisinopril</span></div>
+      <div class="r"><span class="t">13:00</span><span class="n">Lisinopril<small>10 mg · with food</small></span></div>
+    </div>
+    <div class="tabbar" id="tb"></div>
+  </div>
+  <div class="panel">
+    <h2>Taking the morning</h2>
+    <div class="sub">Two taps. Each pill flies to the day's line; the empty compartment closes itself.</div>
+    <div id="log"></div>
+    <div class="clock" id="clock"></div>
+  </div>
+</div>
+<script src="box.js"></script>
+<script>
+document.getElementById('tb').innerHTML = `<div class="tab on">Today</div><div class="tab">Box</div><div class="tab">Progress</div><div class="tab">Settings</div>`;
+const EV = [
+  [300,'h','Tick 0.35','touch tablet'],[450,'s','sfx_lift','lift'],[1150,'h','Click 0.7','lands · 2 of 5'],[1150,'s','sfx_take',''],
+  [1500,'h','Tick 0.35','touch softgel'],[1650,'s','sfx_lift','lift'],[2350,'h','Click 0.7','lands · 3 of 5'],[2350,'s','sfx_take',''],
+  [2940,'v','Thud 0.5','lid contact'],[2940,'s','sfx_lid','felt click'],
+];
+document.getElementById('log').innerHTML = EV.map((e,i)=>`<div class="ev" id="e${i}"><span class="ms">${e[0]}</span><span class="kind ${e[1]}">${e[1]=='s'?'SOUND':'HAPTIC'}</span>${e[2]}<span style="margin-left:auto;font-size:11px">${e[3]}</span></div>`).join('');
+const ctx = setupCanvas('cv', 390, 330);
+const ease = t => t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2;
+const clamp = (v,a=0,b=1) => Math.max(a, Math.min(b, v));
+function target(k) {
+  const seg = document.querySelectorAll('#seg i')[k].getBoundingClientRect(), c = document.getElementById('cv').getBoundingClientRect();
+  return [(seg.left + seg.width/2 - c.left) * 2, (seg.top + 1 - c.top) * 2];
+}
+function pillState(t, t0, k) {
+  if (t < t0) return {};
+  if (t < t0 + 150) return { lift: 0.05, dy: -40, scale: 1.06, touch: (t - t0) / 150 };
+  if (t < t0 + 850) { const u = ease((t - t0 - 150) / 700); return { lift: 1, to: target(k), t: u, scale: 1.06 - 0.66 * u, arc: 230 }; }
+  return { taken: true };
+}
+function lidAngle(t) {
+  if (t < 2700) return 108;
+  const s = (t - 2700) / 1000;
+  return 108 * Math.exp(-6 * s) * Math.abs(Math.cos(6.5 * s));
+}
+function render(t) {
+  const tab = Object.assign({type:'tablet',tag:'sand'}, pillState(t, 300, 1));
+  const soft = Object.assign({type:'softgel',tag:'amber'}, pillState(t, 1500, 2));
+  const filled = 1 + (t >= 1150) + (t >= 2350);
+  document.querySelectorAll('#seg i').forEach((el,i) => el.className = i < filled ? 'on' : '');
+  document.getElementById('cnt').textContent = filled;
+  const lede = t < 1150 ? 'Two doses waiting in the morning compartment.' : t < 2350 ? 'One dose left this morning.' : t < 3150 ? 'Morning done.' : 'Morning done. Next · Lisinopril at 13:00.';
+  document.getElementById('lede').innerHTML = `<span>${lede}</span>`;
+  ctx.clearRect(0, 0, 780, 660);
+  const lid = lidAngle(t);
+  drawBox(ctx, 780, 660, { lids:[lid,0,0,0], selected:0, current:0, top:0.33,
+    tickIn: clamp((t - 2450) / 200), marks:[t > 3050 ? 'tick' : null, null, null, null],
+    pills:[[{type:'capsule',tag:'sage',taken:true}, tab, soft], [{type:'oval',tag:'clay'}], [], [{type:'capsule',tag:'slate'}]] });
+  EV.forEach((e,i) => document.getElementById('e'+i).classList.toggle('on', t >= e[0] && t < e[0] + 450));
+  document.getElementById('clock').textContent = `t = ${Math.round(t)} ms`;
+}
+document.fonts.ready.then(() => { render(0); document.body.dataset.ready = 1; });
+</script></body></html>

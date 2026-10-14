@@ -1,0 +1,72 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css">
+<style>
+.frames { display:flex; gap:22px; margin-top:40px; }
+.frame { width: 300px; }
+.frame .shot { width:300px; height:360px; background:#fff; border-radius:28px; overflow:hidden; position:relative; box-shadow: 0 18px 40px -18px rgba(27,36,26,.25); border:1px solid #E2E4DE; }
+.frame .t { font: 600 11px Sans; letter-spacing:1.4px; color: var(--olive); margin-top:16px; }
+.frame h3 { font: 400 22px Serif; margin-top:4px; }
+.frame p { font: 400 12.5px/1.5 Sans; color: var(--ink2); margin-top:6px; }
+.frame .k { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+.frame .k span { font: 500 11px Sans; padding:4px 9px; border-radius:99px; background: var(--oliveSoft); color: var(--olive); }
+.frame .k span.s { background:#F7EEDC; color:#8A6B22; }
+.counter { position:absolute; left:20px; bottom:16px; right:20px; }
+.counter .seg { display:flex; gap:4px; } .counter .seg i { flex:1; height:3px; border-radius:2px; background: var(--hair); } .counter .seg i.on { background: var(--olive); }
+.counter .lab { font: 500 12px Sans; color: var(--ink3); margin-top:8px; } .counter .lab b { color: var(--ink); }
+.ring { position:absolute; width:46px; height:46px; border-radius:50%; border:2px solid var(--olive); display:grid; place-items:center; }
+.ring:after { content:''; width:12px; height:7px; border-left:2px solid var(--olive); border-bottom:2px solid var(--olive); transform: rotate(-45deg) translate(1px,-2px); }
+.timeline { margin-top:44px; background:#fff; border:1px solid var(--hair2); border-radius:20px; padding:22px 26px; width: 1588px; }
+.tl { position:relative; height:120px; margin-top:58px; }
+.tl .axis { position:absolute; left:0; right:0; top:22px; height:1px; background: var(--hair2); }
+.tl .tick { position:absolute; top:14px; font: 500 11px Sans; color: var(--ink3); transform: translateX(-50%); }
+.tl .tick:before { content:''; display:block; width:1px; height:8px; background: var(--ink4); margin: 0 auto 4px; }
+.tl .bar { position:absolute; height:18px; border-radius:9px; font: 600 10.5px/18px Sans; padding: 0 9px; white-space:nowrap; color:#fff; }
+.tl .ev { position:absolute; font: 600 10.5px Sans; padding: 3px 8px; border-radius: 99px; transform: translateX(-50%); white-space:nowrap; }
+.ev.h { background: var(--oliveSoft); color: var(--olive); } .ev.snd { background:#F7EEDC; color:#8A6B22; }
+</style></head><body>
+<div class="board-title">The signature moment — taking a dose</div>
+<div class="board-sub">Touch the pill itself. It lifts out of its compartment, travels to the day's progress line and becomes a filled segment. When a compartment is empty its lid closes on its own with a felt click. Under 1.2 s end to end, fully interruptible, and every beat has a sound and a haptic that line up to the frame.</div>
+<div class="frames" id="frames"></div>
+<div class="timeline">
+  <div class="cap">Timeline · ms from touch-down (springs shown at their settle time)</div>
+  <div class="tl" id="tl"></div>
+</div>
+<script src="box.js"></script>
+<script>
+const F = [
+  { t:'0 ms', h:'Touch', p:'Finger lands on the softgel. It rises 3 dp and scales to 1.06; its shadow widens. Neighbouring pills dim to 70 %.', k:['haptic · tick 0.35'], st:{lift:0.08,scale:1.06}, seg:2 },
+  { t:'0–380 ms', h:'Lift', p:'On release (or after a 220 ms press-and-hold) the pill rises out along an arc, turning flat-on. Spring: damping 0.72, stiffness 380.', k:['sound · sfx_lift'], st:{lift:0.7,dy:-150,dx:40,endTilt:0}, seg:2 },
+  { t:'380–620 ms', h:'Land', p:'The pill shrinks into the progress line and becomes the next filled segment. Counter rolls 2 → 3 (odometer).', k:['haptic · click 0.7','sound · sfx_take'], st:{lift:1,alpha:0.85,dy:178,dx:150,scale:0.45,endTilt:0}, seg:3, ring:true },
+  { t:'620–1050 ms', h:'Close', p:'Last pill out → the empty compartment shows a drawn tick, then the lid swings shut (damping 0.62). Contact frame fires the click.', k:['haptic · thud 0.5','sound · sfx_lid'], lid:40, seg:3, empty:true },
+  { t:'1050 ms +', h:'Settle', p:'Lid embossed with a tick. The next compartment\'s dot pulses once. Undo is available for 4 s from a quiet snackbar.', k:['no sound'], lid:0, seg:3, empty:true, done:true },
+];
+const host = document.getElementById('frames');
+F.forEach((f,i) => {
+  host.insertAdjacentHTML('beforeend', `<div class="frame"><div class="shot"><canvas id="f${i}"></canvas>
+    <div class="counter"><div class="seg">${[0,1,2,3,4].map(j=>`<i class="${j < (f.seg||1) ? 'on':''}"></i>`).join('')}</div><div class="lab"><b>${f.seg||1}</b> of 5 today</div></div></div>
+    <div class="t">${f.t}</div><h3>${f.h}</h3><p>${f.p}</p><div class="k">${f.k.map(x=>`<span class="${x.startsWith('sound')?'s':''}">${x}</span>`).join('')}</div></div>`);
+});
+// Timeline
+const tl = document.getElementById('tl'), W = 1530, ms = x => x / 1250 * W;
+tl.innerHTML = '<div class="axis"></div>' + [0,200,400,600,800,1000,1200].map(t=>`<div class="tick" style="left:${ms(t)}px">${t}</div>`).join('');
+const bars = [[0,120,'press · scale 1.06','#9AA698',44],[120,380,'lift · spring 0.72 / 380','#5E6E5D',44],[380,620,'land → segment fills · odometer','#3E4B3D',66],[620,700,'tick draws','#9AA698',88],[700,1050,'lid closes · spring 0.62 / 300','#5E6E5D',88]];
+bars.forEach(([a,b,l,c,y]) => tl.insertAdjacentHTML('beforeend', `<div class="bar" style="left:${ms(a)}px;width:${ms(b-a)}px;top:${y}px;background:${c}">${l}</div>`));
+[[0,'tick 0.35','h'],[130,'sfx_lift','snd'],[600,'click 0.7','h'],[600,'sfx_take','snd'],[1040,'thud 0.5','h'],[1040,'sfx_lid','snd']].forEach(([t,l,c],k) =>
+  tl.insertAdjacentHTML('beforeend', `<div class="ev ${c}" style="left:${ms(t)+(c=='snd'?0:0)}px;top:${c=='snd'?-14:-36}px">${l}</div>`));
+document.fonts.ready.then(() => {
+  F.forEach((f,i) => {
+    const ctx = setupCanvas('f'+i, 300, 330);
+    ctx.save(); ctx.translate(-40, -30); ctx.scale(1.3, 1.3);
+    const morning = [{type:'capsule',tag:'sage',taken:true},{type:'tablet',tag:'sand',taken:true}];
+    let soft = {type:'softgel',tag:'amber'};
+    if (f.st) soft = Object.assign(soft, f.st);
+    if (f.empty) soft = {type:'softgel',tag:'amber',taken:true};
+    morning.push(soft);
+    const lid0 = f.lid !== undefined ? f.lid : 108;
+    drawBox(ctx, 600, 520, { lids:[lid0,0,0,0], selected:0, current:0, top:0.40, labels:true,
+      tickIn: f.empty ? 1 : 0, marks: f.done ? ['tick',1,null,1] : [null,1,null,1],
+      pills:[morning,[{type:'oval',tag:'clay'}],[],[{type:'capsule',tag:'slate'}]] });
+    ctx.restore();
+  });
+  document.body.dataset.ready = 1;
+});
+</script></body></html>

@@ -1,0 +1,112 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css">
+<style>
+.bar { display:flex; align-items:center; padding: 6px 0 14px; }
+.back { width:40px; height:40px; border-radius:50%; border:1px solid var(--hair2); display:grid; place-items:center; }
+.back:after { content:''; width:8px; height:8px; border-left:1.6px solid var(--ink); border-bottom:1.6px solid var(--ink); transform: rotate(45deg) translate(1px,-1px); }
+.edit { margin-left:auto; font: 600 14px Sans; color: var(--olive); }
+.tray { margin: 0 16px; height: 230px; border-radius: 28px; background: radial-gradient(120% 90% at 30% 20%, #FBF9F5 0%, #EFEAE1 60%, #E6E0D4 100%); position:relative; overflow:hidden; box-shadow: inset 0 1px 0 #fff, inset 0 -18px 30px -20px rgba(94,110,93,.18); border:1px solid #E5E0D6; }
+.tray canvas { position:absolute; inset:0; }
+.tray .tag { position:absolute; left:18px; bottom:16px; font: 600 10px Sans; letter-spacing:1.4px; color:#8C8576; }
+.name { font: 400 42px/1 Serif; letter-spacing:-0.8px; margin-top: 18px; }
+.dose { font: 400 15px Sans; color: var(--ink2); margin-top: 8px; }
+.times { display:flex; gap:10px; margin-top: 18px; }
+.time { flex:1; border:1px solid var(--hair2); border-radius:16px; padding: 12px 14px; }
+.time b { font: 600 17px Sans; display:block; }
+.time span { font: 500 12px Sans; color: var(--ink3); }
+.time.done { background: var(--oliveSoft); border-color: transparent; } .time.done span { color: var(--olive); }
+.h14 { margin-top: 22px; }
+.dots { display:grid; grid-template-columns: repeat(14, 1fr); gap: 6px; margin-top: 10px; }
+.dots i { aspect-ratio:1; border-radius:50%; background: var(--olive); }
+.dots i.m { background: transparent; box-shadow: inset 0 0 0 1.5px var(--ink4); } .dots i.s { background:#D9BA74; } .dots i.t { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px var(--olive); background: var(--oliveSoft); }
+.legend { display:flex; gap:14px; margin-top: 8px; font: 500 11px Sans; color: var(--ink3); }
+.notes { margin-top: 18px; border-radius: 16px; background: #F7F7F4; padding: 12px 14px; font: 400 13px/1.5 Sans; color: var(--ink2); }
+.actions { position:absolute; left:24px; right:24px; bottom: 30px; display:flex; gap: 10px; }
+.actions .btn { flex:1; }
+.mini { transform-origin: top left; }
+.field { border-bottom: 1.5px solid var(--olive); padding: 10px 0; font: 400 26px Serif; margin-top: 20px; }
+.field .caret { display:inline-block; width:2px; height:26px; background: var(--olive); vertical-align: -4px; margin-left: 2px; }
+</style></head><body>
+<div class="board-title">Detail, and the first minute</div>
+<div class="board-sub">Long-press a pill (or tap its row) and it grows into its own page — the same object, not a new screen. First launch is a short assembly: the box is built in front of you, then your first medicine is placed into it.</div>
+<div class="row">
+  <div class="col"><div class="cap">D · Medication detail (shared element)</div>
+  <div class="phone">
+    <div class="status"><span>19:48</span><span><i></i><i></i></span></div>
+    <div class="pad"><div class="bar"><span class="back"></span><span class="edit">Edit</span></div></div>
+    <div class="tray"><canvas id="spec"></canvas><span class="tag">TABLET · SAND · SCORED</span></div>
+    <div class="pad">
+      <div class="name">Metformin</div>
+      <div class="dose">500 mg · with breakfast and dinner</div>
+      <div class="times"><div class="time done"><b>08:00</b><span>Taken 08:04</span></div><div class="time"><b>20:00</b><span>Due in 12 min</span></div></div>
+      <div class="h14"><div class="eyebrow">Last 14 days</div>
+        <div class="dots"><i></i><i></i><i></i><i class="m"></i><i></i><i></i><i></i><i></i><i class="s"></i><i></i><i></i><i></i><i></i><i class="t"></i></div>
+        <div class="legend"><span>● taken</span><span>○ missed</span><span style="color:#B98A2E">● skipped</span></div></div>
+      <div class="notes">Take with food. Kidney function check due in March.</div>
+    </div>
+    <div class="actions"><div class="btn ghost">Skip</div><div class="btn primary">Take 20:00 now</div></div>
+  </div>
+  <div class="note"><b>Shared element:</b> the pill in the box (or the row glyph) morphs into the specimen tray — <span class="mono">SharedTransitionLayout</span> + <span class="mono">Modifier.sharedElement</span> (Compose 1.7+). Back gesture reverses it with predictive back. The tray is the same linen as the box body.</div>
+  </div>
+
+  <div class="col"><div class="cap">E1 · First launch — the box assembles</div>
+  <div class="phone">
+    <div class="status"><span>9:00</span><span><i></i><i></i></span></div>
+    <canvas id="o1" style="margin-top:120px"></canvas>
+    <div class="pad" style="text-align:center;margin-top:10px">
+      <div class="serif" style="font-size:40px;letter-spacing:-0.6px">Hävn</div>
+      <div class="dose" style="margin-top:6px">A calm place for your medicines.</div>
+    </div>
+  </div>
+  <div class="note"><b>0–1.6 s:</b> the base rises out of the white (fade + 12 dp), then four lids drop in one at a time, 90 ms apart, each landing with a soft tick and a light haptic. Wordmark fades in last. Skippable by tap; under reduce-motion the finished box simply appears.</div>
+  </div>
+
+  <div class="col"><div class="cap">E2 · Who is it for</div>
+  <div class="phone">
+    <div class="status"><span>9:00</span><span><i></i><i></i></span></div>
+    <canvas id="o2" style="margin-top:40px;margin-bottom:-40px"></canvas>
+    <div class="pad">
+      <div class="eyebrow" style="margin-top:20px">Step 1 of 2</div>
+      <div class="serif" style="font-size:36px;line-height:1.05;margin-top:10px;letter-spacing:-0.5px">Who is this box for?</div>
+      <div class="field">Elin<span class="caret"></span></div>
+      <div class="dose" style="margin-top:14px">No account, no cloud. Everything stays on this phone.</div>
+    </div>
+    <div class="actions"><div class="btn primary">Continue</div></div>
+  </div>
+  <div class="note"><b>Personal from the first word:</b> the name is engraved on the front of the box as you type (small caps, letter-spaced). One question per screen, large serif prompt, keyboard opens automatically.</div>
+  </div>
+
+  <div class="col"><div class="cap">E3 · Your first medicine goes in</div>
+  <div class="phone">
+    <div class="status"><span>9:01</span><span><i></i><i></i></span></div>
+    <canvas id="o3" style="margin-top:40px;margin-bottom:-40px"></canvas>
+    <div class="pad">
+      <div class="eyebrow" style="margin-top:20px">Step 2 of 2</div>
+      <div class="serif" style="font-size:36px;line-height:1.05;margin-top:10px;letter-spacing:-0.5px">Vitamin D, every morning at 8:00.</div>
+      <div class="dose" style="margin-top:12px">We'll nudge you at 8:00 with a soft chime. You can change it any time.</div>
+    </div>
+    <div class="actions"><div class="btn primary">Done</div></div>
+  </div>
+  <div class="note"><b>The payoff:</b> after the form, the configured pill drops from above into the Morning compartment (gravity ease, small bounce), the lid closes over it, and the reminder time appears under the box. The user has <i>seen</i> the product work before they ever get a notification.</div>
+  </div>
+</div>
+<script src="box.js"></script>
+<script>
+document.fonts.ready.then(() => {
+  // Specimen: a big scored tablet on linen
+  const sp = document.getElementById('spec'); sp.width = 716; sp.height = 460; sp.style.width='358px'; sp.style.height='230px';
+  const c = sp.getContext('2d');
+  c.fillStyle = 'rgba(40,48,38,0.16)'; c.beginPath(); c.ellipse(358, 300, 130, 30, 0, 0, 7); c.filter='blur(8px)'; c.fill(); c.filter='none';
+  pill(c, 'tablet', 358, 220, 360, -18, MED.light.sand, {});
+  // Onboarding
+  let ctx = setupCanvas('o1', 390, 300);
+  ctx.globalAlpha = 1;
+  drawBox(ctx, 780, 600, { lids:[0,0,22,70], selected:-1, current:-1, top:0.38, labels:false, pills:[[],[],[],[]] });
+  ctx = setupCanvas('o2', 390, 290);
+  const b = drawBox(ctx, 780, 500, { lids:[0,0,0,0], selected:-1, current:-1, top:0.34, labels:false, pills:[[],[],[],[]] });
+  ctx.font = '600 22px Sans'; ctx.letterSpacing = '6px'; ctx.fillStyle = '#5E6E5D'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('ELIN', 390, b.front + (b.bottom - b.front) * 0.56);
+  ctx = setupCanvas('o3', 390, 290);
+  drawBox(ctx, 780, 500, { lids:[108,0,0,0], selected:0, current:0, top:0.38, labels:true, pills:[[{type:'capsule',tag:'sage',lift:0.62,dy:-160,endTilt:-10,scale:1.3}],[],[],[]] });
+  document.body.dataset.ready = 1;
+});
+</script></body></html>
