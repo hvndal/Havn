@@ -29,7 +29,7 @@ TASKS (in order; each step builds and keeps the app working; commit per step)
   - paper, surfaceRaised, ink, ink2, ink3, rule, signal, taken (= ink), for light and dark.
   - Map every existing semantic slot onto them: accent → signal; positive and taken → ink; warning and danger → ink with words, never a second hue.
   - Delete Sage/Clay/Amber/Slate/Sand as UI colours; medication colour tags become ink shades or are dropped.
-- Contrast: check signal #C23A05 on paper #F2F1EC (should be about 4.9:1) and paper text on a signal bar. If either fails 4.5:1, darken signal slightly or make the bar text ink. Use ink3 only for ≥24 sp or non-text.
+- Contrast: check signal #C23A05 on paper #F2F1EC is 4.76:1 and paper text on a signal bar is 4.76:1, both passing AA. Dark #FF5A1F on #121210 is 6.0:1. ink3 #8E8F85 on paper is only 2.9:1, so use it for non-text or ≥24 sp only, never for labels.
 - Dark mode: use font grade (not weight) on Archivo if the axis exists to offset heavier-looking text.
 - HavnTypography.kt: hero 96/700 tnum −0.055em; title 34/700 −0.035em; row 17/600; body 15/400; label = Plex Mono 11 caps +0.13em; nav/caption = Plex Mono 9 caps +0.10em. Nothing between 17 and 34.
 - Shapes: every radius 0. Spacing tokens 4/8/12/20/32/56, gutter 20 dp. Remove all shadows and tonal elevation.
