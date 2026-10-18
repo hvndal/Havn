@@ -1,0 +1,134 @@
+<title>Hävn Swiss Preview</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Page: a contact strip of phone frames at 360×760. Frames carry their own fixed app tokens. */
+:root{--bg:#E6E5DF;--fg:#14140E;--mut:#5A5B50;--rule:#C9C8BF;
+  --sans:"Archivo","Helvetica Neue",Helvetica,sans-serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0B0B0A;--fg:#EDECE4;--mut:#9C9D93;--rule:#2A2A26;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0B0B0A;--fg:#EDECE4;--mut:#9C9D93;--rule:#2A2A26;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans)}
+.wrap{max-width:1500px;margin:0 auto;padding-block:40px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:16px;border-bottom:2px solid var(--fg);padding-bottom:16px;margin-bottom:32px}
+h1{margin:0;font-size:clamp(40px,7vw,88px);line-height:.9;font-weight:700;letter-spacing:-.045em}
+.k{font-family:var(--mono);font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:40px 20px}
+figure{margin:0;display:flex;flex-direction:column;gap:10px;min-width:0}
+.box{position:relative;width:100%;aspect-ratio:360/760;overflow:hidden;outline:1px solid var(--rule)}
+.ph{position:absolute;left:0;top:0;width:360px;height:760px;transform-origin:0 0;transform:scale(var(--s,1));background:var(--p);color:var(--i);font-family:var(--sans);overflow:hidden}
+.L{--p:#F2F1EC;--r:#FBFAF7;--i:#14140E;--i2:#5A5B50;--i3:#8E8F85;--ru:#D3D2C9;--sg:#C23A05}
+.D{--p:#121210;--r:#1A1A17;--i:#EDECE4;--i2:#9C9D93;--i3:#6A6B62;--ru:#2A2A26;--sg:#FF5A1F}
+.m{font-family:var(--mono);text-transform:uppercase;letter-spacing:.13em;font-size:11px}
+.top{position:absolute;left:20px;right:20px;top:20px;display:flex;justify-content:space-between}
+.hero{font-size:96px;line-height:.86;font-weight:700;letter-spacing:-.055em;font-variant-numeric:tabular-nums}
+.t34{font-size:34px;line-height:1;font-weight:700;letter-spacing:-.035em}
+.row{display:grid;grid-template-columns:52px 1fr 20px;gap:12px;align-items:center;height:56px;padding:0 20px;border-bottom:1px solid var(--ru)}
+.row .n{font-size:17px;font-weight:600;letter-spacing:-.01em}.row .d{font-size:15px;color:var(--i2)}
+.row.next{background:var(--sg);color:#F2F1EC;border-bottom-color:var(--sg)}.row.next .d{color:#F2F1EC}
+.row.done .n,.row.done .d,.row.done .m{color:var(--i3)}
+.cb{width:20px;height:20px;border:1.5px solid currentColor;position:relative}
+.cb.on{background:var(--i);border-color:var(--i)}
+.cb.on::after{content:"";position:absolute;left:4px;top:5px;width:9px;height:4px;border-left:2px solid var(--p);border-bottom:2px solid var(--p);transform:rotate(-45deg)}
+.nav{position:absolute;left:0;right:0;bottom:0;height:56px;border-top:2px solid var(--i);display:grid;grid-template-columns:repeat(4,1fr);background:var(--p)}
+.nav span{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;display:flex;align-items:center;justify-content:center;color:var(--i2);position:relative}
+.nav span.on{color:var(--i)}.nav span.on::before{content:"";position:absolute;top:-2px;left:22%;right:22%;height:2px;background:var(--sg)}
+.rule2{height:2px;background:var(--i);margin:0 20px}
+.spec{padding:14px 20px;border-bottom:1px solid var(--ru)}.spec .v{font-size:34px;font-weight:700;letter-spacing:-.035em;line-height:1.05;margin-top:6px}.spec .v.s{font-size:17px;font-weight:600;letter-spacing:-.01em}
+.mx{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:0 64px 0 20px}
+.mx i{aspect-ratio:1;display:block;background:var(--i)}.mx i.p{opacity:.35}.mx i.x{background:transparent;box-shadow:inset 0 0 0 1.5px var(--sg)}.mx i.f{background:transparent;box-shadow:inset 0 0 0 1px var(--ru)}
+.btn{display:flex;align-items:center;height:52px;padding:0 20px;background:var(--i);color:var(--p);font-weight:600;font-size:15px;justify-content:space-between}
+.btn.o{background:transparent;color:var(--i);box-shadow:inset 0 0 0 1px var(--i)}
+.notes{margin-top:56px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;border-top:2px solid var(--fg);padding-top:20px}
+.notes p{margin:6px 0 0;font-size:15px;line-height:1.5;color:var(--mut);max-width:60ch}
+</style>
+
+<div class="wrap">
+<header><h1>Hävn,<br>Swiss.</h1><span class="k">Preview · 360×760 dp · Example: Wed 14.10, 12:18</span></header>
+<div class="grid">
+
+<figure><span class="k">01 Launch · splash</span><div class="box"><div class="ph L"></div></div><span class="k">Plain paper. No logo.</span></figure>
+
+<figure><span class="k">02 Today</span><div class="box"><div class="ph L">
+ <div class="top m"><span>Today</span><span>Wed 14.10</span></div>
+ <div style="position:absolute;top:84px;left:20px;right:20px"><span class="m" style="color:var(--i2)">Next dose in</span><div class="hero" style="margin-top:10px">42<span style="font-size:34px;letter-spacing:-.03em"> min</span></div></div>
+ <div style="position:absolute;top:262px;left:0;right:0"><div class="rule2"></div>
+  <div class="row done"><span class="m">08:00</span><span><span class="n">Metformin</span> <span class="d">500 mg</span></span><span class="cb on"></span></div>
+  <div class="row done"><span class="m">08:00</span><span><span class="n">Vitamin D3</span> <span class="d">2,000 IU</span></span><span class="cb on"></span></div>
+  <div class="row next"><span class="m">13:00</span><span><span class="n">Iron</span> <span class="d">65 mg</span></span><span class="cb"></span></div>
+  <div class="row"><span class="m">19:00</span><span><span class="n">Metformin</span> <span class="d">500 mg</span></span><span class="cb"></span></div>
+  <div class="row"><span class="m">22:00</span><span><span class="n">Magnesium</span> <span class="d">200 mg</span></span><span class="cb"></span></div>
+  <div class="m" style="padding:14px 20px;color:var(--i2)">Hold a row · skip or later</div>
+ </div>
+ <div class="nav"><span class="on">Today</span><span>History</span><span>Meds</span><span>Settings</span></div></div></div><span class="k">One hero. One orange bar.</span></figure>
+
+<figure><span class="k">03 Today · dark</span><div class="box"><div class="ph D">
+ <div class="top m"><span>Today</span><span>Wed 14.10</span></div>
+ <div style="position:absolute;top:84px;left:20px;right:20px"><span class="m" style="color:var(--i2)">Next dose in</span><div class="hero" style="margin-top:10px">42<span style="font-size:34px;letter-spacing:-.03em"> min</span></div></div>
+ <div style="position:absolute;top:262px;left:0;right:0"><div class="rule2"></div>
+  <div class="row done"><span class="m">08:00</span><span><span class="n">Metformin</span> <span class="d">500 mg</span></span><span class="cb on"></span></div>
+  <div class="row done"><span class="m">08:00</span><span><span class="n">Vitamin D3</span> <span class="d">2,000 IU</span></span><span class="cb on"></span></div>
+  <div class="row next" style="color:#121210"><span class="m">13:00</span><span><span class="n">Iron</span> <span class="d" style="color:#121210">65 mg</span></span><span class="cb"></span></div>
+  <div class="row"><span class="m">19:00</span><span><span class="n">Metformin</span> <span class="d">500 mg</span></span><span class="cb"></span></div>
+  <div class="row"><span class="m">22:00</span><span><span class="n">Magnesium</span> <span class="d">200 mg</span></span><span class="cb"></span></div>
+ </div>
+ <div class="nav"><span class="on">Today</span><span>History</span><span>Meds</span><span>Settings</span></div></div></div><span class="k">Lamp-lit, not inverted.</span></figure>
+
+<figure><span class="k">04 Today · all taken</span><div class="box"><div class="ph L">
+ <div class="top m"><span>Today</span><span>Wed 14.10</span></div>
+ <div style="position:absolute;top:84px;left:20px"><span class="m" style="color:var(--i2)">5 of 5 taken</span><div class="hero" style="margin-top:10px">Done.</div></div>
+ <div style="position:absolute;top:262px;left:0;right:0"><div class="rule2"></div>
+  <div class="row done"><span class="m">22:00</span><span><span class="n">Magnesium</span> <span class="d">200 mg</span></span><span class="cb on"></span></div>
+  <div class="m" style="padding:14px 20px;color:var(--i2)">Next · Thu 08:00 · Metformin</div></div>
+ <div class="nav"><span class="on">Today</span><span>History</span><span>Meds</span><span>Settings</span></div></div></div><span class="k">No confetti.</span></figure>
+
+<figure><span class="k">05 History</span><div class="box"><div class="ph L">
+ <div class="top m"><span>History</span><span>9 weeks</span></div>
+ <div style="position:absolute;top:84px;left:20px"><span class="m" style="color:var(--i2)">Adherence</span><div class="hero" style="margin-top:10px">94<span style="font-size:34px">%</span></div></div>
+ <div style="position:absolute;top:262px;left:0;right:0"><div class="rule2"></div>
+  <div class="mx m" style="margin:12px 0 8px;font-size:9px;color:var(--i2)"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
+  <div class="mx" id="mx"></div>
+  <div class="m" style="padding:14px 20px;color:var(--i2);font-size:9px;letter-spacing:.1em">■ Taken · ▪ Partial · <span style="color:var(--sg)">□ Missed</span></div></div>
+ <div class="nav"><span>Today</span><span class="on">History</span><span>Meds</span><span>Settings</span></div></div></div><span class="k">Missed is an outline, not a fill.</span></figure>
+
+<figure><span class="k">06 Add medication</span><div class="box"><div class="ph L">
+ <div class="top m"><span>New medication</span><span>Close</span></div>
+ <div style="position:absolute;top:64px;left:0;right:0">
+  <div class="spec"><span class="m" style="color:var(--i2)">Name</span><div class="v">Iron</div></div>
+  <div class="spec"><span class="m" style="color:var(--i2)">Dose</span><div class="v">65 mg</div></div>
+  <div class="spec"><span class="m" style="color:var(--i2)">Times</span><div class="v" style="font-variant-numeric:tabular-nums">13:00</div></div>
+  <div class="spec"><span class="m" style="color:var(--i2)">Repeat</span><div class="v s">Mon · Wed · Fri</div></div>
+  <div class="spec"><span class="m" style="color:var(--i2)">Form</span><div class="v s">Tablet</div></div>
+ </div>
+ <div style="position:absolute;left:20px;right:20px;bottom:24px"><div class="btn">Save<span class="m" style="color:var(--p)">→</span></div></div></div></div><span class="k">A spec sheet, not a form.</span></figure>
+
+<figure><span class="k">07 Onboarding · privacy</span><div class="box"><div class="ph D">
+ <div class="top m"><span>Hävn</span><span>2 / 5</span></div>
+ <div style="position:absolute;left:20px;right:20px;top:220px;font-size:64px" class="hero">No account.<br><span style="color:var(--sg)">No network.</span></div>
+ <div style="position:absolute;left:20px;right:20px;bottom:24px"><div class="btn" style="background:var(--i);color:var(--p)">Continue<span class="m" style="color:var(--p)">→</span></div></div></div></div><span class="k">Four words, own screen.</span></figure>
+
+<figure><span class="k">08 Notification + widget</span><div class="box"><div class="ph D" style="--p:#26251F">
+ <div style="position:absolute;top:24px;left:12px;right:12px;background:#F2F1EC;color:#14140E;padding:14px 16px">
+  <span class="m" style="font-size:9px;color:#5A5B50">Hävn · now</span>
+  <div style="font-weight:700;font-size:17px;margin-top:4px">13:00 · Iron · 65 mg</div>
+  <div style="font-size:14px;color:#5A5B50">Due now</div>
+  <div class="m" style="margin-top:10px;display:flex;gap:20px;color:#C23A05">Taken<span style="color:#14140E">In 15 min</span></div></div>
+ <div style="position:absolute;top:300px;left:16px;right:16px;background:#F2F1EC;color:#14140E;padding:16px;border-top:2px solid #14140E">
+  <span class="m" style="font-size:9px;color:#5A5B50">Next</span>
+  <div style="display:flex;justify-content:space-between;align-items:end;margin-top:4px"><div><div style="font-size:34px;font-weight:700;letter-spacing:-.035em;font-variant-numeric:tabular-nums">13:00</div><div style="font-size:15px">Iron · 65 mg</div></div>
+  <span class="m" style="background:#C23A05;color:#F2F1EC;padding:10px 12px">Taken</span></div></div>
+</div></div><span class="k">Square, paper, one orange button.</span></figure>
+
+</div>
+<div class="notes">
+ <div><span class="k">What changed</span><p>Glass capsule, olive, serif, cards, blobs and springs are gone. Ink on paper, one orange signal, Archivo + Plex Mono, zero radius, 2 dp rules.</p></div>
+ <div><span class="k">Logo loading</span><p>The splash is plain paper and goes straight to Today. The launcher icon becomes a typographic mark, not a pill box.</p></div>
+ <div><span class="k">Motion</span><p>Checkbox fills ink upward in 140 ms. The orange bar cuts to the next dose. History fills in a diagonal wave on first open.</p></div>
+</div>
+</div>
+<script>
+const mx=document.getElementById('mx');const miss=[9,24,40],part=[3,17,30,51];
+for(let i=0;i<63;i++){const c=document.createElement('i');c.className=i>58?'f':miss.includes(i)?'x':part.includes(i)?'p':'';mx.appendChild(c)}
+const ro=new ResizeObserver(es=>es.forEach(e=>e.target.firstElementChild.style.setProperty('--s',e.contentRect.width/360)));
+document.querySelectorAll('.box').forEach(b=>ro.observe(b));
+</script>
