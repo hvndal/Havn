@@ -1,0 +1,140 @@
+<title>Hävn Onboarding Motion</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* One live phone + notes column. Phone uses fixed app tokens; page chrome follows theme. */
+:root{--bg:#E6E5DF;--fg:#14140E;--mut:#5A5B50;--rule:#C9C8BF;--sans:"Archivo","Helvetica Neue",Helvetica,sans-serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;--dec:cubic-bezier(.2,0,0,1)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0B0B0A;--fg:#EDECE4;--mut:#9C9D93;--rule:#2A2A26;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0B0B0A;--fg:#EDECE4;--mut:#9C9D93;--rule:#2A2A26;color-scheme:dark}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans)}
+.wrap{max-width:1180px;margin:0 auto;padding-block:40px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;grid-template-columns:minmax(0,400px) minmax(0,1fr);gap:56px;align-items:start}
+@media(max-width:860px){.wrap{grid-template-columns:minmax(0,1fr)}}
+.k{font-family:var(--mono);font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut)}
+h1{margin:0 0 20px;font-size:clamp(40px,6vw,72px);line-height:.92;font-weight:700;letter-spacing:-.045em}
+.ctl{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.ctl button{font:500 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;padding:10px 12px;border:1px solid var(--fg);background:transparent;color:var(--fg);cursor:pointer}
+.ctl button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.box{position:relative;width:100%;max-width:400px;aspect-ratio:360/760;overflow:hidden;outline:1px solid var(--rule)}
+.ph{position:absolute;inset:0 auto auto 0;width:360px;height:760px;transform-origin:0 0;transform:scale(var(--s,1));background:#F2F1EC;color:#14140E;overflow:hidden;--i:#14140E;--i2:#5A5B50;--ru:#D3D2C9;--sg:#C23A05;--p:#F2F1EC}
+.ph.dark{background:#121210;color:#EDECE4;--i:#EDECE4;--i2:#9C9D93;--ru:#2A2A26;--sg:#FF5A1F;--p:#121210}
+.ph{transition:background 220ms var(--dec),color 220ms var(--dec)}
+.m{font-family:var(--mono);text-transform:uppercase;letter-spacing:.13em;font-size:11px}
+.top{position:absolute;left:20px;right:20px;top:20px;display:flex;justify-content:space-between;z-index:3}
+.bg{position:absolute;left:0;top:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.scene{position:absolute;inset:0;z-index:2}
+.big{font-size:64px;line-height:.9;font-weight:700;letter-spacing:-.05em}
+/* word reveal: mask + rise */
+.w{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.06em}
+.w>span{display:inline-block;transform:translateY(105%);transition:transform 520ms var(--dec)}
+.in .w>span{transform:none}
+.fade{opacity:0;transform:translateY(8px);transition:opacity 260ms var(--dec),transform 260ms var(--dec)}
+.in .fade{opacity:1;transform:none}
+.btn{position:absolute;left:20px;right:20px;bottom:24px;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:var(--i);color:var(--p);font-weight:600;font-size:15px;border:0;cursor:pointer;font-family:var(--sans)}
+.btn .arr{display:inline-block;transition:transform 140ms var(--dec)}.btn:hover .arr{transform:translateX(4px)}
+.field{position:absolute;left:20px;right:20px;top:450px}
+.field .v{font-size:34px;font-weight:700;letter-spacing:-.035em;min-height:40px;display:flex;align-items:center}
+.caret{width:2px;height:34px;background:var(--sg);margin-left:3px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.uline{height:2px;background:var(--i);transform-origin:left;transform:scaleX(0);transition:transform 600ms var(--dec) 300ms}.in .uline{transform:scaleX(1)}
+.row{display:grid;grid-template-columns:52px 1fr 20px;gap:12px;align-items:center;height:56px;padding:0 20px;border-bottom:1px solid var(--ru)}
+.row .n{font-size:17px;font-weight:600}.row .d{font-size:15px;color:var(--i2)}
+.row.next{background:var(--sg);color:#F2F1EC;border-color:var(--sg)}.row.next .d{color:#F2F1EC}
+.cb{width:20px;height:20px;border:1.5px solid currentColor;position:relative;overflow:hidden}
+.cb::before{content:"";position:absolute;inset:0;background:var(--i);transform:translateY(100%);transition:transform 140ms var(--dec)}
+.cb.on{border-color:var(--i)}.cb.on::before{transform:none}
+.cb::after{content:"";position:absolute;left:4px;top:5px;width:9px;height:4px;border-left:2px solid var(--p);border-bottom:2px solid var(--p);transform:rotate(-45deg);opacity:0;transition:opacity 60ms linear 90ms}.cb.on::after{opacity:1}
+.toggle{display:flex;gap:0;margin-top:20px}
+.toggle span{flex:1;height:52px;display:flex;align-items:center;justify-content:center;font-weight:600;border:1px solid var(--i)}
+.toggle span.on{background:var(--sg);border-color:var(--sg);color:#F2F1EC}
+.dots{position:absolute;left:20px;bottom:92px;display:flex;gap:6px;z-index:3}
+.dots i{width:20px;height:2px;background:var(--ru);transition:background 220ms var(--dec)}.dots i.on{background:var(--sg)}
+.notes{display:flex;flex-direction:column;gap:0;border-top:2px solid var(--fg)}
+.notes>div{display:grid;grid-template-columns:120px minmax(0,1fr);gap:16px;padding:16px 0;border-bottom:1px solid var(--rule)}
+.notes>div.cur{background:color-mix(in srgb,var(--fg) 5%,transparent)}
+.notes p{margin:0;font-size:15px;line-height:1.5;color:var(--mut)}.notes b{color:var(--fg);font-weight:600}
+@media (prefers-reduced-motion:reduce){*{transition-duration:1ms!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+<div>
+ <span class="k">Onboarding · live · 360×760 dp</span>
+ <div class="box" style="margin-top:12px"><div class="ph" id="ph">
+  <canvas class="bg" id="bg" width="720" height="1520"></canvas>
+  <div class="top m"><span>Hävn</span><span id="step">1 / 5</span></div>
+  <div class="dots" id="dots"><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="scene" id="scene"></div>
+ </div></div>
+ <div class="ctl" id="ctl"><button type="button" data-g="0">1 Name</button><button type="button" data-g="1">2 Privacy</button><button type="button" data-g="2">3 First med</button><button type="button" data-g="3">4 It renders</button><button type="button" data-g="4">5 Reminders</button><button type="button" id="replay">Replay</button></div>
+</div>
+<div>
+ <h1>Onboarding,<br>with something behind it.</h1>
+ <p class="k" style="margin:0 0 20px">Still Swiss: every background is a real instrument, drawn in ink lines, never a blob.</p>
+ <div class="notes" id="notes">
+  <div><span class="k">1 · Name</span><p><b>Behind:</b> a 24-hour ruler sweeps slowly across the page, ticks drawing in left to right, current hour in orange. <b>Front:</b> "What should we call you?" rises word by word (mask reveal, 28 ms stagger). The underline draws in after.</p></div>
+  <div><span class="k">2 · Privacy</span><p><b>Behind:</b> dark room. The hairline grid fades out cell by cell, like a network switching off. <b>Front:</b> "No account." then "No network." slams up in orange. Theme cuts to dark in 220 ms.</p></div>
+  <div><span class="k">3 · First med</span><p><b>Behind:</b> giant outlined "08:00" numerals, 1 dp stroke, drifting upward very slowly as the clock ticks. <b>Front:</b> spec rows reveal one by one; the time types itself in.</p></div>
+  <div><span class="k">4 · It renders</span><p><b>Behind:</b> nothing. This is the payoff, so the background gets out of the way. <b>Front:</b> their real Today screen builds: rule draws, rows stagger in, the orange bar cuts onto the next dose, the first box wipes full.</p></div>
+  <div><span class="k">5 · Reminders</span><p><b>Behind:</b> a 7 × 9 matrix fills in a diagonal wave, a preview of History. <b>Front:</b> "Want a nudge?" Yes / Not now. Yes triggers the system permission dialog.</p></div>
+ </div>
+ <p class="k" style="margin-top:20px">Motion rules: masks and rises of 8–100%, Decisive ease (0.2, 0, 0, 1), 140–600 ms. No springs, no bounce. Backgrounds move at walking pace or slower and stop when reduced motion is on.</p>
+</div>
+</div>
+
+<script>
+(() => {
+const ph=document.getElementById('ph'),scene=document.getElementById('scene'),cv=document.getElementById('bg'),ctx=cv.getContext('2d');
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const box=document.querySelector('.box');new ResizeObserver(e=>ph.style.setProperty('--s',e[0].contentRect.width/360)).observe(box);
+const words=(t,cls='')=>t.split(' ').map((w,i)=>`<span class="w ${cls}"><span style="transition-delay:${i*28}ms">${w}</span></span>`).join(' ');
+let cur=0,t0=performance.now(),timers=[];
+const S=[
+ {dark:false,html:()=>`<div style="position:absolute;left:20px;right:20px;top:170px" class="big">${words('What should we call you?')}</div>
+   <div class="field"><span class="m fade" style="color:var(--i2);transition-delay:260ms">Name · optional</span><div class="v" id="nm"></div><div class="uline"></div></div>
+   <button class="btn" type="button" data-next>Continue<span class="arr">→</span></button>`,
+   after(){type('nm','Elin',700)}},
+ {dark:true,html:()=>`<div style="position:absolute;left:20px;right:20px;top:230px" class="big">${words('No account.')}<br><span style="color:var(--sg)">${words('No network.')}</span></div>
+   <p class="fade" style="position:absolute;left:20px;right:20px;top:510px;font-size:15px;color:var(--i2);transition-delay:500ms;margin:0">Everything stays on this phone.</p>
+   <button class="btn" type="button" data-next>Continue<span class="arr">→</span></button>`},
+ {dark:false,html:()=>`<div style="position:absolute;left:20px;top:84px" class="big" ><span style="font-size:34px;letter-spacing:-.035em">${words('Your first medication.')}</span></div>
+   <div style="position:absolute;left:0;right:0;top:160px">${[['Name','Iron'],['Dose','65 mg'],['Times','<span id=tm></span>'],['Repeat','Daily']].map((r,i)=>`<div class="fade" style="padding:14px 20px;border-bottom:1px solid var(--ru);transition-delay:${200+i*60}ms"><span class="m" style="color:var(--i2)">${r[0]}</span><div style="font-size:${i<3?34:17}px;font-weight:700;letter-spacing:-.035em;margin-top:6px;font-variant-numeric:tabular-nums">${r[1]}</div></div>`).join('')}</div>
+   <button class="btn" type="button" data-next>Save<span class="arr">→</span></button>`,after(){type('tm','13:00',600)}},
+ {dark:false,html:()=>`<div style="position:absolute;left:20px;top:84px"><span class="m fade" style="color:var(--i2)">Next dose in</span><div class="big" style="font-size:96px;letter-spacing:-.055em;margin-top:10px">${words('42')}<span style="font-size:34px;letter-spacing:-.03em;vertical-align:baseline" class="fade"> min</span></div></div>
+   <div style="position:absolute;top:262px;left:0;right:0"><div class="uline" style="margin:0 20px"></div>
+   <div class="fade" style="transition-delay:350ms"><div class="row"><span class="m">08:00</span><span><span class="n">Metformin</span> <span class="d">500 mg</span></span><span class="cb" id="c1"></span></div></div>
+   <div class="fade" style="transition-delay:378ms"><div class="row" id="r2"><span class="m">13:00</span><span><span class="n">Iron</span> <span class="d">65 mg</span></span><span class="cb"></span></div></div>
+   <div class="fade" style="transition-delay:406ms"><div class="row"><span class="m">19:00</span><span><span class="n">Metformin</span> <span class="d">500 mg</span></span><span class="cb"></span></div></div></div>
+   <p class="m fade" style="position:absolute;left:20px;bottom:150px;color:var(--i2);transition-delay:900ms">This is your Today.</p>
+   <button class="btn" type="button" data-next>Looks right<span class="arr">→</span></button>`,
+   after(){later(()=>document.getElementById('r2')?.classList.add('next'),900);later(()=>document.getElementById('c1')?.classList.add('on'),1500)}},
+ {dark:false,html:()=>`<div style="position:absolute;left:20px;right:20px;top:420px" class="big">${words('Want a nudge?')}</div>
+   <div class="toggle fade" style="position:absolute;left:20px;right:20px;top:560px;transition-delay:300ms"><span class="on">Yes</span><span>Not now</span></div>
+   <p class="m fade" style="position:absolute;left:20px;bottom:40px;color:var(--i2);transition-delay:500ms">Android will ask next</p>`}
+];
+function later(f,ms){timers.push(setTimeout(f,reduce?0:ms))}
+function type(id,s,delay){const el=document.getElementById(id);if(!el)return;el.innerHTML='<span></span><i class="caret"></i>';const sp=el.firstChild;[...s].forEach((c,i)=>later(()=>sp.textContent+=c,delay+i*90))}
+function go(n){timers.forEach(clearTimeout);timers=[];cur=(n+5)%5;t0=performance.now();
+ ph.classList.toggle('dark',S[cur].dark);scene.classList.remove('in');scene.style.opacity=0;
+ setTimeout(()=>{scene.innerHTML=S[cur].html();scene.style.transition='opacity 140ms';scene.style.opacity=1;requestAnimationFrame(()=>requestAnimationFrame(()=>scene.classList.add('in')));S[cur].after&&S[cur].after()},120);
+ document.getElementById('step').textContent=(cur+1)+' / 5';
+ document.querySelectorAll('#dots i').forEach((d,i)=>d.classList.toggle('on',i<=cur));
+ document.querySelectorAll('#ctl [data-g]').forEach((b,i)=>b.setAttribute('aria-pressed',i===cur));
+ document.querySelectorAll('#notes>div').forEach((d,i)=>d.classList.toggle('cur',i===cur));}
+scene.addEventListener('click',e=>{if(e.target.closest('[data-next]'))go(cur+1)});
+document.querySelectorAll('#ctl [data-g]').forEach(b=>b.addEventListener('click',()=>go(+b.dataset.g)));
+document.getElementById('replay').addEventListener('click',()=>go(cur));
+// backgrounds
+const E=x=>1-Math.pow(1-Math.min(1,Math.max(0,x)),3);
+function draw(now){const t=(now-t0)/1000,W=720,H=1520,dark=S[cur].dark;ctx.clearRect(0,0,W,H);
+ const ink=dark?'rgba(237,236,228,':'rgba(20,20,14,',sg=dark?'#FF5A1F':'#C23A05';ctx.lineCap='butt';
+ if(cur===0){const y=1080,span=1200,off=-((reduce?0:t)*18)%100;ctx.strokeStyle=ink+'.22)';ctx.lineWidth=2;
+  for(let h=0;h<=48;h++){const x=40+off+h*50;const p=E(t*1.4-h*0.03);const len=(h%2?24:60)*p;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,y-len);ctx.stroke();
+   if(h%2===0&&p>0.9){ctx.fillStyle=ink+'.3)';ctx.font='500 18px "IBM Plex Mono"';ctx.fillText(String((h/2)%24).padStart(2,'0'),x-10,y+34)}}
+  ctx.strokeStyle=ink+'.22)';ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W*E(t*1.2),y);ctx.stroke();
+  const hx=40+off+12*2*50;ctx.strokeStyle=sg;ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(hx,y);ctx.lineTo(hx,y-110*E(t-0.6));ctx.stroke()}
+ if(cur===1){const c=60;for(let gy=0;gy<H/c;gy++)for(let gx=0;gx<W/c;gx++){const k=(gx*7+gy*13)%23/23;const a=Math.max(0,1-E((reduce?9:t)*0.7-k));if(a<=0)continue;ctx.strokeStyle=ink+(.14*a)+')';ctx.lineWidth=1;ctx.strokeRect(gx*c+.5,gy*c+.5,c,c)}}
+ if(cur===2){ctx.strokeStyle=ink+".14)";ctx.lineWidth=2;ctx.font='700 250px Archivo';const dy=reduce?0:(t*6)%40;ctx.strokeText('08:00',-10,1180-dy)}
+ if(cur===4){const c=40,ox=40,oy=170;for(let r=0;r<9;r++)for(let q=0;q<7;q++){const p=E(((reduce?9:t)*1000-(r+q)*60)/240);if(p<=0)continue;const miss=(r*7+q)%17===5;ctx.globalAlpha=p;if(miss){ctx.strokeStyle=sg;ctx.lineWidth=3;ctx.strokeRect(ox+q*(c+8)+1.5,oy+r*(c+8)+1.5,c-3,c-3)}else{ctx.fillStyle=ink+((r*7+q)%9===3?.05:.12)+")";ctx.fillRect(ox+q*(c+8),oy+r*(c+8),c,c)}ctx.globalAlpha=1}}
+ requestAnimationFrame(draw)}
+document.fonts.ready.then(()=>{go(0);requestAnimationFrame(draw)});
+})();
+</script>
