@@ -1,5 +1,7 @@
 # Hävn — Medication Reminder
 
+> Where is everything? See [`PROJECT_MAP.md`](PROJECT_MAP.md).
+
 A local-first medication organizer for Android. No account, no servers, no
 tracking, and no `INTERNET` permission — your medication history stays on your
 phone.

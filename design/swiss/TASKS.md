@@ -1,13 +1,13 @@
 # Hävn — Swiss redesign: tasks
 
 Source of truth: `design/swiss/HANDOFF.md` (severe Swiss / Braun). It **replaces**
-the earlier "Cinematheque" direction (`design/havn-medication-reminder.html`,
+the earlier "Cinematheque" direction (`design/archive/cinematheque/havn-medication-reminder.html`,
 glass capsule, olive, Hanken). Where they disagree, HANDOFF.md wins.
 
 Paste the block below into Cursor / Claude Code as one prompt.
 
 ```text
-You're working in the Hävn Android repo (Kotlin, Jetpack Compose, Room, Hilt, Glance; package com.havn.app; code in app/src/main). Implement the redesign in design/swiss/HANDOFF.md exactly. Read it first. It replaces the older design/havn-medication-reminder.html direction (glass capsule, olive, Hanken Grotesk); ignore that direction where the two conflict. AGENTS.md and GEMINI.md are stale; update them at the end to point at design/swiss/.
+You're working in the Hävn Android repo (Kotlin, Jetpack Compose, Room, Hilt, Glance; package com.havn.app; code in app/src/main). Implement the redesign in design/swiss/HANDOFF.md exactly. Read it first. It replaces the older design/archive/cinematheque/havn-medication-reminder.html direction (glass capsule, olive, Hanken Grotesk); ignore that direction where the two conflict. AGENTS.md and GEMINI.md are stale; update them at the end to point at design/swiss/.
 
 DIRECTION
 Severe Swiss / Braun-functionalist. Ink plus one signal colour (#C23A05 light, #FF5A1F dark). Archivo plus IBM Plex Mono. 0 dp corners, no cards, no elevation, 2 dp ink rules and 1 dp hairlines, flush left, nothing between 17 sp and 34 sp, one hero per screen at 4–5× everything else. Motion snaps: Decisive (0.2,0,0,1), no springs, no bounce.
