@@ -17,7 +17,6 @@ import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.action.actionRunCallback
-import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.appwidget.updateAll
 import androidx.glance.layout.*
@@ -215,7 +214,6 @@ private fun CompactWidgetLayout(state: WidgetState) {
         modifier = GlanceModifier
             .fillMaxSize()
             .background(WidgetPalette.canvas)
-            .cornerRadius(16.dp)
             .padding(10.dp)
             .clickable(actionStartActivity<MainActivity>()),
     ) {
@@ -227,13 +225,12 @@ private fun CompactWidgetLayout(state: WidgetState) {
             Box(
                 modifier = GlanceModifier
                     .size(36.dp)
-                    .background(if (state.isCompletedForToday) WidgetPalette.takenBubble else WidgetPalette.idleBubble)
-                    .cornerRadius(18.dp),
+                    .background(if (state.isCompletedForToday) WidgetPalette.takenBubble else WidgetPalette.idleBubble),
                 contentAlignment = Alignment.Center,
             ) {
                 WidgetGlyph(
                     res = if (state.isCompletedForToday) com.havn.app.R.drawable.ic_check else com.havn.app.R.drawable.ic_med_capsule,
-                    tint = if (state.isCompletedForToday) WidgetPalette.onAccentSoft else WidgetPalette.accent,
+                    tint = if (state.isCompletedForToday) WidgetPalette.onAccent else WidgetPalette.accent,
                     size = 17.dp,
                 )
             }
@@ -310,7 +307,6 @@ private fun CompactWidgetLayout(state: WidgetState) {
                 Box(
                     modifier = GlanceModifier
                         .background(WidgetPalette.accent)
-                        .cornerRadius(10.dp)
                         .padding(horizontal = 12.dp, vertical = 7.dp)
                         .clickable(
                             actionRunCallback<MarkDoseTakenActionCallback>(
@@ -335,7 +331,6 @@ private fun CompactWidgetLayout(state: WidgetState) {
                 Box(
                     modifier = GlanceModifier
                         .background(WidgetPalette.accentSoft)
-                        .cornerRadius(10.dp)
                         .padding(horizontal = 10.dp, vertical = 6.dp),
                     contentAlignment = Alignment.Center
                 ) {
@@ -362,7 +357,6 @@ private fun StandardWidgetLayout(state: WidgetState, size: DpSize) {
         modifier = GlanceModifier
             .fillMaxSize()
             .background(WidgetPalette.canvas)
-            .cornerRadius(16.dp)
             .padding(12.dp),
     ) {
         Column(
@@ -380,7 +374,6 @@ private fun StandardWidgetLayout(state: WidgetState, size: DpSize) {
                     modifier = GlanceModifier
                         .size(10.dp)
                         .background(WidgetPalette.accent)
-                        .cornerRadius(5.dp)
                 ) {}
                 Spacer(GlanceModifier.width(6.dp))
                 Text(
@@ -409,7 +402,6 @@ private fun StandardWidgetLayout(state: WidgetState, size: DpSize) {
                     Box(
                         modifier = GlanceModifier
                             .background(if (state.isCompletedForToday) WidgetPalette.accentSoft else WidgetPalette.surfaceSunken)
-                            .cornerRadius(12.dp)
                             .padding(horizontal = 8.dp, vertical = 3.dp)
                     ) {
                         Text(
@@ -429,7 +421,6 @@ private fun StandardWidgetLayout(state: WidgetState, size: DpSize) {
                     Box(
                         modifier = GlanceModifier
                             .background(WidgetPalette.accent)
-                            .cornerRadius(10.dp)
                             .padding(horizontal = 8.dp, vertical = 3.dp)
                             .clickable(actionRunCallback<MarkAllDosesTakenActionCallback>()),
                         contentAlignment = Alignment.Center
@@ -534,7 +525,6 @@ private fun WidgetPillRow(item: WidgetPillItem) {
         modifier = GlanceModifier
             .fillMaxWidth()
             .background(if (item.isTaken) WidgetPalette.takenRow else WidgetPalette.surface)
-            .cornerRadius(10.dp)
             .padding(horizontal = 8.dp, vertical = 6.dp),
     ) {
         Row(
@@ -545,13 +535,12 @@ private fun WidgetPillRow(item: WidgetPillItem) {
             Box(
                 modifier = GlanceModifier
                     .size(26.dp)
-                    .background(if (item.isTaken) WidgetPalette.takenBubble else WidgetPalette.idleBubble)
-                    .cornerRadius(13.dp),
+                    .background(if (item.isTaken) WidgetPalette.takenBubble else WidgetPalette.idleBubble),
                 contentAlignment = Alignment.Center,
             ) {
                 WidgetGlyph(
                     res = if (item.isTaken) com.havn.app.R.drawable.ic_check else glyph,
-                    tint = if (item.isTaken) WidgetPalette.onAccentSoft else WidgetPalette.accent,
+                    tint = if (item.isTaken) WidgetPalette.onAccent else WidgetPalette.accent,
                     size = 14.dp,
                 )
             }
@@ -587,7 +576,6 @@ private fun WidgetPillRow(item: WidgetPillItem) {
                 Box(
                     modifier = GlanceModifier
                         .background(WidgetPalette.accentSoft)
-                        .cornerRadius(8.dp)
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                         .clickable(
                             actionRunCallback<MarkDoseUntakenActionCallback>(
@@ -613,7 +601,6 @@ private fun WidgetPillRow(item: WidgetPillItem) {
                 Box(
                     modifier = GlanceModifier
                         .background(WidgetPalette.accent)
-                        .cornerRadius(8.dp)
                         .padding(horizontal = 10.dp, vertical = 5.dp)
                         .clickable(
                             actionRunCallback<MarkDoseTakenActionCallback>(
@@ -645,7 +632,6 @@ private fun CompletedDayCard(state: WidgetState) {
         modifier = GlanceModifier
             .fillMaxWidth()
             .background(WidgetPalette.accentSoft)
-            .cornerRadius(12.dp)
             .padding(10.dp)
             .clickable(actionStartActivity<MainActivity>()),
         contentAlignment = Alignment.Center,
@@ -688,7 +674,6 @@ private fun EmptyMedicationsCard() {
         modifier = GlanceModifier
             .fillMaxWidth()
             .background(WidgetPalette.surface)
-            .cornerRadius(12.dp)
             .padding(12.dp)
             .clickable(actionStartActivity<MainActivity>()),
         contentAlignment = Alignment.Center,

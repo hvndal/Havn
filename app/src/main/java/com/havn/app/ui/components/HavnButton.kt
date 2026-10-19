@@ -17,8 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -30,8 +28,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
@@ -132,7 +130,7 @@ fun HavnButton(
         label = "btnScale",
     )
 
-    val shape: Shape = RoundedCornerShape(HavnTheme.radius.pill)
+    val shape: Shape = RectangleShape
 
     Row(
         modifier = modifier
@@ -142,20 +140,6 @@ fun HavnButton(
                 scaleX = scale
                 scaleY = scale
             }
-            .then(
-                // Only the filled tone casts — an outline button that drops a
-                // shadow looks like a mistake.
-                if (tone == HavnButtonTone.Primary && active) {
-                    Modifier.shadow(
-                        // A low, tight shadow: the button sits on the page
-                        // rather than glowing above it.
-                        elevation = if (pressed) 0.dp else 4.dp,
-                        shape = shape,
-                        ambientColor = colors.accent.copy(alpha = 0.18f),
-                        spotColor = colors.accent.copy(alpha = 0.22f),
-                    )
-                } else Modifier
-            )
             .clip(shape)
             .background(animatedContainer)
             .then(
@@ -203,7 +187,7 @@ fun HavnButton(
 }
 
 /**
- * Circular icon button. [tone] Primary gives it an accent fill; otherwise it
+ * Square icon button. [tone] Primary gives it an accent fill; otherwise it
  * sits quietly on the surface.
  */
 @Composable
@@ -247,7 +231,7 @@ fun HavnIconButton(
                 scaleX = scale
                 scaleY = scale
             }
-            .clip(CircleShape)
+            .clip(RectangleShape)
             .background(animatedContainer)
             .clickable(
                 interactionSource = interaction,
@@ -272,7 +256,7 @@ fun HavnIconButton(
 }
 
 /**
- * A small pill-shaped action that sits inline with text — "Manage", "See all".
+ * A small action that sits inline with text — "Manage", "See all".
  * Deliberately low-contrast so it never competes with a primary button.
  */
 @Composable
@@ -295,7 +279,7 @@ fun HavnTextAction(
     Row(
         modifier = modifier
             .graphicsLayer { this.alpha = alpha }
-            .clip(RoundedCornerShape(HavnTheme.radius.pill))
+            .clip(RectangleShape)
             .clickable(
                 interactionSource = interaction,
                 indication = null,

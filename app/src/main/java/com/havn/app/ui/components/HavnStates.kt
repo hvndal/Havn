@@ -18,8 +18,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,8 +25,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -118,13 +119,13 @@ fun HavnBreathingMark(
         Box(
             modifier = Modifier
                 .size(size * (0.72f + phase * 0.28f))
-                .clip(CircleShape)
+                .clip(RectangleShape)
                 .background(colors.accent.copy(alpha = 0.06f + phase * 0.05f))
         )
         Box(
             modifier = Modifier
                 .size(size * 0.34f)
-                .clip(CircleShape)
+                .clip(RectangleShape)
                 .background(colors.accent.copy(alpha = 0.45f + phase * 0.25f))
         )
     }
@@ -151,14 +152,14 @@ fun HavnErrorState(
         Box(
             modifier = Modifier
                 .size(44.dp)
-                .clip(CircleShape)
+                .clip(RectangleShape)
                 .background(colors.dangerSoft),
             contentAlignment = Alignment.Center,
         ) {
             Box(
                 modifier = Modifier
                     .size(6.dp)
-                    .clip(CircleShape)
+                    .clip(RectangleShape)
                     .background(colors.danger)
             )
         }
@@ -230,15 +231,15 @@ fun HavnSkeleton(
         modifier = modifier
             .fillMaxWidth(widthFraction)
             .height(height)
-            .clip(RoundedCornerShape(cornerRadius))
+            .clip(RectangleShape)
             .background(base)
-            .background(
-                Brush.horizontalGradient(
-                    colors = listOf(Color.Transparent, sheen, Color.Transparent),
-                    startX = -300f + progress * 1100f,
-                    endX = 0f + progress * 1100f,
+            .drawBehind {
+                drawRect(
+                    color = sheen,
+                    topLeft = Offset(-300f + progress * 1100f, 0f),
+                    size = Size(300f, size.height),
                 )
-            )
+            }
     )
 }
 
@@ -254,7 +255,7 @@ fun HavnDoseRowSkeleton(modifier: Modifier = Modifier) {
         Box(
             modifier = Modifier
                 .size(44.dp)
-                .clip(CircleShape)
+                .clip(RectangleShape)
                 .background(HavnTheme.colors.surfaceSunken)
         )
         Spacer(Modifier.width(HavnTheme.spacing.lg))
@@ -299,7 +300,7 @@ fun HavnPulseDots(
             Box(
                 modifier = Modifier
                     .size(dotSize)
-                    .clip(CircleShape)
+                    .clip(RectangleShape)
                     .background(color.copy(alpha = alpha))
             )
         }

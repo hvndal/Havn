@@ -15,8 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,7 +23,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.Role
@@ -87,9 +88,9 @@ fun HavnCadenceStrip(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(HavnTheme.radius.md))
+            .clip(RectangleShape)
             .background(colors.surface)
-            .border(1.dp, colors.hairline, RoundedCornerShape(HavnTheme.radius.md))
+            .border(1.dp, colors.hairline, RectangleShape)
             .padding(vertical = HavnTheme.spacing.sm, horizontal = HavnTheme.spacing.xs),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -162,7 +163,7 @@ private fun CadenceDayCell(
         }
     }
 
-    val cellShape = RoundedCornerShape(HavnTheme.radius.sm)
+    val cellShape = RectangleShape
 
     Column(
         modifier = modifier
@@ -218,7 +219,7 @@ private fun CadenceDayCell(
             Box(
                 modifier = Modifier
                     .size(2.5.dp)
-                    .clip(CircleShape)
+                    .clip(RectangleShape)
                     .background(colors.accent),
             )
         } else {
@@ -245,7 +246,7 @@ private fun CadenceIndicator(day: CadenceDay) {
                 Box(
                     modifier = Modifier
                         .size(8.dp)
-                        .clip(CircleShape)
+                        .clip(RectangleShape)
                         .background(colors.accent),
                 )
             }
@@ -274,16 +275,18 @@ private fun CadenceIndicator(day: CadenceDay) {
                 Box(
                     modifier = Modifier
                         .size(6.dp)
-                        .clip(CircleShape)
+                        .clip(RectangleShape)
                         .background(colors.warning.copy(alpha = 0.75f)),
                 )
             }
             day.isToday -> {
                 // Today with 0 doses yet: subtle open ring
                 Canvas(modifier = Modifier.size(7.dp)) {
-                    drawCircle(
+                    val half = size.minDimension / 2f - 0.7.dp.toPx()
+                    drawRect(
                         color = colors.accent.copy(alpha = 0.5f),
-                        radius = size.minDimension / 2f - 0.7.dp.toPx(),
+                        topLeft = Offset(center.x - half, center.y - half),
+                        size = Size(half * 2f, half * 2f),
                         style = Stroke(width = 1.2.dp.toPx()),
                     )
                 }
@@ -293,16 +296,18 @@ private fun CadenceIndicator(day: CadenceDay) {
                 Box(
                     modifier = Modifier
                         .size(4.dp)
-                        .clip(CircleShape)
+                        .clip(RectangleShape)
                         .background(colors.hairline),
                 )
             }
             else -> {
                 // Past days with no doses: quiet hairline ring
                 Canvas(modifier = Modifier.size(5.dp)) {
-                    drawCircle(
+                    val half = size.minDimension / 2f - 0.5.dp.toPx()
+                    drawRect(
                         color = colors.hairlineStrong,
-                        radius = size.minDimension / 2f - 0.5.dp.toPx(),
+                        topLeft = Offset(center.x - half, center.y - half),
+                        size = Size(half * 2f, half * 2f),
                         style = Stroke(width = 1.dp.toPx()),
                     )
                 }

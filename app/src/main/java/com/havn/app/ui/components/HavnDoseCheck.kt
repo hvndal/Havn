@@ -12,7 +12,6 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -21,9 +20,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathMeasure
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -165,37 +166,39 @@ fun HavnDoseCheck(
                 // 1. Soft ink bleed halo (expanding 4dp, fading softly into paper fibers)
                 val auraRadius = coreR + 4.dp.toPx() * p
                 val auraAlpha = (1f - p) * (1f - p) * 0.28f
-                drawCircle(
+                drawRect(
                     color = accent.copy(alpha = auraAlpha),
-                    radius = auraRadius,
-                    center = center,
+                    topLeft = Offset(center.x - auraRadius, center.y - auraRadius),
+                    size = Size(auraRadius * 2f, auraRadius * 2f),
                 )
 
                 // 2. Crisp capillary hairline ring (expanding 7.5dp, fading cleanly)
                 val rippleRadius = coreR + 7.5.dp.toPx() * p
                 val rippleAlpha = (1f - p) * 0.40f
-                drawCircle(
+                drawRect(
                     color = accent.copy(alpha = rippleAlpha),
-                    radius = rippleRadius,
-                    center = center,
+                    topLeft = Offset(center.x - rippleRadius, center.y - rippleRadius),
+                    size = Size(rippleRadius * 2f, rippleRadius * 2f),
                     style = Stroke(width = 1.1.dp.toPx()),
                 )
             }
 
             // Resting ring
-            drawCircle(
+            val ringHalf = d / 2f - ring / 2f
+            drawRect(
                 color = ringColor,
-                radius = d / 2f - ring / 2f,
-                center = center,
+                topLeft = Offset(center.x - ringHalf, center.y - ringHalf),
+                size = Size(ringHalf * 2f, ringHalf * 2f),
                 style = Stroke(width = ring),
             )
 
             // Fill grows from the centre as the dose is confirmed
             if (fillProgress > 0.01f) {
-                drawCircle(
+                val fillHalf = (d / 2f) * fillProgress
+                drawRect(
                     color = accent,
-                    radius = (d / 2f) * fillProgress,
-                    center = center,
+                    topLeft = Offset(center.x - fillHalf, center.y - fillHalf),
+                    size = Size(fillHalf * 2f, fillHalf * 2f),
                 )
             }
 
@@ -254,7 +257,7 @@ fun HavnProgressRing(
         label = "ringProgress",
     )
 
-    Canvas(modifier = modifier.clip(CircleShape)) {
+    Canvas(modifier = modifier.clip(RectangleShape)) {
         val stroke = strokeWidth.toPx()
         val inset = stroke / 2f
         drawArc(

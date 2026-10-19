@@ -27,7 +27,7 @@ data class HavnColorTokens(
 
     // Line
     val hairline: Color,        // 1px separation, barely there
-    val hairlineStrong: Color,  // deliberate division
+    val hairlineStrong: Color,  // the 2 dp ink rule: section start, what's next
 
     // Type
     val textPrimary: Color,
@@ -36,12 +36,19 @@ data class HavnColorTokens(
     val textDisabled: Color,
 
     // Brand
-    val accent: Color,          // sage, corrected per theme
+    val accent: Color,          // ink — filled controls, checks, selection
     val accentPressed: Color,
     val onAccent: Color,        // type that sits *on* an accent fill
     val accentSoft: Color,      // pale accent fill
     val onAccentSoft: Color,
     val accentMuted: Color,     // de-emphasised brand, e.g. inactive glyphs
+
+    // Signal — the one orange. The next thing to do, or something missed.
+    val signal: Color,
+    val signalPressed: Color,
+    val onSignal: Color,        // type that sits on a signal fill
+    val signalSoft: Color,
+    val onSignalSoft: Color,
 
     // Signals
     val positive: Color,
@@ -72,109 +79,125 @@ data class HavnColorTokens(
     val linen: Color,
 )
 
-/** Light: a white page, olive ink, and almost nothing else. */
+/** Light: paper, ink, one orange. */
 val HavnLightTokens = HavnColorTokens(
     isDark = false,
 
-    canvas = Paper05,
-    surface = Paper00,
-    surfaceRaised = PureWhite,
-    surfaceSunken = Paper10,
-    surfacePressed = Paper20,
+    canvas = Paper,
+    surface = Paper,
+    surfaceRaised = PaperRaised,
+    surfaceSunken = PaperSunken,
+    surfacePressed = PaperPressed,
 
-    hairline = Color(0xFFECEDE9),
-    hairlineStrong = Paper30,
+    hairline = Rule,
+    hairlineStrong = Ink,
 
-    textPrimary = Ink00,
-    textSecondary = Ink40,
-    textTertiary = Ink60,
-    textDisabled = Ink80,
+    textPrimary = Ink,
+    textSecondary = Ink2,
+    textTertiary = Ink3Text,
+    textDisabled = Ink3,
 
-    accent = Sage,
-    accentPressed = SageDeep,
-    onAccent = PureWhite,
-    accentSoft = SageSoft,
-    onAccentSoft = SageInk,
-    accentMuted = SageMuted,
+    // The "accent" is ink. Filled buttons, checks and selection are ink on
+    // paper; orange is reserved for [signal].
+    accent = Ink,
+    accentPressed = Ink2,
+    onAccent = Paper,
+    accentSoft = PaperSunken,
+    onAccentSoft = Ink,
+    accentMuted = Ink3,
 
-    positive = Sage,
-    positiveSoft = SageSoft,
-    onPositiveSoft = SageInk,
-    warning = Amber,
-    warningSoft = AmberSoft,
-    onWarningSoft = Color(0xFF3B2D07),
-    danger = Danger,
-    dangerSoft = DangerSoft,
-    onDangerSoft = Color(0xFF52140F),
+    signal = Signal,
+    signalPressed = SignalPressed,
+    onSignal = Paper,
+    signalSoft = SignalSoft,
+    onSignalSoft = SignalInk,
 
-    // The ambient field is now a breath of colour on white, not a wash.
-    ambientA = Color(0xFFF1F4EF),
-    ambientB = Color(0xFFF7F3EC),
-    scrim = Color(0x551B241A),
-    shadowTint = Color(0xFF5E6E5D),
-    glow = Color(0x00000000), // light mode earns depth from shadow, not glow
+    // Taken is solid ink. Missed and destructive are the one orange.
+    positive = Ink,
+    positiveSoft = PaperSunken,
+    onPositiveSoft = Ink,
+    warning = Signal,
+    warningSoft = SignalSoft,
+    onWarningSoft = SignalInk,
+    danger = Signal,
+    dangerSoft = SignalSoft,
+    onDangerSoft = SignalInk,
 
-    medSage = Sage,
-    medClay = Clay,
-    medAmber = Amber,
-    medSlate = AccentSlate,
-    medSand = AccentSand,
+    // Flat ground: the ambient field resolves to the page itself, and there is
+    // no shadow or glow anywhere.
+    ambientA = Paper,
+    ambientB = Paper,
+    scrim = Color(0x6614140E),
+    shadowTint = Color.Transparent,
+    glow = Color.Transparent,
 
-    linen = Linen,
+    // Per-medication colour collapses to an ink ladder (no hues besides orange).
+    medSage = Ink,
+    medClay = Ink2,
+    medAmber = Color(0xFF3A3B33),
+    medSlate = Ink3Text,
+    medSand = Ink3,
+
+    linen = PaperSunken,
 )
 
 /**
- * Dark: warm green-black. Brand hues are *lifted* — the light-mode sage
- * (#516351) has too little luminance to read as an accent on ink, so the dark
- * theme substitutes a pale sage and flips which tone carries the type.
+ * Dark: warm near-black with pale ink. The orange is lifted (#FF5A1F) so it
+ * reads as light on the dark page; text sits on it in night paper.
  */
 val HavnDarkTokens = HavnColorTokens(
     isDark = true,
 
-    canvas = Forest05,
-    surface = Forest10,
-    surfaceRaised = Forest20,
-    surfaceSunken = Forest00,
-    surfacePressed = Forest30,
+    canvas = NightPaper,
+    surface = NightPaper,
+    surfaceRaised = NightPaperRaised,
+    surfaceSunken = NightPaperSunken,
+    surfacePressed = NightPaperPressed,
 
-    hairline = Forest20,
-    hairlineStrong = Forest40,
+    hairline = NightRule,
+    hairlineStrong = NightInk,
 
-    textPrimary = Bone00,
-    textSecondary = Bone40,
-    textTertiary = Bone60,
-    textDisabled = Bone80,
+    textPrimary = NightInk,
+    textSecondary = NightInk2,
+    textTertiary = NightInk3Text,
+    textDisabled = NightInk3,
 
-    accent = SageLift,
-    accentPressed = SageLiftDim,
-    onAccent = Color(0xFF17230F),
-    accentSoft = SageFillDark,
-    onAccentSoft = SageLift,
-    accentMuted = SageLiftDim,
+    accent = NightInk,
+    accentPressed = NightInk2,
+    onAccent = NightPaper,
+    accentSoft = NightPaperRaised,
+    onAccentSoft = NightInk,
+    accentMuted = NightInk3,
 
-    positive = SageLift,
-    positiveSoft = SageFillDark,
-    onPositiveSoft = SageLift,
-    warning = AmberLift,
-    warningSoft = AmberFillDark,
-    onWarningSoft = AmberLift,
-    danger = DangerLift,
-    dangerSoft = DangerFillDark,
-    onDangerSoft = DangerLift,
+    signal = NightSignal,
+    signalPressed = NightSignalPressed,
+    onSignal = NightPaper,
+    signalSoft = NightSignalSoft,
+    onSignalSoft = NightSignal,
 
-    ambientA = Color(0xFF1B2A1E),
-    ambientB = Color(0xFF2A211B),
+    positive = NightInk,
+    positiveSoft = NightPaperRaised,
+    onPositiveSoft = NightInk,
+    warning = NightSignal,
+    warningSoft = NightSignalSoft,
+    onWarningSoft = NightSignal,
+    danger = NightSignal,
+    dangerSoft = NightSignalSoft,
+    onDangerSoft = NightSignal,
+
+    ambientA = NightPaper,
+    ambientB = NightPaper,
     scrim = Color(0xAA000000),
-    shadowTint = Color(0xFF000000),
-    glow = Color(0x26A8C0A4),
+    shadowTint = Color.Transparent,
+    glow = Color.Transparent,
 
-    medSage = SageLift,
-    medClay = ClayLift,
-    medAmber = AmberLift,
-    medSlate = AccentSlateLift,
-    medSand = AccentSandLift,
+    medSage = NightInk,
+    medClay = NightInk2,
+    medAmber = Color(0xFFC4C5BB),
+    medSlate = NightInk3Text,
+    medSand = NightInk3,
 
-    linen = Color(0xFF1F231E),
+    linen = NightPaperRaised,
 )
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -197,36 +220,37 @@ data class HavnSpacing(
     val huge: Dp = 64.dp,
 
     /** The page's side margin. Everything full-width aligns to this. */
-    val gutter: Dp = 24.dp,
+    val gutter: Dp = 20.dp,
     /** Vertical rhythm between major editorial sections. */
     val section: Dp = 44.dp,
 )
 
+/**
+ * Swiss: every corner is square. The ladder is kept so call sites keep their
+ * intent, but every step resolves to 0 dp.
+ */
 @Immutable
 data class HavnRadius(
-    val xs: Dp = 8.dp,
-    val sm: Dp = 12.dp,
-    val md: Dp = 16.dp,
-    val lg: Dp = 22.dp,
-    val xl: Dp = 28.dp,
-    val xxl: Dp = 36.dp,
-    val pill: Dp = 999.dp,
+    val xs: Dp = 0.dp,
+    val sm: Dp = 0.dp,
+    val md: Dp = 0.dp,
+    val lg: Dp = 0.dp,
+    val xl: Dp = 0.dp,
+    val xxl: Dp = 0.dp,
+    val pill: Dp = 0.dp,
 )
 
 /**
- * Elevation is expressed as shadow *distance*; the colour comes from
- * [HavnColorTokens.shadowTint] so dark mode gets deep, near-black shadow while
- * light mode gets a soft warm one.
+ * Swiss: nothing floats. Depth is a rule or a second paper tone, never a
+ * shadow, so every step resolves to 0 dp.
  */
 @Immutable
 data class HavnElevation(
     val none: Dp = 0.dp,
-    // Flat by default: on a white page a resting card is a hairline, not a
-    // shadow. Shadow is reserved for things that genuinely float.
     val rest: Dp = 0.dp,
-    val raised: Dp = 6.dp,
-    val floating: Dp = 14.dp,
-    val overlay: Dp = 24.dp,
+    val raised: Dp = 0.dp,
+    val floating: Dp = 0.dp,
+    val overlay: Dp = 0.dp,
 )
 
 val LocalHavnColors = staticCompositionLocalOf { HavnLightTokens }

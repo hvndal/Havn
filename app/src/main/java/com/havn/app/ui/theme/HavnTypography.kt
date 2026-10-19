@@ -3,12 +3,9 @@ package com.havn.app.ui.theme
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontVariation
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.sp
 import com.havn.app.R
@@ -16,40 +13,32 @@ import com.havn.app.R
 // ─────────────────────────────────────────────────────────────────────────────
 //  T Y P E
 //
-//  Two voices, used for different jobs — this pairing is what gives Hävn an
-//  editorial character instead of a UI-kit one:
+//  Two voices (design/swiss/HANDOFF.md):
 //
-//   • Instrument Serif  — the *masthead* voice. High contrast, optical, used
-//     large and sparingly: screen titles, hero numerals, the wordmark. It does
-//     the work that cards and borders would otherwise have to do.
+//   • Archivo        — everything you read. Display sizes are Bold with tight
+//     tracking (−4 to −5 %) and 0.9 leading; that oversized type is the hero
+//     of every screen and does the work cards and shadows used to do.
 //
-//   • Hanken Grotesk    — the *instrument* voice. Everything functional:
-//     body, labels, data, controls. Quiet, highly legible at small sizes.
+//   • IBM Plex Mono  — labels, times and metadata. Small, tracked +8 %, set in
+//     capitals at the call site (Compose has no text-transform).
 //
-//  Weight discipline: nothing above SemiBold anywhere in the app. Emphasis
-//  comes from scale, colour and space — not from bolder text.
+//  Every Archivo style turns on tabular figures, so times, doses, counts and
+//  percentages never jitter as they change. Plex Mono is monospaced, so its
+//  digits line up already.
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Bundled (OFL), not downloaded: no font swap on first launch and no
-// dependency on Google Play services being present.
-@OptIn(ExperimentalTextApi::class)
-private fun hanken(weight: FontWeight) = Font(
-    R.font.hanken_grotesk,
-    weight,
-    variationSettings = FontVariation.Settings(FontVariation.weight(weight.weight)),
+// Bundled (OFL, licences in assets/licenses), not downloaded: no font swap on
+// first launch and no dependency on Google Play services being present.
+val Archivo = FontFamily(
+    Font(R.font.archivo_regular, FontWeight.Normal),
+    Font(R.font.archivo_medium, FontWeight.Medium),
+    Font(R.font.archivo_semibold, FontWeight.SemiBold),
+    Font(R.font.archivo_bold, FontWeight.Bold),
 )
 
-val HankenGrotesk = FontFamily(
-    hanken(FontWeight.Light),
-    hanken(FontWeight.Normal),
-    hanken(FontWeight.Medium),
-    hanken(FontWeight.SemiBold),
-)
-
-/** Display serif. Single weight by design — it is never asked to be bold. */
-val EditorialSerif = FontFamily(
-    Font(R.font.instrument_serif, FontWeight.Normal),
-    Font(R.font.instrument_serif_italic, FontWeight.Normal, FontStyle.Italic),
+val PlexMono = FontFamily(
+    Font(R.font.ibm_plex_mono_regular, FontWeight.Normal),
+    Font(R.font.ibm_plex_mono_medium, FontWeight.Medium),
 )
 
 /**
@@ -65,61 +54,66 @@ private val Trim = LineHeightStyle(
 @Suppress("DEPRECATION")
 private val NoFontPadding = PlatformTextStyle(includeFontPadding = false)
 
-private fun serif(
+private const val Tabular = "tnum"
+
+/** Archivo. [tracking] is a fraction of the font size (−0.05 = −5 %). */
+private fun archivo(
     size: Int,
     lineHeight: Int,
-    letterSpacing: Float,
+    tracking: Float,
     weight: FontWeight = FontWeight.Normal,
 ) = TextStyle(
-    fontFamily = EditorialSerif,
+    fontFamily = Archivo,
     fontWeight = weight,
     fontSize = size.sp,
     lineHeight = lineHeight.sp,
-    letterSpacing = letterSpacing.sp,
+    letterSpacing = (size * tracking).sp,
+    fontFeatureSettings = Tabular,
     platformStyle = NoFontPadding,
     lineHeightStyle = Trim,
 )
 
-private fun sans(
+/** IBM Plex Mono, tracked +8 % by default. */
+private fun mono(
     size: Int,
     lineHeight: Int,
-    letterSpacing: Float,
-    weight: FontWeight = FontWeight.Normal,
+    tracking: Float = 0.08f,
+    weight: FontWeight = FontWeight.Medium,
 ) = TextStyle(
-    fontFamily = HankenGrotesk,
+    fontFamily = PlexMono,
     fontWeight = weight,
     fontSize = size.sp,
     lineHeight = lineHeight.sp,
-    letterSpacing = letterSpacing.sp,
+    letterSpacing = (size * tracking).sp,
     platformStyle = NoFontPadding,
     lineHeightStyle = Trim,
 )
 
 val HavnTypography = Typography(
-    // ── Display — serif, editorial. Negative tracking at scale. ──────────────
-    displayLarge = serif(size = 64, lineHeight = 64, letterSpacing = -1.6f),
-    displayMedium = serif(size = 48, lineHeight = 50, letterSpacing = -1.0f),
-    displaySmall = serif(size = 36, lineHeight = 40, letterSpacing = -0.6f),
+    // ── Display — Archivo Bold, the hero of each screen ─────────────────────
+    displayLarge = archivo(size = 64, lineHeight = 58, tracking = -0.05f, weight = FontWeight.Bold),
+    displayMedium = archivo(size = 48, lineHeight = 44, tracking = -0.045f, weight = FontWeight.Bold),
+    displaySmall = archivo(size = 36, lineHeight = 34, tracking = -0.04f, weight = FontWeight.Bold),
 
-    // ── Headline — serif, screen titles ──────────────────────────────────────
-    headlineLarge = serif(size = 32, lineHeight = 36, letterSpacing = -0.5f),
-    headlineMedium = serif(size = 26, lineHeight = 31, letterSpacing = -0.3f),
-    headlineSmall = sans(size = 22, lineHeight = 28, letterSpacing = -0.2f, weight = FontWeight.Medium),
+    // ── Headline — screen and section titles ────────────────────────────────
+    headlineLarge = archivo(size = 34, lineHeight = 32, tracking = -0.04f, weight = FontWeight.Bold),
+    headlineMedium = archivo(size = 28, lineHeight = 28, tracking = -0.035f, weight = FontWeight.Bold),
+    headlineSmall = archivo(size = 22, lineHeight = 24, tracking = -0.02f, weight = FontWeight.SemiBold),
 
-    // ── Title — sans, section and component headers ──────────────────────────
-    titleLarge = sans(size = 20, lineHeight = 26, letterSpacing = -0.2f, weight = FontWeight.Medium),
-    titleMedium = sans(size = 17, lineHeight = 23, letterSpacing = -0.1f, weight = FontWeight.Medium),
-    titleSmall = sans(size = 15, lineHeight = 20, letterSpacing = 0f, weight = FontWeight.Medium),
+    // ── Title — rows and component headers ──────────────────────────────────
+    titleLarge = archivo(size = 20, lineHeight = 24, tracking = -0.015f, weight = FontWeight.SemiBold),
+    titleMedium = archivo(size = 17, lineHeight = 22, tracking = -0.01f, weight = FontWeight.SemiBold),
+    titleSmall = archivo(size = 15, lineHeight = 20, tracking = -0.005f, weight = FontWeight.SemiBold),
 
-    // ── Body — generous leading, this is what gets read ──────────────────────
-    bodyLarge = sans(size = 17, lineHeight = 26, letterSpacing = -0.1f),
-    bodyMedium = sans(size = 15, lineHeight = 23, letterSpacing = 0f),
-    bodySmall = sans(size = 13, lineHeight = 19, letterSpacing = 0.1f),
+    // ── Body — 1.4 leading, this is what gets read ──────────────────────────
+    bodyLarge = archivo(size = 17, lineHeight = 24, tracking = -0.005f),
+    bodyMedium = archivo(size = 15, lineHeight = 21, tracking = 0f),
+    bodySmall = archivo(size = 13, lineHeight = 18, tracking = 0f),
 
-    // ── Label — controls and metadata ────────────────────────────────────────
-    labelLarge = sans(size = 15, lineHeight = 20, letterSpacing = 0f, weight = FontWeight.Medium),
-    labelMedium = sans(size = 13, lineHeight = 17, letterSpacing = 0.1f, weight = FontWeight.Medium),
-    labelSmall = sans(size = 11, lineHeight = 15, letterSpacing = 0.3f, weight = FontWeight.Medium),
+    // ── Label — controls are Archivo; small metadata is mono ────────────────
+    labelLarge = archivo(size = 15, lineHeight = 20, tracking = 0f, weight = FontWeight.SemiBold),
+    labelMedium = archivo(size = 13, lineHeight = 17, tracking = 0f, weight = FontWeight.Medium),
+    labelSmall = mono(size = 11, lineHeight = 14),
 )
 
 /**
@@ -127,21 +121,27 @@ val HavnTypography = Typography(
  */
 object HavnType {
     /**
-     * The small uppercase rule that labels an editorial section. Wide tracking
-     * is what makes it read as a *rule* rather than shouting.
+     * The one giant element per screen: the next dose time, "That's
+     * everything.", 94 %. Bold, −5 % tracking, 0.9 leading.
      */
-    val Eyebrow = sans(size = 11, lineHeight = 14, letterSpacing = 1.4f, weight = FontWeight.Medium)
+    val Poster = archivo(size = 112, lineHeight = 100, tracking = -0.05f, weight = FontWeight.Bold)
 
-    /** Same, but quieter — inside surfaces where the eyebrow shouldn't compete. */
-    val EyebrowQuiet = sans(size = 10, lineHeight = 13, letterSpacing = 1.2f, weight = FontWeight.Medium)
+    /**
+     * The small uppercase mono label above a section or value. Pass text in
+     * capitals; the wide tracking is what makes it read as a label, not a shout.
+     */
+    val Eyebrow = mono(size = 11, lineHeight = 14)
+
+    /** Same, but quieter — inside rows where the label shouldn't compete. */
+    val EyebrowQuiet = mono(size = 10, lineHeight = 13, weight = FontWeight.Normal)
 
     /** Large figures: adherence %, dose counts. Tabular so digits don't jitter. */
-    val Metric = serif(size = 56, lineHeight = 56, letterSpacing = -2.0f)
-    val MetricSmall = serif(size = 30, lineHeight = 32, letterSpacing = -0.8f)
+    val Metric = archivo(size = 64, lineHeight = 58, tracking = -0.05f, weight = FontWeight.Bold)
+    val MetricSmall = archivo(size = 34, lineHeight = 32, tracking = -0.04f, weight = FontWeight.Bold)
 
-    /** Times of day in lists — mono-ish alignment via tabular figures. */
-    val Clock = sans(size = 14, lineHeight = 18, letterSpacing = 0.2f, weight = FontWeight.Medium)
+    /** Times of day in lists: the mono time column (08:00 · 13:00). */
+    val Clock = mono(size = 13, lineHeight = 16, tracking = 0.02f)
 
-    /** The wordmark. Tracked out, serif, never bold. */
-    val Wordmark = serif(size = 22, lineHeight = 24, letterSpacing = 3.0f)
+    /** The wordmark HÄVN: small mono capitals, tracked wide. */
+    val Wordmark = mono(size = 13, lineHeight = 16, tracking = 0.16f)
 }

@@ -47,12 +47,15 @@ object HavnTheme {
         @Composable @ReadOnlyComposable get() = LocalHavnElevation.current
 }
 
+/** Square everywhere, including stock M3 components (sheets, dialogs, chips). */
+private val Square = RoundedCornerShape(0.dp) // Shapes() needs a CornerBasedShape
+
 val HavnShapes = Shapes(
-    extraSmall = RoundedCornerShape(8.dp),
-    small = RoundedCornerShape(12.dp),
-    medium = RoundedCornerShape(16.dp),
-    large = RoundedCornerShape(22.dp),
-    extraLarge = RoundedCornerShape(28.dp),
+    extraSmall = Square,
+    small = Square,
+    medium = Square,
+    large = Square,
+    extraLarge = Square,
 )
 
 @Composable
@@ -141,6 +144,11 @@ private fun HavnColorTokens.animated(): HavnColorTokens {
         accentSoft = c(accentSoft, "accentSoft"),
         onAccentSoft = c(onAccentSoft, "onAccentSoft"),
         accentMuted = c(accentMuted, "accentMuted"),
+        signal = c(signal, "signal"),
+        signalPressed = c(signalPressed, "signalPressed"),
+        onSignal = c(onSignal, "onSignal"),
+        signalSoft = c(signalSoft, "signalSoft"),
+        onSignalSoft = c(onSignalSoft, "onSignalSoft"),
         positive = c(positive, "positive"),
         positiveSoft = c(positiveSoft, "positiveSoft"),
         onPositiveSoft = c(onPositiveSoft, "onPositiveSoft"),
@@ -184,6 +192,8 @@ private fun ColorScheme.animated(darkTheme: Boolean): ColorScheme {
         surfaceContainerHigh = c(surfaceContainerHigh, "m3containerHigh"),
         surfaceContainerLow = c(surfaceContainerLow, "m3containerLow"),
         primary = c(primary, "m3primary"),
+        tertiary = c(tertiary, "m3tertiary"),
+        error = c(error, "m3error"),
         onPrimary = c(onPrimary, "m3onPrimary"),
         outline = c(outline, "m3outline"),
         outlineVariant = c(outlineVariant, "m3outlineVariant"),

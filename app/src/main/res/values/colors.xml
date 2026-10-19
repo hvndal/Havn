@@ -9,8 +9,7 @@
       frame. A values-night variant exists alongside this one, so a dark-mode
       user no longer gets a flash of ivory on every cold start.
     -->
-    <color name="window_background">#FFFFFF</color>
-    <color name="splash_background">#FFFFFF</color>
+    <color name="window_background">#F2F1EC</color>
+    <color name="splash_background">#F2F1EC</color>
 
-    <color name="brand_sage">#5E6E5D</color>
 </resources>

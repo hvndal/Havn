@@ -20,8 +20,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -36,7 +35,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.havn.app.domain.model.DayPeriod
 import com.havn.app.domain.model.TodayDose
-import com.havn.app.ui.components.HavnAmbientField
 import com.havn.app.ui.components.HavnBreathingMark
 import com.havn.app.ui.components.HavnDoseCheck
 import com.havn.app.ui.components.HavnEmptyState
@@ -77,13 +75,6 @@ fun OrganizerScreen(
             .fillMaxSize()
             .background(colors.canvas)
     ) {
-        HavnAmbientField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(0.9f),
-            intensity = 0.75f,
-        )
-
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
@@ -231,14 +222,14 @@ private fun PeriodChip(
 
     Column(
         modifier = modifier
-            .clip(RoundedCornerShape(HavnTheme.radius.md))
+            .clip(RectangleShape)
             .background(background)
             // Outlined, not filled: the open lid on the box above already
             // carries the selection, so the chip only needs to agree with it.
             .border(
                 width = if (selected) 1.5.dp else 1.dp,
                 color = if (selected) colors.accent else colors.hairline,
-                shape = RoundedCornerShape(HavnTheme.radius.md),
+                shape = RectangleShape,
             )
             .havnPress(scaleDown = 0.94f, onClickLabel = period.label, onClick = onClick)
             .padding(vertical = HavnTheme.spacing.md),
@@ -290,9 +281,9 @@ private fun OrganizerDoseRow(
             modifier = Modifier
                 .size(40.dp)
                 .graphicsLayer { alpha = contentAlpha }
-                .clip(CircleShape)
+                .clip(RectangleShape)
                 .background(colors.surface)
-                .border(1.dp, colors.hairlineStrong, CircleShape),
+                .border(1.dp, colors.hairlineStrong, RectangleShape),
             contentAlignment = Alignment.Center,
         ) {
             MedIcon(type = dose.medication.iconType, size = 20.dp, tint = accent)

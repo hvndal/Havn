@@ -13,17 +13,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.rotate
-import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.contentDescription
@@ -38,7 +35,7 @@ import com.havn.app.domain.model.DoseStatus
 import com.havn.app.domain.model.MedIconType
 import com.havn.app.domain.model.TodayDose
 import com.havn.app.ui.screens.home.medAccent
-import com.havn.app.ui.theme.HankenGrotesk
+import com.havn.app.ui.theme.PlexMono
 import com.havn.app.ui.theme.HavnTheme
 import kotlin.math.abs
 import kotlin.math.cos
@@ -128,25 +125,8 @@ fun HavnOrganizerView(
         val stroke = g.stroke
 
         val lidFill = colors.surface
-        val bodyFill = if (colors.isDark) colors.linen else lerp(colors.linen, Color.White, 0.35f)
+        val bodyFill = if (colors.isDark) colors.linen else lerp(colors.linen, colors.surfaceRaised, 0.35f)
         val wellFill = colors.surfaceSunken
-
-        // ── Ground shadow: a soft contact pool under the box ────────────────
-        val shadowCenter = Offset(size.width / 2f, g.bottom + g.depth * 0.08f)
-        scale(scaleX = 1f, scaleY = 0.16f, pivot = shadowCenter) {
-            drawCircle(
-                brush = Brush.radialGradient(
-                    colors = listOf(
-                        colors.shadowTint.copy(alpha = if (colors.isDark) 0.55f else 0.20f),
-                        colors.shadowTint.copy(alpha = 0f),
-                    ),
-                    center = shadowCenter,
-                    radius = g.width * 0.62f,
-                ),
-                radius = g.width * 0.62f,
-                center = shadowCenter,
-            )
-        }
 
         // ── Body: top rim + linen front, one silhouette ─────────────────────
         val silhouette = roundedPolygon(
@@ -159,7 +139,7 @@ fun HavnOrganizerView(
         )
         drawPath(silhouette, lidFill)
 
-        // Front face with a gentle top-to-bottom fall-off for volume.
+        // Front face.
         val frontFace = roundedPolygon(
             listOf(
                 Offset(g.left, g.front), Offset(g.right, g.front),
@@ -169,35 +149,11 @@ fun HavnOrganizerView(
             roundCorners = setOf(2, 3),
         )
         drawPath(frontFace, bodyFill)
-        drawPath(
-            frontFace,
-            Brush.verticalGradient(
-                listOf(Color.Transparent, colors.shadowTint.copy(alpha = if (colors.isDark) 0.25f else 0.06f)),
-                startY = g.front,
-                endY = g.bottom,
-            ),
-        )
 
         // ── Wells: drawn for every compartment, revealed as lids lift ───────
         for (i in 0 until 4) {
             val well = quad(g, i, uBack = 0.14f, uFront = 0.86f, inset = 0.11f)
             drawPath(well, wellFill)
-            // The back inner wall catches shadow; the floor stays clean.
-            clipPath(well) {
-                val top = g.yAt(0.14f)
-                drawRect(
-                    brush = Brush.verticalGradient(
-                        listOf(
-                            colors.shadowTint.copy(alpha = if (colors.isDark) 0.45f else 0.12f),
-                            Color.Transparent,
-                        ),
-                        startY = top,
-                        endY = top + g.depth * 0.32f,
-                    ),
-                    topLeft = Offset(g.left, top),
-                    size = Size(g.width, g.depth),
-                )
-            }
             drawPath(well, line.copy(alpha = 0.35f), style = Stroke(stroke * 0.7f))
 
             drawContents(
@@ -206,10 +162,10 @@ fun HavnOrganizerView(
                 doses = doses.filter { it.period == periods[i] },
                 tagColors = tagColors,
                 fallback = colors.medSage,
-                ghost = colors.hairlineStrong,
+                ghost = colors.hairline,
                 check = colors.accent,
-                shadow = colors.shadowTint,
-                isDark = colors.isDark,
+                paper = colors.surfaceRaised,
+                ink = colors.textPrimary,
             )
         }
 
@@ -228,10 +184,10 @@ fun HavnOrganizerView(
             val label = textMeasurer.measure(
                 period.label.uppercase(),
                 TextStyle(
-                    fontFamily = HankenGrotesk,
+                    fontFamily = PlexMono,
                     fontSize = (g.width / 36f).coerceIn(8.5f * density, 11f * density).toSp(),
-                    letterSpacing = 1.4.sp,
-                    fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+                    letterSpacing = 0.9.sp,
+                    fontWeight = if (selected) FontWeight.Medium else FontWeight.Normal,
                     color = if (selected) colors.accent else colors.textTertiary,
                 ),
             )
@@ -239,7 +195,12 @@ fun HavnOrganizerView(
             val cy = g.front + g.frontHeight * 0.56f
             drawText(label, topLeft = Offset(cx - label.size.width / 2f, cy - label.size.height / 2f))
             if (period == currentPeriod) {
-                drawCircle(colors.accent, radius = stroke * 1.6f, center = Offset(cx, g.front + g.frontHeight * 0.24f))
+                val dot = stroke * 1.6f
+                drawRect(
+                    colors.accent,
+                    topLeft = Offset(cx - dot, g.front + g.frontHeight * 0.24f - dot),
+                    size = Size(dot * 2f, dot * 2f),
+                )
             }
         }
 
@@ -288,7 +249,7 @@ private class BoxGeometry(w: Float, h: Float) {
     val backLeft = Offset(left + persp, back)
     val backRight = Offset(right - persp, back)
 
-    val corner = width * 0.03f
+    val corner = 0f
     val stroke = (width / 260f).coerceIn(1.6f, 4f)
 
     fun frontX(f: Float) = left + width * f
@@ -350,7 +311,7 @@ private fun DrawScope.drawLid(
     if (forward > -0.2f) {
         val lip = roundedPolygon(
             listOf(tipL, tipR, tipR + Offset(0f, thickness), tipL + Offset(0f, thickness)),
-            radius = thickness * 0.5f,
+            radius = 0f,
         )
         drawPath(lip, lerp(top, line, 0.10f))
         drawPath(lip, line, style = Stroke(g.stroke * 0.8f, join = StrokeJoin.Round))
@@ -358,17 +319,6 @@ private fun DrawScope.drawLid(
 
     val lid = roundedPolygon(listOf(hingeL, hingeR, tipR, tipL), radius = g.corner * 0.9f)
     drawPath(lid, if (showingTop) top else underside)
-    if (!showingTop) {
-        // Underside reads as the inside of the lid: a little shade at the hinge.
-        drawPath(
-            lid,
-            Brush.verticalGradient(
-                listOf(line.copy(alpha = 0f), line.copy(alpha = 0.08f)),
-                startY = tipL.y,
-                endY = hingeL.y,
-            ),
-        )
-    }
     drawPath(lid, line, style = Stroke(g.stroke, join = StrokeJoin.Round))
 
     // Lid marks fade out as the lid lifts — they belong to the closed state.
@@ -377,7 +327,11 @@ private fun DrawScope.drawLid(
     val c = p((f0 + f1) / 2f, 0.55f)
     val r = (g.width / 4f) * 0.075f
     if (allTaken) {
-        drawCircle(mark.copy(alpha = markAlpha), r * 1.25f, c)
+        drawRect(
+            mark.copy(alpha = markAlpha),
+            topLeft = c - Offset(r * 1.25f, r * 1.25f),
+            size = Size(r * 2.5f, r * 2.5f),
+        )
         val tick = Path().apply {
             moveTo(c.x - r * 0.55f, c.y + r * 0.02f)
             lineTo(c.x - r * 0.12f, c.y + r * 0.42f)
@@ -390,7 +344,11 @@ private fun DrawScope.drawLid(
         val step = r * 0.95f
         val start = c.x - step * (n - 1) / 2f
         repeat(n) { k ->
-            drawCircle(mark.copy(alpha = markAlpha * 0.85f), r * 0.28f, Offset(start + step * k, c.y))
+            drawRect(
+                mark.copy(alpha = markAlpha * 0.85f),
+                topLeft = Offset(start + step * k - r * 0.28f, c.y - r * 0.28f),
+                size = Size(r * 0.56f, r * 0.56f),
+            )
         }
     }
 }
@@ -404,8 +362,8 @@ private fun DrawScope.drawContents(
     fallback: Color,
     ghost: Color,
     check: Color,
-    shadow: Color,
-    isDark: Boolean,
+    paper: Color,
+    ink: Color,
 ) {
     if (doses.isEmpty()) return
     val compW = g.width / 4f
@@ -439,15 +397,9 @@ private fun DrawScope.drawContents(
         val tint = tagColors[dose.medication.colorTag] ?: fallback
 
         if (dose.status == DoseStatus.PENDING) {
-            // Contact shadow first so the pill sits on the floor.
-            drawOval(
-                shadow.copy(alpha = if (isDark) 0.45f else 0.14f),
-                topLeft = center + Offset(-size * 0.42f, size * 0.06f),
-                size = Size(size * 0.84f, size * 0.30f),
-            )
-            drawPill(dose.medication.iconType, center, size, tilt, tint, ghost = null, stroke = g.stroke)
+            drawPill(dose.medication.iconType, center, size, tilt, tint, ghost = null, stroke = g.stroke, paper = paper, ink = ink)
         } else {
-            drawPill(dose.medication.iconType, center, size, tilt, tint, ghost = ghost, stroke = g.stroke)
+            drawPill(dose.medication.iconType, center, size, tilt, tint, ghost = ghost, stroke = g.stroke, paper = paper, ink = ink)
         }
     }
 }
@@ -464,9 +416,11 @@ private fun DrawScope.drawPill(
     tint: Color,
     ghost: Color?,
     stroke: Float,
+    paper: Color,
+    ink: Color,
 ) {
-    val light = lerp(tint, Color.White, 0.78f)
-    val edge = lerp(tint, Color.Black, 0.18f)
+    val light = lerp(tint, paper, 0.78f)
+    val edge = lerp(tint, ink, 0.18f)
     val outline = Stroke(stroke * 0.7f)
 
     fun body(color: Color) = ghost ?: color
@@ -484,8 +438,6 @@ private fun DrawScope.drawPill(
                     clipRect(left = c.x - len / 2f, top = c.y - wid, right = c.x, bottom = c.y + wid) {
                         drawRoundRect(tint, tl, Size(len, wid), r)
                     }
-                    // A sliver of highlight along the shell.
-                    drawLine(Color.White.copy(alpha = 0.55f), Offset(tl.x + wid * 0.6f, c.y - wid * 0.22f), Offset(c.x + len * 0.3f, c.y - wid * 0.22f), strokeWidth = wid * 0.12f, cap = StrokeCap.Round)
                 }
                 drawRoundRect(line(), tl, Size(len, wid), r, style = outline)
             }
@@ -501,7 +453,6 @@ private fun DrawScope.drawPill(
                 val tl = Offset(c.x - s.width / 2f, c.y - s.height / 2f)
                 if (ghost == null) {
                     drawOval(tint.copy(alpha = 0.88f), tl, s)
-                    drawOval(Color.White.copy(alpha = 0.45f), tl + Offset(s.width * 0.18f, s.height * 0.16f), Size(s.width * 0.34f, s.height * 0.26f))
                 }
                 drawOval(line(), tl, s, style = outline)
             }
@@ -509,7 +460,7 @@ private fun DrawScope.drawPill(
                 // A sachet with a crimped top.
                 val s = Size(size * 0.62f, size * 0.52f)
                 val tl = Offset(c.x - s.width / 2f, c.y - s.height / 2f)
-                val r = androidx.compose.ui.geometry.CornerRadius(s.width * 0.12f)
+                val r = androidx.compose.ui.geometry.CornerRadius.Zero
                 if (ghost == null) drawRoundRect(light, tl, s, r)
                 drawRoundRect(line(), tl, s, r, style = outline)
                 drawLine(body(edge.copy(alpha = 0.6f)), tl + Offset(0f, s.height * 0.22f), tl + Offset(s.width, s.height * 0.22f), strokeWidth = stroke * 0.6f)
@@ -520,7 +471,7 @@ private fun DrawScope.drawPill(
                 val wid = size * 0.24f
                 val tl = Offset(c.x - len / 2f, c.y - wid / 2f)
                 val r = androidx.compose.ui.geometry.CornerRadius(wid / 2f)
-                if (ghost == null) drawRoundRect(lerp(tint, Color.White, 0.55f), tl, Size(len, wid), r)
+                if (ghost == null) drawRoundRect(lerp(tint, paper, 0.55f), tl, Size(len, wid), r)
                 drawRoundRect(line(), tl, Size(len, wid), r, style = outline)
                 val neck = c.x + len * 0.18f
                 drawLine(body(edge.copy(alpha = 0.6f)), Offset(neck, c.y - wid / 2f), Offset(neck, c.y + wid / 2f), strokeWidth = stroke * 0.7f)
@@ -589,24 +540,18 @@ fun HavnPillSpecimen(
     ) { form ->
         Canvas(Modifier.fillMaxSize()) {
             val stroke = (size.minDimension / 70f).coerceAtLeast(1.5f)
-            val r = size.minDimension * 0.22f
             val tray = roundedPolygon(
                 listOf(
                     Offset(0f, 0f), Offset(size.width, 0f),
                     Offset(size.width, size.height), Offset(0f, size.height),
                 ),
-                radius = r,
+                radius = 0f,
             )
-            drawPath(tray, if (colors.isDark) colors.linen else lerp(colors.linen, Color.White, 0.45f))
+            drawPath(tray, if (colors.isDark) colors.linen else lerp(colors.linen, colors.surfaceRaised, 0.45f))
             drawPath(tray, colors.accent.copy(alpha = 0.55f), style = Stroke(stroke))
             val c = Offset(size.width / 2f, size.height / 2f)
             val s = size.minDimension * 0.62f
-            drawOval(
-                colors.shadowTint.copy(alpha = if (colors.isDark) 0.45f else 0.14f),
-                topLeft = c + Offset(-s * 0.42f, s * 0.12f),
-                size = Size(s * 0.84f, s * 0.26f),
-            )
-            drawPill(form, c, s, -28f, tint, ghost = null, stroke = stroke * 1.2f)
+            drawPill(form, c, s, -28f, tint, ghost = null, stroke = stroke * 1.2f, paper = colors.surfaceRaised, ink = colors.textPrimary)
         }
     }
 }

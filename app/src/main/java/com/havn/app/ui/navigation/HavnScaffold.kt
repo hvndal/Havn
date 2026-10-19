@@ -22,8 +22,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,8 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -98,18 +95,6 @@ private fun HavnBottomBar(
     Column(
         modifier = modifier.fillMaxWidth(),
     ) {
-        // A short gradient above the bar so scrolling content dissolves into it
-        // instead of being cut by a hard edge.
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(16.dp)
-                .background(
-                    Brush.verticalGradient(
-                        listOf(Color.Transparent, colors.canvas)
-                    )
-                )
-        )
         // One hairline marks the bar's edge — a printed rule, not a panel.
         Box(
             modifier = Modifier
@@ -174,7 +159,7 @@ private fun HavnNavItem(
 
     Column(
         modifier = modifier
-            .clip(RoundedCornerShape(HavnTheme.radius.md))
+            .clip(RectangleShape)
             .selectable(
                 selected = selected,
                 interactionSource = interaction,
@@ -216,7 +201,7 @@ private fun HavnNavItem(
                     scaleY = dotScale
                     alpha = dotScale
                 }
-                .clip(CircleShape)
+                .clip(RectangleShape)
                 .background(colors.accent)
         )
     }

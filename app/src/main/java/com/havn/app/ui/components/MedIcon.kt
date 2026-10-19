@@ -10,14 +10,14 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.havn.app.R
 import com.havn.app.domain.model.MedIconType
-import com.havn.app.ui.theme.Sage
+import com.havn.app.ui.theme.HavnTheme
 
 @Composable
 fun MedIcon(
     type: MedIconType,
     modifier: Modifier = Modifier,
     size: Dp = 24.dp,
-    tint: Color = Sage,
+    tint: Color = HavnTheme.colors.textPrimary,
 ) {
     val res = when (type) {
         MedIconType.CAPSULE -> R.drawable.ic_med_capsule
@@ -30,6 +30,8 @@ fun MedIcon(
         painter = painterResource(res),
         contentDescription = null,
         modifier = modifier.size(size),
-        tint = if (type == MedIconType.CAPSULE) Color.Unspecified else tint,
+        // One colour, every icon: a two-tone capsule in fixed pigments would
+        // vanish on the dark page.
+        tint = tint,
     )
 }

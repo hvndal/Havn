@@ -31,8 +31,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -52,6 +50,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
@@ -491,15 +490,12 @@ private fun ProfileAvatar(
     selected: Boolean = false,
 ) {
     val colors = HavnTheme.colors
-    val tint = remember(user?.avatarColor) {
-        runCatching { Color(android.graphics.Color.parseColor(user?.avatarColor ?: "#516351")) }
-            .getOrDefault(Color(0xFF5E6E5D))
-    }
+    val tint = avatarAccent(user?.avatarColor)
 
     Box(
         modifier = Modifier
             .size(size)
-            .clip(CircleShape)
+            .clip(RectangleShape)
             .background(tint.copy(alpha = if (colors.isDark) 0.28f else 0.16f))
             .then(
                 if (onClick != null) {
@@ -660,14 +656,14 @@ private fun DayMetric(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(2.dp)
-                .clip(CircleShape)
+                .clip(RectangleShape)
                 .background(colors.hairline)
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth(progress)
                     .height(2.dp)
-                    .clip(CircleShape)
+                    .clip(RectangleShape)
                     .background(colors.accent)
             )
         }
@@ -849,11 +845,11 @@ private fun DoseRow(
         Box(
             modifier = Modifier
                 .size(42.dp)
-                .clip(CircleShape)
-                // White disc with a hairline: the medication's colour lives in
+                .clip(RectangleShape)
+                // Paper square with a hairline: the medication's colour lives in
                 // the glyph alone, so a list of five meds stays calm.
                 .background(colors.surface)
-                .border(1.dp, colors.hairlineStrong, CircleShape),
+                .border(1.dp, colors.hairlineStrong, RectangleShape),
             contentAlignment = Alignment.Center,
         ) {
             MedIcon(
@@ -964,10 +960,7 @@ private fun ProfileSheet(
         contentColor = colors.textPrimary,
         scrimColor = colors.scrim,
         dragHandle = { HavnDragHandle() },
-        shape = RoundedCornerShape(
-            topStart = HavnTheme.radius.xl,
-            topEnd = HavnTheme.radius.xl,
-        ),
+        shape = RectangleShape,
     ) {
         Column(
             modifier = Modifier
@@ -987,7 +980,7 @@ private fun ProfileSheet(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(HavnTheme.radius.md))
+                        .clip(RectangleShape)
                         .havnPress(scaleDown = 0.99f) { onSelect(profile.id) }
                         .padding(vertical = HavnTheme.spacing.md),
                     verticalAlignment = Alignment.CenterVertically,
@@ -1045,10 +1038,7 @@ private fun DoseDetailSheet(
         contentColor = colors.textPrimary,
         scrimColor = colors.scrim,
         dragHandle = { HavnDragHandle() },
-        shape = RoundedCornerShape(
-            topStart = HavnTheme.radius.xl,
-            topEnd = HavnTheme.radius.xl,
-        ),
+        shape = RectangleShape,
     ) {
         Column(
             modifier = Modifier
@@ -1060,7 +1050,7 @@ private fun DoseDetailSheet(
                 Box(
                     modifier = Modifier
                         .size(52.dp)
-                        .clip(CircleShape)
+                        .clip(RectangleShape)
                         .background(accent.copy(alpha = if (colors.isDark) 0.2f else 0.12f)),
                     contentAlignment = Alignment.Center,
                 ) {
@@ -1147,7 +1137,7 @@ fun HavnDragHandle() {
             modifier = Modifier
                 .width(32.dp)
                 .height(4.dp)
-                .clip(CircleShape)
+                .clip(RectangleShape)
                 .background(HavnTheme.colors.hairlineStrong)
         )
     }
@@ -1166,7 +1156,23 @@ fun medAccent(tag: String): Color {
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview(name = "Greeting & Metric - Light", showBackground = true, backgroundColor = 0xFFF9F7F3)
+/**
+ * Profile colours are stored as hex (onboarding's AVATAR_COLORS). They render on
+ * the same ink ladder as medications, so no old hue reaches the screen.
+ */
+@Composable
+fun avatarAccent(hex: String?): Color {
+    val colors = HavnTheme.colors
+    return when (hex?.uppercase()) {
+        "#9A5637" -> colors.medClay
+        "#8A6B22" -> colors.medAmber
+        "#7E929A", "#6B5F7A" -> colors.medSlate
+        "#A89878" -> colors.medSand
+        else -> colors.medSage
+    }
+}
+
+@androidx.compose.ui.tooling.preview.Preview(name = "Greeting & Metric - Light", showBackground = true, backgroundColor = 0xFFF2F1EC)
 @Composable
 private fun HomeGreetingLightPreview() {
     com.havn.app.ui.theme.HavnTheme(themeMode = com.havn.app.ui.theme.ThemeMode.LIGHT) {
@@ -1192,7 +1198,7 @@ private fun HomeGreetingLightPreview() {
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview(name = "Greeting & Metric - Dark", showBackground = true, backgroundColor = 0xFF15170F, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
+@androidx.compose.ui.tooling.preview.Preview(name = "Greeting & Metric - Dark", showBackground = true, backgroundColor = 0xFF121210, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun HomeGreetingDarkPreview() {
     com.havn.app.ui.theme.HavnTheme(themeMode = com.havn.app.ui.theme.ThemeMode.DARK) {

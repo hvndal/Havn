@@ -13,7 +13,7 @@ Start here. Every folder in this repo, what it's for, and whether it's current.
 | `…/data/` | Database, backup, preferences |
 | `…/widget/` | Home-screen widget |
 | `app/src/main/res/` | Fonts, sounds (`raw/`), icons, strings |
-| `app/src/main/assets/organizer/` | 3D organiser (three.js) |
+| `app/src/main/assets/licenses/` | Font licences (OFL) shipped with the app |
 | `build-release.sh`, `gradlew` | Build the release |
 
 ## Design — current (Swiss)

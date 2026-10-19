@@ -9,14 +9,13 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
@@ -32,31 +31,21 @@ import com.havn.app.ui.theme.HavnTheme
 /**
  * The one surface primitive in the app.
  *
- * Depth is built from three cooperating signals rather than a heavy border:
- * a fill one step above its ground, a hairline at ~4% contrast, and a soft
- * shadow tinted by the theme. In dark mode the shadow nearly vanishes (there
- * is nothing darker than the ground to cast onto), so the hairline carries
- * separation instead — which is why both are always present.
+ * Depth is a fill and a hairline, never a shadow: [elevation] is kept for
+ * call-site compatibility and draws nothing.
  */
 @Composable
 fun HavnSurface(
     modifier: Modifier = Modifier,
     color: Color = HavnTheme.colors.surface,
-    shape: Shape = RoundedCornerShape(HavnTheme.radius.lg),
+    shape: Shape = RectangleShape,
     elevation: Dp = HavnTheme.elevation.rest,
     border: BorderStroke? = BorderStroke(1.dp, HavnTheme.colors.hairline),
     contentPadding: Dp = 0.dp,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val colors = HavnTheme.colors
     Column(
         modifier = modifier
-            .shadow(
-                elevation = elevation,
-                shape = shape,
-                ambientColor = colors.shadowTint.copy(alpha = if (colors.isDark) 0.9f else 0.07f),
-                spotColor = colors.shadowTint.copy(alpha = if (colors.isDark) 0.9f else 0.05f),
-            )
             .clip(shape)
             .background(color)
             .then(if (border != null) Modifier.border(border, shape) else Modifier)
@@ -76,7 +65,7 @@ fun HavnInteractiveSurface(
     modifier: Modifier = Modifier,
     color: Color = HavnTheme.colors.surface,
     pressedColor: Color = HavnTheme.colors.surfacePressed,
-    shape: Shape = RoundedCornerShape(HavnTheme.radius.lg),
+    shape: Shape = RectangleShape,
     elevation: Dp = HavnTheme.elevation.rest,
     border: BorderStroke? = BorderStroke(1.dp, HavnTheme.colors.hairline),
     contentPadding: Dp = 0.dp,
@@ -85,7 +74,6 @@ fun HavnInteractiveSurface(
     onClickLabel: String? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val colors = HavnTheme.colors
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
     val haptics = rememberHavnHaptics()
@@ -107,12 +95,6 @@ fun HavnInteractiveSurface(
                 scaleX = scale
                 scaleY = scale
             }
-            .shadow(
-                elevation = elevation,
-                shape = shape,
-                ambientColor = colors.shadowTint.copy(alpha = if (colors.isDark) 0.9f else 0.07f),
-                spotColor = colors.shadowTint.copy(alpha = if (colors.isDark) 0.9f else 0.05f),
-            )
             .clip(shape)
             .background(fill)
             .then(if (border != null) Modifier.border(border, shape) else Modifier)
@@ -139,7 +121,7 @@ fun HavnInteractiveSurface(
 @Composable
 fun HavnWell(
     modifier: Modifier = Modifier,
-    shape: Shape = RoundedCornerShape(HavnTheme.radius.md),
+    shape: Shape = RectangleShape,
     border: BorderStroke? = null,
     contentPadding: Dp = 0.dp,
     content: @Composable ColumnScope.() -> Unit,

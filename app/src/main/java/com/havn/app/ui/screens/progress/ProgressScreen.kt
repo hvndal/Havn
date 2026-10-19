@@ -23,8 +23,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,9 +32,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
@@ -365,18 +364,26 @@ private fun AdherenceChart(days: List<DayRecord>, modifier: Modifier = Modifier)
         clipRect(right = w * reveal) {
             drawPath(
                 path = fill,
-                brush = Brush.verticalGradient(
-                    listOf(colors.accent.copy(alpha = 0.22f), Color.Transparent),
-                ),
+                color = colors.accentSoft,
             )
             drawPath(
                 path = line,
                 color = colors.accent,
-                style = Stroke(width = 2.5.dp.toPx(), cap = StrokeCap.Round),
+                style = Stroke(width = 2.5.dp.toPx(), cap = StrokeCap.Butt),
             )
             val last = points.last()
-            drawCircle(colors.canvas, radius = 5.dp.toPx(), center = last)
-            drawCircle(colors.accent, radius = 3.5.dp.toPx(), center = last)
+            val outer = 5.dp.toPx()
+            val inner = 3.5.dp.toPx()
+            drawRect(
+                color = colors.canvas,
+                topLeft = Offset(last.x - outer, last.y - outer),
+                size = Size(outer * 2f, outer * 2f),
+            )
+            drawRect(
+                color = colors.accent,
+                topLeft = Offset(last.x - inner, last.y - inner),
+                size = Size(inner * 2f, inner * 2f),
+            )
         }
     }
 }
@@ -420,7 +427,7 @@ private fun MedicationBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(3.dp)
-                .clip(CircleShape)
+                .clip(RectangleShape)
                 .background(colors.hairline)
         ) {
             if (width > 0.001f) {
@@ -428,7 +435,7 @@ private fun MedicationBar(
                     modifier = Modifier
                         .fillMaxWidth(width.coerceIn(0.001f, 1f))
                         .height(3.dp)
-                        .clip(CircleShape)
+                        .clip(RectangleShape)
                         .background(accent)
                 )
             }
@@ -469,7 +476,7 @@ private fun CalendarPane(
                 style = MaterialTheme.typography.headlineMedium,
                 color = colors.textSecondary,
                 modifier = Modifier
-                    .clip(CircleShape)
+                    .clip(RectangleShape)
                     .havnPressFade(onClick = onPrevious)
                     .padding(horizontal = HavnTheme.spacing.md),
             )
@@ -478,7 +485,7 @@ private fun CalendarPane(
                 style = MaterialTheme.typography.headlineMedium,
                 color = if (canGoForward) colors.textSecondary else colors.textDisabled,
                 modifier = Modifier
-                    .clip(CircleShape)
+                    .clip(RectangleShape)
                     .havnPressFade(enabled = canGoForward, onClick = onNext)
                     .padding(horizontal = HavnTheme.spacing.md),
             )
@@ -529,12 +536,12 @@ private fun CalendarPane(
                     Box(
                         modifier = Modifier
                             .size(7.dp)
-                            .clip(CircleShape)
+                            .clip(RectangleShape)
                             .background(
                                 when (detail.status) {
                                     DoseStatus.TAKEN -> colors.accent
                                     DoseStatus.SKIPPED -> colors.warning
-                                    DoseStatus.PENDING -> colors.hairlineStrong
+                                    DoseStatus.PENDING -> colors.textDisabled
                                 }
                             )
                     )
@@ -640,7 +647,7 @@ private fun DayCell(
     Box(
         modifier = modifier
             .aspectRatio(1f)
-            .clip(RoundedCornerShape(HavnTheme.radius.sm))
+            .clip(RectangleShape)
             .background(fill)
             .then(
                 if (isToday && !isSelected) {
@@ -661,7 +668,7 @@ private fun DayCell(
                 Box(
                     modifier = Modifier
                         .size(3.dp)
-                        .clip(CircleShape)
+                        .clip(RectangleShape)
                         .background(if (isSelected) colors.onAccent else colors.accent)
                 )
             }

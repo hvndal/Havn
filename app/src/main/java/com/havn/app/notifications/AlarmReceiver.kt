@@ -55,7 +55,7 @@ class AlarmReceiver : BroadcastReceiver() {
         const val EXTRA_IS_SNOOZE = "is_snooze"
         private const val SNOOZE_MS = 15 * 60_000L
 
-        const val BRAND_ACCENT = 0xFF5E6E5D.toInt()
+        const val BRAND_ACCENT = 0xFFC23A05.toInt() // Signal — the one orange
 
         // Notification-ID bands, so a dose, its early nudge, an evening
         // summary and a test can never overwrite one another.

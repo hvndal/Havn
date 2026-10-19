@@ -23,8 +23,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -38,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -345,7 +344,7 @@ private fun TimeRow(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = HavnTheme.spacing.sm)
-            .clip(RoundedCornerShape(HavnTheme.radius.md))
+            .clip(RectangleShape)
             .background(colors.surfaceSunken)
             .havnPress(scaleDown = 0.99f, onClickLabel = "Change time", onClick = onEdit)
             .padding(horizontal = HavnTheme.spacing.lg, vertical = HavnTheme.spacing.md),
@@ -363,7 +362,7 @@ private fun TimeRow(
                 style = MaterialTheme.typography.labelMedium,
                 color = colors.textTertiary,
                 modifier = Modifier
-                    .clip(RoundedCornerShape(HavnTheme.radius.sm))
+                    .clip(RectangleShape)
                     .havnPress(scaleDown = 0.95f, onClick = onRemove)
                     .padding(horizontal = HavnTheme.spacing.sm, vertical = HavnTheme.spacing.xs),
             )
@@ -395,9 +394,9 @@ private fun IconChoice(
     Box(
         modifier = modifier
             .aspectRatio(1f)
-            .clip(RoundedCornerShape(HavnTheme.radius.md))
+            .clip(RectangleShape)
             .background(background)
-            .border(borderWidth, if (selected) accent else Color.Transparent, RoundedCornerShape(HavnTheme.radius.md))
+            .border(borderWidth, if (selected) accent else Color.Transparent, RectangleShape)
             .havnPress(
                 scaleDown = 0.92f,
                 onClickLabel = type.name.lowercase(),
@@ -437,13 +436,13 @@ private fun ColourChoice(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .clip(CircleShape)
+                .clip(RectangleShape)
                 .background(tint)
-                .border(ring, colors.canvas, CircleShape)
+                .border(ring, colors.canvas, RectangleShape)
                 .border(
                     width = if (selected) 1.5.dp else 0.dp,
                     color = if (selected) colors.textPrimary else Color.Transparent,
-                    shape = CircleShape,
+                    shape = RectangleShape,
                 )
         )
     }

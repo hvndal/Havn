@@ -20,8 +20,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -247,7 +246,7 @@ private fun FilterChip(
     val colors = HavnTheme.colors
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(HavnTheme.radius.pill))
+            .clip(RectangleShape)
             .background(if (selected) colors.accent else colors.surfaceSunken)
             .havnPress(scaleDown = 0.94f, onClick = onClick)
             .padding(horizontal = HavnTheme.spacing.lg, vertical = HavnTheme.spacing.sm),
@@ -293,7 +292,7 @@ private fun MedicationRow(
                 modifier = Modifier
                     .size(42.dp)
                     .graphicsLayer { alpha = contentAlpha }
-                    .clip(CircleShape)
+                    .clip(RectangleShape)
                     .background(accent.copy(alpha = if (colors.isDark) 0.18f else 0.12f)),
                 contentAlignment = Alignment.Center,
             ) {

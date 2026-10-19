@@ -26,8 +26,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -41,12 +39,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.havn.app.ui.screens.home.avatarAccent
 import com.havn.app.domain.model.User
 import com.havn.app.ui.components.HavnAmbientField
 import com.havn.app.ui.components.HavnBrandLogo
@@ -339,18 +339,15 @@ private fun ProfileRow(
         key = profile.id,
         delayMs = HavnMotion.staggerDelay(index, step = 60),
     )
-    val tint = remember(profile.avatarColor) {
-        runCatching { Color(android.graphics.Color.parseColor(profile.avatarColor)) }
-            .getOrDefault(Color(0xFF5E6E5D))
-    }
+    val tint = avatarAccent(profile.avatarColor)
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .havnReveal(reveal)
-            .clip(RoundedCornerShape(HavnTheme.radius.md))
+            .clip(RectangleShape)
             .background(colors.surface)
-            .border(1.dp, colors.hairline, RoundedCornerShape(HavnTheme.radius.md))
+            .border(1.dp, colors.hairline, RectangleShape)
             .havnPress(scaleDown = 0.985f, enabled = enabled, onClick = onClick)
             .padding(HavnTheme.spacing.lg),
         verticalAlignment = Alignment.CenterVertically,
@@ -358,7 +355,7 @@ private fun ProfileRow(
         Box(
             modifier = Modifier
                 .size(40.dp)
-                .clip(CircleShape)
+                .clip(RectangleShape)
                 .background(tint.copy(alpha = if (colors.isDark) 0.3f else 0.16f)),
             contentAlignment = Alignment.Center,
         ) {
@@ -481,10 +478,7 @@ private fun ColourSwatch(
     modifier: Modifier = Modifier,
 ) {
     val colors = HavnTheme.colors
-    val tint = remember(hex) {
-        runCatching { Color(android.graphics.Color.parseColor(hex)) }
-            .getOrDefault(Color(0xFF5E6E5D))
-    }
+    val tint = avatarAccent(hex)
     // The ring grows rather than the swatch: changing the swatch's own size
     // would reflow the row and make its neighbours twitch on every selection.
     val ring by animateDpAsState(
@@ -502,13 +496,13 @@ private fun ColourSwatch(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .clip(CircleShape)
+                .clip(RectangleShape)
                 .background(tint)
-                .border(ring, colors.canvas, CircleShape)
+                .border(ring, colors.canvas, RectangleShape)
                 .border(
                     width = if (selected) 1.5.dp else 0.dp,
                     color = if (selected) colors.textPrimary else Color.Transparent,
-                    shape = CircleShape,
+                    shape = RectangleShape,
                 )
         )
     }

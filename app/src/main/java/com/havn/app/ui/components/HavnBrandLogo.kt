@@ -14,7 +14,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
@@ -48,20 +47,17 @@ fun HavnBrandLogo(
 ) {
     val colors = HavnTheme.colors
 
-    // In dark mode the box reads as an *object in low light* rather than an
-    // inverted diagram: the shell stays pale enough to hold its silhouette,
-    // but sits well below the text so it doesn't glare.
-    val shell = if (colors.isDark) Color(0xFF232823) else Color(0xFFFFFFFF)
-    val shellAlt = if (colors.isDark) Color(0xFF1B201B) else Color(0xFFEDE8DF)
-    val stroke = if (colors.isDark) Color(0xFF6F7F6E) else Color(0xFF5E6E5D)
-    val letterColor = if (colors.isDark) Color(0xFFDDE3DA) else Color(0xFF1B241A)
-    val tabletFill = if (colors.isDark) Color(0xFF3A403A) else Color(0xFFF0ECE3)
-    val tabletStroke = if (colors.isDark) Color(0xFF555C54) else Color(0xFFD3CDBF)
-    val tabletScore = if (colors.isDark) Color(0xFF6E766C) else Color(0xFFB5AE9E)
-    val ovalFill = if (colors.isDark) Color(0xFF7F9A7D) else Color(0xFF536352)
-    val ovalStroke = if (colors.isDark) Color(0xFF5F7A5D) else Color(0xFF384637)
-    val capsuleTint = if (colors.isDark) Color(0xFF8FA98D) else Color(0xFF5E6E5D)
-    val capsuleLight = if (colors.isDark) Color(0xFFE4EAE1) else Color(0xFFFFFFFF)
+    val shell = colors.surfaceRaised
+    val shellAlt = colors.linen
+    val stroke = colors.hairlineStrong
+    val letterColor = colors.textPrimary
+    val tabletFill = colors.surfaceSunken
+    val tabletStroke = colors.hairline
+    val tabletScore = colors.accentMuted
+    val ovalFill = colors.accent
+    val ovalStroke = colors.accent
+    val capsuleTint = colors.accent
+    val capsuleLight = colors.surfaceRaised
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -75,14 +71,8 @@ fun HavnBrandLogo(
             val w = size.width
             val h = size.height
             val strokeW = w * 0.035f
-            val cornerR = w * 0.18f
 
-            val outerRoundRect = RoundRect(
-                rect = Rect(0f, 0f, w, h),
-                cornerRadius = CornerRadius(cornerR, cornerR),
-            )
-
-            val outerPath = Path().apply { addRoundRect(outerRoundRect) }
+            val outerPath = Path().apply { addRect(Rect(0f, 0f, w, h)) }
             drawPath(outerPath, shell)
 
             clipPath(outerPath) {
@@ -156,11 +146,10 @@ fun HavnBrandLogo(
             drawLine(letterColor, Offset(hCx + hW / 2, hCy - hH / 2), Offset(hCx + hW / 2, hCy + hH / 2), hStroke)
             drawLine(letterColor, Offset(hCx - hW / 2, hCy), Offset(hCx + hW / 2, hCy), hStroke)
 
-            drawRoundRect(
+            drawRect(
                 color = stroke,
                 topLeft = Offset(0f, 0f),
                 size = Size(w, h),
-                cornerRadius = CornerRadius(cornerR, cornerR),
                 style = Stroke(width = strokeW),
             )
         }
@@ -193,7 +182,7 @@ fun HavnBrandLogo(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview(name = "Light Mode", showBackground = true, backgroundColor = 0xFFF9F7F3)
+@androidx.compose.ui.tooling.preview.Preview(name = "Light Mode", showBackground = true, backgroundColor = 0xFFF2F1EC)
 @Composable
 private fun HavnBrandLogoLightPreview() {
     com.havn.app.ui.theme.HavnTheme(themeMode = com.havn.app.ui.theme.ThemeMode.LIGHT) {
@@ -201,7 +190,7 @@ private fun HavnBrandLogoLightPreview() {
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview(name = "Dark Mode", showBackground = true, backgroundColor = 0xFF15170F, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
+@androidx.compose.ui.tooling.preview.Preview(name = "Dark Mode", showBackground = true, backgroundColor = 0xFF121210, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun HavnBrandLogoDarkPreview() {
     com.havn.app.ui.theme.HavnTheme(themeMode = com.havn.app.ui.theme.ThemeMode.DARK) {

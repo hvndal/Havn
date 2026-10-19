@@ -26,8 +26,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -41,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import com.havn.app.BuildConfig
@@ -69,6 +68,7 @@ import com.havn.app.ui.components.HavnSegmented
 import com.havn.app.ui.components.HavnSwitchRow
 import com.havn.app.ui.components.HavnTextField
 import com.havn.app.ui.components.havnPress
+import com.havn.app.ui.screens.home.avatarAccent
 import com.havn.app.ui.screens.onboarding.AVATAR_COLORS
 import com.havn.app.ui.theme.HavnMotion
 import com.havn.app.ui.theme.HavnTheme
@@ -381,7 +381,7 @@ fun SettingsScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(HavnTheme.radius.md))
+                    .clip(RectangleShape)
                     .background(
                         when {
                             message?.isError == true -> colors.dangerSoft
@@ -495,10 +495,7 @@ private fun ProfileRow(
     modifier: Modifier = Modifier,
 ) {
     val colors = HavnTheme.colors
-    val tint = remember(profile.avatarColor) {
-        runCatching { Color(android.graphics.Color.parseColor(profile.avatarColor)) }
-            .getOrDefault(Color(0xFF5E6E5D))
-    }
+    val tint = avatarAccent(profile.avatarColor)
 
     Row(
         modifier = modifier
@@ -510,7 +507,7 @@ private fun ProfileRow(
         Box(
             modifier = Modifier
                 .size(40.dp)
-                .clip(CircleShape)
+                .clip(RectangleShape)
                 .background(tint.copy(alpha = if (colors.isDark) 0.3f else 0.16f)),
             contentAlignment = Alignment.Center,
         ) {
@@ -562,7 +559,7 @@ private fun AddProfileDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = colors.surfaceRaised,
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(HavnTheme.radius.xl),
+        shape = RectangleShape,
         title = {
             Text(
                 text = "Add a profile",
@@ -593,13 +590,11 @@ private fun AddProfileDialog(
                 Spacer(Modifier.height(HavnTheme.spacing.md))
                 Row(horizontalArrangement = Arrangement.spacedBy(HavnTheme.spacing.md)) {
                     AVATAR_COLORS.forEach { hex ->
-                        val tint = runCatching {
-                            Color(android.graphics.Color.parseColor(hex))
-                        }.getOrDefault(Color(0xFF5E6E5D))
+                        val tint = avatarAccent(hex)
                         Box(
                             modifier = Modifier
                                 .size(if (hex == color) 34.dp else 28.dp)
-                                .clip(CircleShape)
+                                .clip(RectangleShape)
                                 .background(tint)
                                 .havnPress(scaleDown = 0.9f) { color = hex }
                         )
@@ -640,9 +635,9 @@ private fun SupportCard(onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(HavnTheme.radius.lg))
+            .clip(RectangleShape)
             .background(colors.surfaceRaised)
-            .border(1.dp, colors.hairline, RoundedCornerShape(HavnTheme.radius.lg))
+            .border(1.dp, colors.hairline, RectangleShape)
             .havnPress(onClickLabel = "Open Buy Me a Coffee", onClick = onClick)
             .padding(HavnTheme.spacing.lg),
         verticalAlignment = Alignment.CenterVertically,

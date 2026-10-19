@@ -7,170 +7,134 @@ import androidx.compose.ui.graphics.Color
 // ─────────────────────────────────────────────────────────────────────────────
 //  H Ä V N   —   P A L E T T E
 //
-//  Warm minimalism. Paper, sage, clay, amber.
+//  Swiss. Paper, ink, one orange. (design/swiss/HANDOFF.md)
 //  This file holds *raw pigments* only. Screens must never reference these
 //  directly — they consume semantic tokens from HavnTokens.kt instead, so that
 //  light and dark are two deliberate art directions rather than one inverted.
+//
+//  Contrast, measured (WCAG 2.x):
+//   • Ink on Paper 16.3:1 · Ink2 on Paper 6.1:1 · Ink3Text on Paper 5.0:1
+//   • Signal on Paper 4.8:1 · Paper on Signal 4.8:1
+//   • Ink3 is 2.9:1 — rules, ticks and empty cells only, never text.
 // ─────────────────────────────────────────────────────────────────────────────
 
-// ── Paper (light canvas ladder) ──────────────────────────────────────────────
-// Pure white, taken straight from the launcher icon. Surfaces no longer step
-// up in tone — on a white page they separate by hairline alone, the way a
-// printed Scandinavian spread does. The few greys that remain are neutral with
-// the faintest olive cast so they sit with the brand instead of reading blue.
-val Paper00 = Color(0xFFFFFFFF) // canvas, cards, sheets
-val Paper05 = Color(0xFFFFFFFF) // canvas
-val Paper10 = Color(0xFFF5F6F3) // recessed wells, inputs
-val Paper20 = Color(0xFFEEEFEB) // pressed / selected fill
-val Paper30 = Color(0xFFE2E4DE) // strong fill, deliberate rule
-val Paper40 = Color(0xFFC9CDC5) // hairline on tinted ground
+// ── Paper (light ground) ─────────────────────────────────────────────────────
+val Paper        = Color(0xFFF2F1EC) // the page
+val PaperRaised  = Color(0xFFFBFAF7) // sheets and dialogs above the page
+val PaperSunken  = Color(0xFFEAE9E3) // the second paper tone: wells, inputs
+val PaperPressed = Color(0xFFE1E0D9) // momentary press
 
-// Linen — the warm half of the organiser shell in the icon. Used sparingly,
-// only where the product itself (the pill box) needs a second material.
-val Linen     = Color(0xFFEDE8DF)
-val LinenDeep = Color(0xFFD9D2C4)
+// ── Ink (light foreground) ───────────────────────────────────────────────────
+val Ink      = Color(0xFF14140E) // primary text, 2 dp rules, filled checks
+val Ink2     = Color(0xFF5A5B50) // secondary text
+val Ink3Text = Color(0xFF64655A) // tertiary text — the lightest grey that is still text
+val Ink3     = Color(0xFF8E8F85) // non-text only: ticks, empty cells, disabled
+val Rule     = Color(0xFFD3D2C9) // 1 dp hairline
 
-// ── Ink (light foreground ladder) ────────────────────────────────────────────
-val Ink00 = Color(0xFF1B241A) // primary text — the H in the icon
-val Ink40 = Color(0xFF454D44) // secondary text
-val Ink60 = Color(0xFF737A71) // tertiary text / metadata
-val Ink80 = Color(0xFFA9AEA6) // disabled, placeholder
+// ── Night paper (dark ground) ────────────────────────────────────────────────
+// Its own art direction: warm near-black, never #000.
+val NightPaper        = Color(0xFF121210)
+val NightPaperRaised  = Color(0xFF1A1A17)
+val NightPaperSunken  = Color(0xFF0C0C0A)
+val NightPaperPressed = Color(0xFF24241F)
 
-// ── Forest (dark canvas ladder) ──────────────────────────────────────────────
-// Dark mode is its own art direction: a warm green-black, like ink on slate.
-// Never pure #000 — that kills the depth these surfaces are built from.
-val Forest00 = Color(0xFF0D0F0C) // deepest — scrim, behind sheets
-val Forest05 = Color(0xFF121410) // canvas
-val Forest10 = Color(0xFF191C17) // raised sheet — cards
-val Forest20 = Color(0xFF21241E) // elevated / hover
-val Forest30 = Color(0xFF2B2F27) // pressed, strong fill
-val Forest40 = Color(0xFF3A3F35) // hairline on dark
+// ── Night ink (dark foreground) ──────────────────────────────────────────────
+val NightInk      = Color(0xFFEDECE4)
+val NightInk2     = Color(0xFF9C9D93)
+val NightInk3Text = Color(0xFF86877D)
+val NightInk3     = Color(0xFF6A6B62)
+val NightRule     = Color(0xFF2A2A26)
 
-// ── Bone (dark foreground ladder) ────────────────────────────────────────────
-val Bone00 = Color(0xFFEDEBE4) // primary text on dark
-val Bone40 = Color(0xFFBFC3B7) // secondary
-val Bone60 = Color(0xFF8B9084) // tertiary
-val Bone80 = Color(0xFF5E6359) // disabled
-
-// ── Sage — the brand ─────────────────────────────────────────────────────────
-// The olive outline of the launcher icon. Every accent in the app is this one
-// pigment, so the app and its icon read as the same object.
-val Sage         = Color(0xFF5E6E5D) // core brand (light accents)
-val SageDeep     = Color(0xFF3E4B3D) // pressed accent, dark text on pale sage
-val SageInk      = Color(0xFF233022) // text on light sage fills
-val SageSoft     = Color(0xFFEEF1EC) // pale fill, light mode — a tint, not a colour
-val SageMuted    = Color(0xFF9AA698) // mid tone, works in both themes
-
-// Dark-mode brand: sage lifts and desaturates so it reads as *light* on ink.
-// A 0xFF516351 accent on Forest05 is unreadable; this is the corrected tone.
-val SageLift     = Color(0xFFA8C0A4) // accent on dark
-val SageLiftDim  = Color(0xFF7D9479) // secondary accent on dark
-val SageFillDark = Color(0xFF232E21) // pale-sage equivalent on dark
-
-// ── Clay (secondary) ─────────────────────────────────────────────────────────
-val Clay         = Color(0xFF9A5637)
-val ClaySoft     = Color(0xFFF6E0D4)
-val ClayLift     = Color(0xFFE8A480) // on dark
-val ClayFillDark = Color(0xFF33211A)
-
-// ── Amber (tertiary / warning) ───────────────────────────────────────────────
-val Amber        = Color(0xFF8A6B22)
-val AmberSoft    = Color(0xFFF7E8C4)
-val AmberLift    = Color(0xFFD9BA74) // on dark
-val AmberFillDark = Color(0xFF2E2614)
-
-// ── Signal ───────────────────────────────────────────────────────────────────
-val Danger       = Color(0xFFA33228)
-val DangerSoft   = Color(0xFFF8DFDB)
-val DangerLift   = Color(0xFFE99A90)
-val DangerFillDark = Color(0xFF331B18)
-
-// ── Medication accents (shared, tuned per theme in HavnTokens) ───────────────
-val AccentSlate  = Color(0xFF7E929A)
-val AccentSand   = Color(0xFFA89878)
-val AccentSlateLift = Color(0xFFA8BEC6)
-val AccentSandLift  = Color(0xFFCFBE9C)
-
-val PureWhite = Color(0xFFFFFFFF)
+// ── Signal — the one orange ──────────────────────────────────────────────────
+// One orange element on screen at a time: the next thing to do, or something
+// missed. Lifted on dark so it reads as light rather than a smudge.
+val Signal          = Color(0xFFC23A05)
+val SignalPressed   = Color(0xFF9E2F04)
+val SignalSoft      = Color(0xFFF5E2D7)
+val SignalInk       = Color(0xFF8A2A04) // text on SignalSoft
+val NightSignal        = Color(0xFFFF5A1F)
+val NightSignalPressed = Color(0xFFE04A14)
+val NightSignalSoft    = Color(0xFF2A1A12)
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Material 3 schemes
 //
 //  These exist so stock M3 components (Switch, ModalBottomSheet, TimePicker,
 //  Snackbar…) inherit Hävn's identity without being restyled one by one.
-//  Hävn's own surfaces read from HavnTokens instead.
+//  Hävn's own surfaces read from HavnTokens instead. Primary is ink, not
+//  orange: orange is reserved for one element per screen.
 // ─────────────────────────────────────────────────────────────────────────────
 
 val HavnLightColors = lightColorScheme(
-    primary = Sage,
-    onPrimary = PureWhite,
-    primaryContainer = SageSoft,
-    onPrimaryContainer = SageInk,
-    inversePrimary = SageLift,
-    secondary = Clay,
-    onSecondary = PureWhite,
-    secondaryContainer = ClaySoft,
-    onSecondaryContainer = Color(0xFF4A2414),
-    tertiary = Amber,
-    onTertiary = PureWhite,
-    tertiaryContainer = AmberSoft,
-    onTertiaryContainer = Color(0xFF3B2D07),
-    error = Danger,
-    onError = PureWhite,
-    errorContainer = DangerSoft,
-    onErrorContainer = Color(0xFF52140F),
-    background = Paper05,
-    onBackground = Ink00,
-    surface = Paper05,
-    onSurface = Ink00,
-    surfaceVariant = Paper10,
-    onSurfaceVariant = Ink40,
-    surfaceContainerLowest = PureWhite,
-    surfaceContainerLow = Paper00,
-    surfaceContainer = Paper05,
-    surfaceContainerHigh = Paper10,
-    surfaceContainerHighest = Paper20,
-    outline = Ink80,
-    outlineVariant = Paper30,
-    scrim = Color(0xFF15170F),
-    inverseSurface = Forest10,
-    inverseOnSurface = Bone00,
-    surfaceTint = Color.Transparent, // Hävn expresses depth with shadow, not tint
+    primary = Ink,
+    onPrimary = Paper,
+    primaryContainer = PaperSunken,
+    onPrimaryContainer = Ink,
+    inversePrimary = NightInk,
+    secondary = Ink2,
+    onSecondary = Paper,
+    secondaryContainer = PaperSunken,
+    onSecondaryContainer = Ink,
+    tertiary = Signal,
+    onTertiary = Paper,
+    tertiaryContainer = SignalSoft,
+    onTertiaryContainer = SignalInk,
+    error = Signal,
+    onError = Paper,
+    errorContainer = SignalSoft,
+    onErrorContainer = SignalInk,
+    background = Paper,
+    onBackground = Ink,
+    surface = Paper,
+    onSurface = Ink,
+    surfaceVariant = PaperSunken,
+    onSurfaceVariant = Ink2,
+    surfaceContainerLowest = PaperRaised,
+    surfaceContainerLow = PaperRaised,
+    surfaceContainer = Paper,
+    surfaceContainerHigh = PaperSunken,
+    surfaceContainerHighest = PaperPressed,
+    outline = Ink3,
+    outlineVariant = Rule,
+    scrim = Ink,
+    inverseSurface = NightPaperRaised,
+    inverseOnSurface = NightInk,
+    surfaceTint = Color.Transparent, // flat: no tonal elevation
 )
 
 val HavnDarkColors = darkColorScheme(
-    primary = SageLift,
-    onPrimary = Color(0xFF17230F),
-    primaryContainer = SageFillDark,
-    onPrimaryContainer = SageLift,
-    inversePrimary = Sage,
-    secondary = ClayLift,
-    onSecondary = Color(0xFF2E1408),
-    secondaryContainer = ClayFillDark,
-    onSecondaryContainer = ClayLift,
-    tertiary = AmberLift,
-    onTertiary = Color(0xFF241B05),
-    tertiaryContainer = AmberFillDark,
-    onTertiaryContainer = AmberLift,
-    error = DangerLift,
-    onError = Color(0xFF330A07),
-    errorContainer = DangerFillDark,
-    onErrorContainer = DangerLift,
-    background = Forest05,
-    onBackground = Bone00,
-    surface = Forest05,
-    onSurface = Bone00,
-    surfaceVariant = Forest20,
-    onSurfaceVariant = Bone40,
-    surfaceContainerLowest = Forest00,
-    surfaceContainerLow = Forest05,
-    surfaceContainer = Forest10,
-    surfaceContainerHigh = Forest20,
-    surfaceContainerHighest = Forest30,
-    outline = Bone80,
-    outlineVariant = Forest40,
+    primary = NightInk,
+    onPrimary = NightPaper,
+    primaryContainer = NightPaperRaised,
+    onPrimaryContainer = NightInk,
+    inversePrimary = Ink,
+    secondary = NightInk2,
+    onSecondary = NightPaper,
+    secondaryContainer = NightPaperRaised,
+    onSecondaryContainer = NightInk,
+    tertiary = NightSignal,
+    onTertiary = NightPaper,
+    tertiaryContainer = NightSignalSoft,
+    onTertiaryContainer = NightSignal,
+    error = NightSignal,
+    onError = NightPaper,
+    errorContainer = NightSignalSoft,
+    onErrorContainer = NightSignal,
+    background = NightPaper,
+    onBackground = NightInk,
+    surface = NightPaper,
+    onSurface = NightInk,
+    surfaceVariant = NightPaperRaised,
+    onSurfaceVariant = NightInk2,
+    surfaceContainerLowest = NightPaperSunken,
+    surfaceContainerLow = NightPaper,
+    surfaceContainer = NightPaperRaised,
+    surfaceContainerHigh = NightPaperRaised,
+    surfaceContainerHighest = NightPaperPressed,
+    outline = NightInk3,
+    outlineVariant = NightRule,
     scrim = Color(0xFF000000),
-    inverseSurface = Paper00,
-    inverseOnSurface = Ink00,
+    inverseSurface = PaperRaised,
+    inverseOnSurface = Ink,
     surfaceTint = Color.Transparent,
 )
