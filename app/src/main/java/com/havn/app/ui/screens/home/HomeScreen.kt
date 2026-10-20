@@ -1,5 +1,6 @@
 package com.havn.app.ui.screens.home
 
+import androidx.compose.runtime.produceState
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
@@ -149,83 +150,37 @@ fun HomeScreen(
             .fillMaxSize()
             .background(colors.canvas)
     ) {
-        // The ambient field is anchored to the top of the screen, not to the
-        // scroll content, so it behaves like light in the room rather than an
-        // element that scrolls away.
-        HavnAmbientField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 420.dp)
-                .aspectRatio(0.82f),
-        )
-
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
                 bottom = contentPadding.calculateBottomPadding() + HavnTheme.spacing.xxl,
             ),
         ) {
-            item(key = "chrome") {
-                HomeChrome(
-                    user = uiState.user,
+            item(key = "top") {
+                SwissTopLine(
+                    date = uiState.selectedDate,
+                    isToday = uiState.isTodaySelected,
+                    onReturnToToday = { viewModel.selectDate(LocalDate.now()) },
                     onOpenProfiles = { showProfiles = true },
-                    onOpenReminders = onOpenReminders,
                     modifier = Modifier.padding(horizontal = gutter),
                 )
             }
 
-            item(key = "greeting") {
-                GreetingBlock(
-                    name = uiState.user?.name.orEmpty(),
-                    state = uiState,
-                    modifier = Modifier.padding(horizontal = gutter),
-                )
-            }
-
-            item(key = "metric") {
-                if (uiState.isLoading) {
-                    Spacer(Modifier.height(HavnTheme.spacing.xl))
-                } else if (uiState.total > 0) {
-                    DayMetric(
+            item(key = "hero") {
+                if (!uiState.isLoading && uiState.total > 0) {
+                    NextDoseHero(
                         state = uiState,
-                        onMarkAll = viewModel::markAllRemaining,
-                        onOpenProgress = onOpenProgress,
                         modifier = Modifier.padding(horizontal = gutter),
                     )
                 }
-            }
-
-            item(key = "cadence-strip") {
-                if (!uiState.isLoading && uiState.hasMedications && uiState.cadenceDays.isNotEmpty()) {
-                    Spacer(Modifier.height(HavnTheme.spacing.xl))
-                    HavnCadenceStrip(
-                        days = uiState.cadenceDays,
-                        selectedDate = uiState.selectedDate,
-                        onSelectDay = viewModel::selectDate,
-                        modifier = Modifier.padding(horizontal = gutter),
-                    )
-                }
-            }
-
-            item(key = "today-header") {
-                Spacer(Modifier.height(HavnTheme.spacing.section))
-                val headerTitle = if (uiState.isTodaySelected) {
-                    "Today"
-                } else {
-                    uiState.selectedDate.format(DateTimeFormatter.ofPattern("EEEE, MMM d"))
-                }
-                SectionRule(
-                    eyebrow = headerTitle,
-                    trailing = {
-                        if (!uiState.isTodaySelected) {
-                            HavnTextAction(text = "Return to today", onClick = { viewModel.selectDate(LocalDate.now()) })
-                        } else if (uiState.hasMedications) {
-                            HavnTextAction(text = "Manage", onClick = onManageMedications)
-                        }
-                    },
-                    modifier = Modifier.padding(horizontal = gutter),
+                Spacer(Modifier.height(HavnTheme.spacing.xxl))
+                Box(
+                    Modifier
+                        .padding(horizontal = gutter)
+                        .fillMaxWidth()
+                        .height(2.dp)
+                        .background(colors.hairlineStrong)
                 )
-                Spacer(Modifier.height(HavnTheme.spacing.lg))
             }
 
             when {
@@ -246,38 +201,41 @@ fun HomeScreen(
                 }
 
                 else -> {
-                    // Grouped by part of day. A flat list of eight doses is
-                    // just a list; grouped, it reads as a day with a shape.
-                    DayPeriod.entries.forEach { period ->
-                        val periodDoses = uiState.dosesIn(period)
-                        if (periodDoses.isEmpty()) return@forEach
-
-                        item(key = "period-${period.name}") {
-                            PeriodLabel(
-                                period = period,
-                                modifier = Modifier.padding(horizontal = gutter),
-                            )
-                        }
-                        itemsIndexed(
-                            items = periodDoses,
-                            key = { _, dose -> "${dose.medication.id}_${dose.slot}" },
-                        ) { index, dose ->
-                            SwipeableDoseRow(
+                    val sorted = uiState.doses.sortedBy { it.sortKey }
+                    val nextKey = uiState.nextDose?.let { "${it.medication.id}_${it.slot}" }
+                    items(
+                        items = sorted,
+                        key = { dose -> "${dose.medication.id}_${dose.slot}" },
+                    ) { dose ->
+                        HavnSwipeToLogRow(
+                            isTaken = dose.isTaken,
+                            isSkipped = dose.isSkipped,
+                            onTake = { viewModel.setStatus(dose, DoseStatus.TAKEN) },
+                            onSkip = { viewModel.setStatus(dose, DoseStatus.SKIPPED) },
+                            onUndo = { viewModel.setStatus(dose, DoseStatus.PENDING) },
+                        ) {
+                            SwissDoseRow(
                                 dose = dose,
-                                index = index,
+                                isNext = uiState.isTodaySelected && "${dose.medication.id}_${dose.slot}" == nextKey,
                                 onToggle = { viewModel.toggleDose(dose) },
-                                onMarkStatus = { status -> viewModel.setStatus(dose, status) },
                                 onOpenDetail = { detailDose = dose },
-                                modifier = Modifier.padding(horizontal = gutter),
                             )
                         }
+                    }
+                    item(key = "hint") {
+                        Text(
+                            text = "TAP A ROW FOR DETAILS · SWIPE TO SKIP",
+                            style = HavnType.Eyebrow,
+                            color = colors.textSecondary,
+                            modifier = Modifier.padding(horizontal = gutter, vertical = HavnTheme.spacing.md),
+                        )
                     }
 
                     if (uiState.asNeededMeds.isNotEmpty()) {
                         item(key = "as-needed-header") {
                             Spacer(Modifier.height(HavnTheme.spacing.section))
                             Text(
-                                text = "As needed",
+                                text = "AS NEEDED",
                                 style = HavnType.Eyebrow,
                                 color = HavnTheme.colors.textSecondary,
                                 modifier = Modifier.padding(horizontal = gutter).padding(bottom = HavnTheme.spacing.sm),
@@ -288,25 +246,34 @@ fun HomeScreen(
                             items = uiState.asNeededMeds,
                             key = { med -> "as-needed-${med.id}" }
                         ) { med ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = gutter, vertical = HavnTheme.spacing.sm),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(text = med.name, style = MaterialTheme.typography.bodyLarge, color = HavnTheme.colors.textPrimary)
-                                    Text(text = med.dosage, style = MaterialTheme.typography.bodyMedium, color = HavnTheme.colors.textTertiary)
+                            Column {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(56.dp)
+                                        .padding(horizontal = gutter),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Text("ANY", style = HavnType.Clock, color = colors.textSecondary, modifier = Modifier.width(52.dp))
+                                    Spacer(Modifier.width(HavnTheme.spacing.md))
+                                    Text(
+                                        text = med.name + if (med.dosage.isNotBlank()) "  " + med.dosage else "",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = colors.textPrimary,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.weight(1f),
+                                    )
+                                    Text(
+                                        text = "LOG DOSE",
+                                        style = HavnType.Eyebrow,
+                                        color = colors.textPrimary,
+                                        modifier = Modifier
+                                            .havnPress(onClickLabel = "Log ${med.name}") { viewModel.logAsNeeded(med) }
+                                            .padding(vertical = HavnTheme.spacing.md),
+                                    )
                                 }
-                                HavnButton(
-                                    text = "Log dose",
-                                    onClick = { 
-                                        // A new dose log is created with current time as the slot
-                                        viewModel.logAsNeeded(med)
-                                    },
-                                    tone = HavnButtonTone.Secondary,
-                                    size = HavnButtonSize.Small,
-                                )
+                                Box(Modifier.fillMaxWidth().height(1.dp).background(colors.hairline))
                             }
                         }
                     }
@@ -353,6 +320,189 @@ fun HomeScreen(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+
+/** Mono top line: "TODAY" and the date, the way a timetable is headed. */
+@Composable
+private fun SwissTopLine(
+    date: LocalDate,
+    isToday: Boolean,
+    onReturnToToday: () -> Unit,
+    onOpenProfiles: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = HavnTheme.colors
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .statusBarsPadding()
+            .padding(top = HavnTheme.spacing.lg),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = if (isToday) "TODAY" else "BACK TO TODAY",
+            style = HavnType.Eyebrow,
+            color = colors.textPrimary,
+            modifier = Modifier
+                .weight(1f)
+                .havnPress(enabled = !isToday, onClick = onReturnToToday),
+        )
+        Text(
+            text = date.format(DateTimeFormatter.ofPattern("EEE dd.MM")).uppercase(),
+            style = HavnType.Eyebrow,
+            color = colors.textPrimary,
+            modifier = Modifier.havnPress(onClickLabel = "Profiles", onClick = onOpenProfiles),
+        )
+    }
+}
+
+/** The one giant element on Today: how long until the next dose. */
+@Composable
+private fun NextDoseHero(state: HomeUiState, modifier: Modifier = Modifier) {
+    val colors = HavnTheme.colors
+    val now by produceState(LocalTime.now()) {
+        while (true) {
+            delay(30_000)
+            value = LocalTime.now()
+        }
+    }
+    val next = state.nextDose?.takeIf { state.isTodaySelected }
+    val minutes = next?.time?.let { java.time.Duration.between(now, it).toMinutes() }
+
+    val (label, big, unit) = when {
+        state.allDone -> Triple("${state.taken} OF ${state.total} TAKEN", "Done.", "")
+        next == null -> Triple("${state.taken} OF ${state.total} TAKEN", "${state.remaining}", " left")
+        minutes == null -> Triple("NEXT DOSE", "Any", " time")
+        minutes < 0 -> Triple("DUE SINCE", next.slot, "")
+        minutes < 60 -> Triple("NEXT DOSE IN", "$minutes", " min")
+        else -> Triple("NEXT DOSE AT", next.slot, "")
+    }
+
+    Column(modifier = modifier.padding(top = HavnTheme.spacing.xxxl)) {
+        Text(label, style = HavnType.Eyebrow, color = colors.textSecondary)
+        Spacer(Modifier.height(HavnTheme.spacing.md))
+        Row(verticalAlignment = Alignment.Bottom) {
+            Text(
+                text = big,
+                style = HavnType.Poster.copy(fontSize = 96.sp, lineHeight = 84.sp),
+                color = colors.textPrimary,
+                maxLines = 1,
+            )
+            if (unit.isNotEmpty()) {
+                Text(
+                    text = unit,
+                    style = MaterialTheme.typography.headlineLarge,
+                    color = colors.textPrimary,
+                    modifier = Modifier.padding(bottom = 10.dp),
+                )
+            }
+        }
+    }
+}
+
+/**
+ * One dose as a timetable row: mono time, name and dose, a square check.
+ * The next dose is the one orange slab on the screen.
+ */
+@Composable
+private fun SwissDoseRow(
+    dose: TodayDose,
+    isNext: Boolean,
+    onToggle: () -> Unit,
+    onOpenDetail: () -> Unit,
+) {
+    val colors = HavnTheme.colors
+    val background = if (isNext) colors.signal else colors.canvas
+    val ink = when {
+        isNext -> colors.onSignal
+        dose.isPending -> colors.textPrimary
+        else -> colors.textTertiary
+    }
+    val secondary = if (isNext) colors.onSignal else if (dose.isPending) colors.textSecondary else colors.textTertiary
+
+    Column(Modifier.background(background)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .havnPress(scaleDown = 1f, onClickLabel = "Open ${dose.medication.name}", onClick = onOpenDetail)
+                .padding(horizontal = HavnTheme.spacing.gutter),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = dose.slot.ifEmpty { "ANY" },
+                style = HavnType.Clock,
+                color = ink,
+                modifier = Modifier.width(52.dp),
+            )
+            Spacer(Modifier.width(HavnTheme.spacing.md))
+            Row(Modifier.weight(1f), verticalAlignment = Alignment.Bottom) {
+                Text(
+                    text = dose.medication.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = ink,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
+                )
+                if (dose.medication.dosage.isNotBlank()) {
+                    Text(
+                        text = "  " + dose.medication.dosage + if (dose.isSkipped) " · skipped" else "",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = secondary,
+                        maxLines = 1,
+                    )
+                }
+            }
+            Spacer(Modifier.width(HavnTheme.spacing.md))
+            SwissCheck(
+                checked = dose.isTaken,
+                color = ink,
+                fill = if (isNext) colors.onSignal else colors.textPrimary,
+                tick = if (isNext) colors.signal else colors.canvas,
+                onToggle = onToggle,
+                contentDescription = "${dose.medication.name}, ${dose.displayTime()}",
+            )
+        }
+        if (!isNext) {
+            Box(Modifier.fillMaxWidth().height(1.dp).background(colors.hairline))
+        }
+    }
+}
+
+/** 20 dp square, 1.5 dp stroke; taken fills with ink and draws a paper tick. */
+@Composable
+private fun SwissCheck(
+    checked: Boolean,
+    color: Color,
+    fill: Color,
+    tick: Color,
+    onToggle: () -> Unit,
+    contentDescription: String,
+) {
+    Box(
+        modifier = Modifier
+            .size(48.dp)
+            .havnPress(onClickLabel = contentDescription, onClick = onToggle),
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(20.dp)
+                .background(if (checked) fill else Color.Transparent)
+                .border(1.5.dp, if (checked) fill else color, RectangleShape),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (checked) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_check),
+                    contentDescription = null,
+                    tint = tick,
+                    modifier = Modifier.size(14.dp),
+                )
+            }
+        }
+    }
+}
 
 /**
  * The day's closing moment.

@@ -70,7 +70,7 @@ class LaunchSmokeTest {
         seed()
 
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
-            waitFor("Good ")
+            waitFor("TODAY")
             waitFor("Metformin")
             snap(scenario, "02-today")
 
@@ -79,7 +79,8 @@ class LaunchSmokeTest {
             tab("Settings"); pump(1500); snap(scenario, "05-settings")
             tab("Today"); waitFor("Metformin")
 
-            compose.onNode(hasContentDescription("Reminders")).performClick()
+            tab("Settings")
+            compose.onAllNodes(hasText("Reminders")).onFirst().performClick()
             pump(1500); snap(scenario, "06-reminders")
             back(scenario)
 
