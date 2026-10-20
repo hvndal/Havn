@@ -182,18 +182,6 @@ fun HomeScreen(
                 )
             }
 
-            // The product leads: the box itself, straight after the greeting,
-            // so the first thing on screen is the thing the app is about.
-            item(key = "organizer") {
-                if (uiState.hasMedications) {
-                    Spacer(Modifier.height(HavnTheme.spacing.lg))
-                    OrganizerHero(
-                        doses = uiState.doses,
-                        onOpen = onOpenOrganizer,
-                    )
-                }
-            }
-
             item(key = "metric") {
                 if (uiState.isLoading) {
                     Spacer(Modifier.height(HavnTheme.spacing.xl))
@@ -917,17 +905,7 @@ private fun TodayEmptyState(
             headline = "Your organiser is empty",
             body = "Add your first medication and Hävn will keep the schedule, " +
                 "the reminders and the record.",
-            // The empty box itself, lids closed — the product, waiting.
-            illustration = {
-                HavnOrganizerView(
-                    doses = emptyList(),
-                    selectedPeriod = DayPeriod.current(),
-                    onSlotTapped = { onAddMedication() },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1.5f),
-                )
-            },
+            illustration = {},
             action = {
                 HavnButton(
                     text = "Add a medication",
