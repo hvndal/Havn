@@ -35,6 +35,7 @@ import com.havn.app.domain.model.DoseStatus
 import com.havn.app.domain.model.MedIconType
 import com.havn.app.domain.model.TodayDose
 import com.havn.app.ui.screens.home.medAccent
+import com.havn.app.ui.theme.HavnMotion
 import com.havn.app.ui.theme.PlexMono
 import com.havn.app.ui.theme.HavnTheme
 import kotlin.math.abs
@@ -86,7 +87,7 @@ fun HavnOrganizerView(
         LaunchedEffect(target) {
             hinges[i].animateTo(
                 target,
-                spring(dampingRatio = 0.72f, stiffness = Spring.StiffnessLow),
+                HavnMotion.glide(),
             )
         }
     }

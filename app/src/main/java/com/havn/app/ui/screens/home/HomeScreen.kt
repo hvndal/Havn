@@ -1,5 +1,6 @@
 package com.havn.app.ui.screens.home
 
+import com.havn.app.ui.theme.rememberReduceMotion
 import androidx.compose.runtime.produceState
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -479,10 +480,14 @@ private fun SwissCheck(
     onToggle: () -> Unit,
     contentDescription: String,
 ) {
+    val haptics = rememberHavnHaptics()
     Box(
         modifier = Modifier
             .size(48.dp)
-            .havnPress(onClickLabel = contentDescription, onClick = onToggle),
+            .havnPress(onClickLabel = contentDescription, onClick = {
+                if (checked) haptics.release() else haptics.latch()
+                onToggle()
+            }),
         contentAlignment = Alignment.Center,
     ) {
         Box(
@@ -516,7 +521,7 @@ private fun SwissCheck(
 @Composable
 private fun DayCompleteOverlay(visible: Boolean) {
     val colors = HavnTheme.colors
-    val reduceMotion = remember { false }
+    val reduceMotion = rememberReduceMotion()
 
     AnimatedVisibility(
         visible = visible,

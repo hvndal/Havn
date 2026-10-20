@@ -92,7 +92,6 @@ fun HavnSegmented(
                             selected = selected,
                             role = Role.Tab,
                             onClick = {
-                                haptics.tick()
                                 onSelect(index)
                             },
                         ),

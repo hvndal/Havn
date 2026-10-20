@@ -153,7 +153,6 @@ fun HavnButton(
                 enabled = active,
                 role = Role.Button,
                 onClick = {
-                    haptics.click()
                     onClick()
                 },
             )
@@ -240,7 +239,6 @@ fun HavnIconButton(
                 role = Role.Button,
                 onClickLabel = contentDescription,
                 onClick = {
-                    haptics.click()
                     onClick()
                 },
             ),
@@ -285,7 +283,6 @@ fun HavnTextAction(
                 indication = null,
                 role = Role.Button,
                 onClick = {
-                    haptics.click()
                     onClick()
                 },
             )

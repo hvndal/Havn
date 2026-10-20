@@ -102,7 +102,6 @@ fun HavnCadenceStrip(
                 day = day,
                 isSelected = isSelected,
                 onClick = {
-                    haptics.tick()
                     onSelectDay(day.date)
                 },
                 modifier = Modifier.weight(1f),

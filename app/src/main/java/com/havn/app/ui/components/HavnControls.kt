@@ -386,10 +386,6 @@ fun HavnOdometerCounter(
     style: androidx.compose.ui.text.TextStyle = com.havn.app.ui.theme.HavnType.Metric,
     color: Color = HavnTheme.colors.textPrimary,
 ) {
-    val haptics = rememberHavnHaptics()
-    LaunchedEffect(value) {
-        haptics.tick()
-    }
 
     AnimatedContent(
         targetState = value,

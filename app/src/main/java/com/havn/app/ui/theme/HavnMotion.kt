@@ -1,79 +1,88 @@
 package com.havn.app.ui.theme
 
-import androidx.compose.animation.core.AnimationSpec
+import android.content.Context
+import android.provider.Settings
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.FiniteAnimationSpec
-import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  M O T I O N
 //
-//  Principles, in order:
-//   1. Motion clarifies where something came from. It is never decoration.
-//   2. Springs for anything a finger touches — a finger expects mass.
-//   3. Tweens for anything the system does on its own (fades, colour shifts).
-//   4. Fast. Nothing an impatient user waits on exceeds ~280ms.
-//   5. Damping stays high (0.75–0.9). Bounce reads as toy, not instrument.
+//  Swiss (design/swiss/HANDOFF.md):
+//   1. One curve — Decisive, cubic-bezier(0.2, 0, 0, 1). Fast start, clean stop.
+//   2. No springs, no bounce, no overshoot. Things cut into place.
+//   3. Three durations: State 140 ms, Nav 220 ms, Sheet 260 ms.
+//   4. Stagger 28 ms between siblings; 12 ms per cell in a grid wave.
+//   5. Reduce motion on: decorative motion stops, state changes still show.
 // ─────────────────────────────────────────────────────────────────────────────
 
 object HavnMotion {
 
     // ── Duration ─────────────────────────────────────────────────────────────
-    const val Instant = 90      // state flips: check, toggle tick
-    const val Quick = 160       // press feedback, small fades
-    const val Standard = 240    // the default — enters, colour, cross-fades
-    const val Considered = 380  // large surfaces, hero reveals
-    const val Ambient = 1400    // background drift, breathing
+    const val Instant = 90      // micro flips inside a control
+    const val Quick = 140       // State: checks, toggles, colour changes
+    const val Standard = 220    // Nav: screen cuts, list reveals
+    const val Considered = 260  // Sheet: sheets, large surfaces
+    const val Ambient = 1400    // slow, time-driven drift only
+
+    const val Stagger = 28
+    const val CellWave = 12
 
     // ── Easing ───────────────────────────────────────────────────────────────
-    /** Decelerate — things arriving on screen. Confident, never floaty. */
-    val Enter: Easing = CubicBezierEasing(0.16f, 1f, 0.3f, 1f)
-    /** Accelerate — things leaving. Gets out of the way quickly. */
-    val Exit: Easing = CubicBezierEasing(0.5f, 0f, 0.9f, 0.2f)
-    /** Symmetric — colour and opacity changes with no directional meaning. */
-    val Smooth: Easing = CubicBezierEasing(0.4f, 0f, 0.2f, 1f)
+    /** The house curve. Everything uses it. */
+    val Decisive: Easing = CubicBezierEasing(0.2f, 0f, 0f, 1f)
+    val Enter: Easing = Decisive
+    val Exit: Easing = Decisive
+    val Smooth: Easing = Decisive
 
-    // ── Springs ──────────────────────────────────────────────────────────────
-    /** The press response. Snappy, settles without visible overshoot. */
-    fun <T> press(): FiniteAnimationSpec<T> = spring(
-        dampingRatio = 0.82f,
-        stiffness = 900f,
-    )
+    // ── Former springs, now plain tweens on the house curve ─────────────────
+    /** Press feedback. */
+    fun <T> press(): FiniteAnimationSpec<T> = tween(Quick, easing = Decisive)
 
-    /** Elements settling into place — cards, sheets, reveals. */
-    fun <T> settle(): FiniteAnimationSpec<T> = spring(
-        dampingRatio = 0.86f,
-        stiffness = 380f,
-    )
+    /** Elements settling into place — rows, reveals. */
+    fun <T> settle(): FiniteAnimationSpec<T> = tween(Standard, easing = Decisive)
 
-    /** Larger travel: sheets, hero transitions. Slightly softer landing. */
-    fun <T> glide(): FiniteAnimationSpec<T> = spring(
-        dampingRatio = 0.9f,
-        stiffness = 220f,
-    )
+    /** Larger travel: sheets, hero transitions. */
+    fun <T> glide(): FiniteAnimationSpec<T> = tween(Considered, easing = Decisive)
 
-    /** The one place a little life is allowed: a completed dose. */
-    fun <T> celebrate(): FiniteAnimationSpec<T> = spring(
-        dampingRatio = 0.55f,
-        stiffness = 700f,
-    )
+    /** A completed dose: the same crisp cut as any other state change. */
+    fun <T> celebrate(): FiniteAnimationSpec<T> = tween(Quick, easing = Decisive)
 
     // ── Tweens ───────────────────────────────────────────────────────────────
-    fun <T> quick(): FiniteAnimationSpec<T> = tween(Quick, easing = Smooth)
-    fun <T> standard(): FiniteAnimationSpec<T> = tween(Standard, easing = Smooth)
+    fun <T> quick(): FiniteAnimationSpec<T> = tween(Quick, easing = Decisive)
+    fun <T> standard(): FiniteAnimationSpec<T> = tween(Standard, easing = Decisive)
     fun <T> enter(delayMs: Int = 0): FiniteAnimationSpec<T> =
-        tween(Considered, delayMillis = delayMs, easing = Enter)
-    fun <T> exit(): FiniteAnimationSpec<T> = tween(Quick, easing = Exit)
+        tween(Standard, delayMillis = delayMs, easing = Decisive)
+    fun <T> exit(): FiniteAnimationSpec<T> = tween(Quick, easing = Decisive)
 
-    /** Theme cross-fade — slow enough to read as a dissolve, not a flash. */
-    fun <T> theme(): FiniteAnimationSpec<T> = tween(420, easing = Smooth)
+    /** Theme switch: a cut, not a slow dissolve. */
+    fun <T> theme(): FiniteAnimationSpec<T> = tween(Standard, easing = Decisive)
+
+    /** Spec that jumps straight to the end — for reduced motion. */
+    fun <T> none(): FiniteAnimationSpec<T> = snap()
 
     /** Stagger delay for the nth item in a revealing list, capped so long
      *  lists never make the user wait on an animation. */
-    fun staggerDelay(index: Int, step: Int = 45, max: Int = 360): Int =
+    fun staggerDelay(index: Int, step: Int = Stagger, max: Int = 280): Int =
         (index * step).coerceAtMost(max)
 }
 
+/**
+ * True when the user has turned animations off (Developer options or
+ * Accessibility → Remove animations both set the animator scale to 0).
+ * Decorative and looping motion should stop; state changes still show.
+ */
+fun Context.isReduceMotionOn(): Boolean =
+    Settings.Global.getFloat(contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f
 
+@Composable
+fun rememberReduceMotion(): Boolean {
+    val context = LocalContext.current
+    return remember(context) { context.isReduceMotionOn() }
+}

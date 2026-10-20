@@ -1,5 +1,6 @@
 package com.havn.app.ui.components
 
+import com.havn.app.ui.theme.rememberReduceMotion
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.InfiniteRepeatableSpec
 import androidx.compose.animation.core.RepeatMode
@@ -104,8 +105,9 @@ fun HavnBreathingMark(
     size: Dp = 76.dp,
 ) {
     val colors = HavnTheme.colors
+    val reduceMotion = rememberReduceMotion()
     val transition = rememberInfiniteTransition(label = "breathe")
-    val phase by transition.animateFloat(
+    val breathing by transition.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
@@ -114,6 +116,7 @@ fun HavnBreathingMark(
         ),
         label = "breathePhase",
     )
+    val phase = if (reduceMotion) 0.5f else breathing
 
     Box(modifier = modifier.size(size), contentAlignment = Alignment.Center) {
         Box(
@@ -209,8 +212,9 @@ fun HavnSkeleton(
     widthFraction: Float = 1f,
 ) {
     val colors = HavnTheme.colors
+    val reduceMotion = rememberReduceMotion()
     val transition = rememberInfiniteTransition(label = "skeleton")
-    val progress by transition.animateFloat(
+    val sweeping by transition.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
@@ -219,6 +223,7 @@ fun HavnSkeleton(
         ),
         label = "skeletonSweep",
     )
+    val progress = if (reduceMotion) -1f else sweeping
 
     val base = colors.surfaceSunken
     val sheen = if (colors.isDark) {
@@ -281,6 +286,7 @@ fun HavnPulseDots(
     modifier: Modifier = Modifier,
     dotSize: Dp = 6.dp,
 ) {
+    val reduceMotion = rememberReduceMotion()
     val transition = rememberInfiniteTransition(label = "dots")
     Row(
         modifier = modifier,
@@ -288,7 +294,7 @@ fun HavnPulseDots(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         repeat(3) { index ->
-            val alpha by transition.animateFloat(
+            val pulsing by transition.animateFloat(
                 initialValue = 0.25f,
                 targetValue = 1f,
                 animationSpec = InfiniteRepeatableSpec(
@@ -297,6 +303,7 @@ fun HavnPulseDots(
                 ),
                 label = "dot$index",
             )
+            val alpha = if (reduceMotion) 0.6f else pulsing
             Box(
                 modifier = Modifier
                     .size(dotSize)

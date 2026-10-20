@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.TextStyle
 import com.havn.app.ui.theme.HavnMotion
+import com.havn.app.ui.theme.rememberReduceMotion
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -45,9 +46,10 @@ fun rememberRevealProgress(
     delayMs: Int = 0,
     enabled: Boolean = true,
 ): Float {
-    val anim = remember(key) { Animatable(if (enabled) 0f else 1f) }
-    LaunchedEffect(key, enabled) {
-        if (!enabled) {
+    val animate = enabled && !rememberReduceMotion()
+    val anim = remember(key) { Animatable(if (animate) 0f else 1f) }
+    LaunchedEffect(key, animate) {
+        if (!animate) {
             anim.snapTo(1f)
             return@LaunchedEffect
         }

@@ -103,7 +103,6 @@ fun HavnSwipeToLogRow(
     LaunchedEffect(dismissState.targetValue) {
         val armed = dismissState.targetValue != SwipeToDismissBoxValue.Settled
         if (armed != previousArmed) {
-            haptics.tick()
             previousArmed = armed
         }
     }

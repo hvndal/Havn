@@ -105,7 +105,6 @@ fun HavnInteractiveSurface(
                 role = Role.Button,
                 onClickLabel = onClickLabel,
                 onClick = {
-                    haptics.click()
                     onClick()
                 },
             )

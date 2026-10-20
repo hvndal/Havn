@@ -38,7 +38,7 @@ import com.havn.app.ui.theme.HavnMotion
 fun Modifier.havnPress(
     scaleDown: Float = 0.96f,
     enabled: Boolean = true,
-    haptic: Boolean = true,
+    haptic: Boolean = false,
     role: Role? = Role.Button,
     onClickLabel: String? = null,
     onClick: () -> Unit,
@@ -80,7 +80,7 @@ fun Modifier.havnPress(
  */
 fun Modifier.havnPressFade(
     enabled: Boolean = true,
-    haptic: Boolean = true,
+    haptic: Boolean = false,
     role: Role? = Role.Button,
     onClick: () -> Unit,
 ) = composed {
@@ -130,6 +130,15 @@ class HavnHaptics(
 ) {
     constructor(context: Context, feedback: HapticFeedback) : this(feedback, context)
 
+    /** Respect the phone's own "touch feedback" switch. */
+    private fun systemHapticsOn(): Boolean = context == null || runCatching {
+        android.provider.Settings.System.getInt(
+            context?.contentResolver,
+            android.provider.Settings.System.HAPTIC_FEEDBACK_ENABLED,
+            1,
+        ) != 0
+    }.getOrDefault(true)
+
     private val vibrator: Vibrator? = runCatching {
         if (context == null) null
         else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -146,6 +155,7 @@ class HavnHaptics(
      * Subtle micro-detent for tabs, segment switching, odometer rolls, and swipe thresholds.
      */
     fun tick() {
+        if (!systemHapticsOn()) return
         runCatching {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && vibrator?.hasVibrator() == true) {
                 if (vibrator.areAllPrimitivesSupported(VibrationEffect.Composition.PRIMITIVE_LOW_TICK)) {
@@ -179,6 +189,7 @@ class HavnHaptics(
      * For buttons, row presses, and picker selections.
      */
     fun click() {
+        if (!systemHapticsOn()) return
         runCatching {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && vibrator?.hasVibrator() == true) {
                 if (vibrator.areAllPrimitivesSupported(VibrationEffect.Composition.PRIMITIVE_CLICK)) {
@@ -201,43 +212,23 @@ class HavnHaptics(
     }
 
     /**
-     * Stage 3: Physical mechanical latch / confirm.
-     * For marking a dose taken or confirming important actions.
-     * Dual-phase: a subtle preparatory pulse followed by a solid latch.
+     * A dose taken: one crisp click.
      */
     fun latch() {
+        if (!systemHapticsOn()) return
         runCatching {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && vibrator?.hasVibrator() == true) {
-                if (vibrator.areAllPrimitivesSupported(
-                        VibrationEffect.Composition.PRIMITIVE_CLICK,
-                        VibrationEffect.Composition.PRIMITIVE_THUD
-                    )
-                ) {
-                    vibrator.vibrate(
-                        VibrationEffect.startComposition()
-                            .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 0.5f)
-                            .addPrimitive(VibrationEffect.Composition.PRIMITIVE_THUD, 0.85f, 35)
-                            .compose()
-                    )
-                    return
-                } else if (vibrator.areAllPrimitivesSupported(VibrationEffect.Composition.PRIMITIVE_THUD)) {
-                    vibrator.vibrate(
-                        VibrationEffect.startComposition()
-                            .addPrimitive(VibrationEffect.Composition.PRIMITIVE_THUD, 0.9f)
-                            .compose()
-                    )
-                    return
-                } else if (vibrator.areAllPrimitivesSupported(VibrationEffect.Composition.PRIMITIVE_CLICK)) {
-                    vibrator.vibrate(
-                        VibrationEffect.startComposition()
-                            .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1.0f)
-                            .compose()
-                    )
-                    return
-                }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && vibrator?.hasVibrator() == true &&
+                vibrator.areAllPrimitivesSupported(VibrationEffect.Composition.PRIMITIVE_CLICK)
+            ) {
+                vibrator.vibrate(
+                    VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 0.8f)
+                        .compose()
+                )
+                return
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && vibrator?.hasVibrator() == true) {
-                vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_HEAVY_CLICK))
+                vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
             } else {
                 feedback.performHapticFeedback(HapticFeedbackType.LongPress)
             }
@@ -254,6 +245,7 @@ class HavnHaptics(
      * For unchecking a dose or resetting a state.
      */
     fun release() {
+        if (!systemHapticsOn()) return
         runCatching {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && vibrator?.hasVibrator() == true) {
                 if (vibrator.areAllPrimitivesSupported(VibrationEffect.Composition.PRIMITIVE_LOW_TICK)) {
@@ -276,6 +268,7 @@ class HavnHaptics(
      * Quiet double-tap chord when all doses for the day are finished.
      */
     fun celebrate() {
+        if (!systemHapticsOn()) return
         runCatching {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && vibrator?.hasVibrator() == true) {
                 if (vibrator.areAllPrimitivesSupported(VibrationEffect.Composition.PRIMITIVE_CLICK)) {

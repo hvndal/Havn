@@ -166,7 +166,6 @@ private fun HavnNavItem(
                 indication = null,
                 role = Role.Tab,
                 onClick = {
-                    haptics.tick()
                     onClick()
                 },
             )
