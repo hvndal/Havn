@@ -1,5 +1,9 @@
 package com.havn.app.ui.screens.onboarding
 
+import androidx.compose.foundation.shape.CircleShape
+
+import androidx.compose.foundation.shape.RoundedCornerShape
+
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.animateDpAsState
@@ -54,7 +58,6 @@ import com.havn.app.domain.model.DayPeriod
 import com.havn.app.domain.model.MedIconType
 import com.havn.app.domain.model.Medication
 import com.havn.app.domain.model.TodayDose
-import com.havn.app.ui.components.HavnOrganizerView
 import com.havn.app.ui.components.HavnButton
 import com.havn.app.ui.components.HavnButtonSize
 import com.havn.app.ui.components.HavnButtonTone
@@ -209,24 +212,13 @@ private fun IdentityPage(
         Spacer(Modifier.height(HavnTheme.spacing.xl))
 
         HavnBrandLogo(
-            iconSize = 36.dp,
+            iconSize = 44.dp,
             showWordmark = false,
             showTagline = false,
             modifier = Modifier.havnReveal(reveal),
         )
 
-        // The first thing a new user sees is the product: the organiser,
-        // with a morning's worth of doses waiting under an open lid.
-        HavnOrganizerView(
-            doses = SAMPLE_DOSES,
-            selectedPeriod = DayPeriod.MORNING,
-            onSlotTapped = { },
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(1.45f)
-                .havnReveal(reveal),
-        )
-
+        Spacer(Modifier.height(HavnTheme.spacing.section))
         Spacer(Modifier.height(HavnTheme.spacing.lg))
 
         HavnTextReveal(
@@ -345,9 +337,9 @@ private fun ProfileRow(
         modifier = Modifier
             .fillMaxWidth()
             .havnReveal(reveal)
-            .clip(RectangleShape)
+            .clip(RoundedCornerShape(12.dp))
             .background(colors.surface)
-            .border(1.dp, colors.hairline, RectangleShape)
+            .border(1.dp, colors.hairline, RoundedCornerShape(12.dp))
             .havnPress(scaleDown = 0.985f, enabled = enabled, onClick = onClick)
             .padding(HavnTheme.spacing.lg),
         verticalAlignment = Alignment.CenterVertically,
@@ -355,7 +347,7 @@ private fun ProfileRow(
         Box(
             modifier = Modifier
                 .size(40.dp)
-                .clip(RectangleShape)
+                .clip(RoundedCornerShape(12.dp))
                 .background(tint.copy(alpha = if (colors.isDark) 0.3f else 0.16f)),
             contentAlignment = Alignment.Center,
         ) {
@@ -496,13 +488,13 @@ private fun ColourSwatch(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .clip(RectangleShape)
+                .clip(RoundedCornerShape(12.dp))
                 .background(tint)
-                .border(ring, colors.canvas, RectangleShape)
+                .border(ring, colors.canvas, RoundedCornerShape(12.dp))
                 .border(
                     width = if (selected) 1.5.dp else 0.dp,
                     color = if (selected) colors.textPrimary else Color.Transparent,
-                    shape = RectangleShape,
+                    shape = RoundedCornerShape(12.dp),
                 )
         )
     }

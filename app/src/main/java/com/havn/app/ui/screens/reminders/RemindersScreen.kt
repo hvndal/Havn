@@ -1,5 +1,9 @@
 package com.havn.app.ui.screens.reminders
 
+import androidx.compose.foundation.shape.CircleShape
+
+import androidx.compose.foundation.shape.RoundedCornerShape
+
 import android.Manifest
 import android.content.Intent
 import android.net.Uri
@@ -438,7 +442,7 @@ private fun UpcomingRow(
         Box(
             modifier = Modifier
                 .size(7.dp)
-                .clip(RectangleShape)
+                .clip(RoundedCornerShape(12.dp))
                 .background(accent)
         )
         Spacer(Modifier.width(HavnTheme.spacing.lg))

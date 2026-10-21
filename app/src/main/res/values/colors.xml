@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Launcher icon -->
-    <color name="ic_launcher_background">#FFFFFF</color>
-    <color name="ic_launcher_foreground">#5E6E5D</color>
+    <color name="ic_launcher_background">#F2F1EC</color>
+    <color name="ic_launcher_foreground">#14140E</color>
 
     <!--
       The window background the system paints before Compose draws its first

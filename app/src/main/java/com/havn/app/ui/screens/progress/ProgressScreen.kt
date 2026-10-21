@@ -1,5 +1,9 @@
 package com.havn.app.ui.screens.progress
 
+import androidx.compose.foundation.shape.CircleShape
+
+import androidx.compose.foundation.shape.RoundedCornerShape
+
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -111,7 +115,7 @@ fun ProgressScreen(
                     )
                     Spacer(Modifier.height(HavnTheme.spacing.sm))
                     Text(
-                        text = "Progress",
+                        text = "History",
                         style = MaterialTheme.typography.displaySmall,
                         color = colors.textPrimary,
                     )
@@ -427,7 +431,7 @@ private fun MedicationBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(3.dp)
-                .clip(RectangleShape)
+                .clip(RoundedCornerShape(12.dp))
                 .background(colors.hairline)
         ) {
             if (width > 0.001f) {
@@ -435,7 +439,7 @@ private fun MedicationBar(
                     modifier = Modifier
                         .fillMaxWidth(width.coerceIn(0.001f, 1f))
                         .height(3.dp)
-                        .clip(RectangleShape)
+                        .clip(RoundedCornerShape(12.dp))
                         .background(accent)
                 )
             }
@@ -476,7 +480,7 @@ private fun CalendarPane(
                 style = MaterialTheme.typography.headlineMedium,
                 color = colors.textSecondary,
                 modifier = Modifier
-                    .clip(RectangleShape)
+                    .clip(RoundedCornerShape(12.dp))
                     .havnPressFade(onClick = onPrevious)
                     .padding(horizontal = HavnTheme.spacing.md),
             )
@@ -485,7 +489,7 @@ private fun CalendarPane(
                 style = MaterialTheme.typography.headlineMedium,
                 color = if (canGoForward) colors.textSecondary else colors.textDisabled,
                 modifier = Modifier
-                    .clip(RectangleShape)
+                    .clip(RoundedCornerShape(12.dp))
                     .havnPressFade(enabled = canGoForward, onClick = onNext)
                     .padding(horizontal = HavnTheme.spacing.md),
             )
@@ -536,7 +540,7 @@ private fun CalendarPane(
                     Box(
                         modifier = Modifier
                             .size(7.dp)
-                            .clip(RectangleShape)
+                            .clip(RoundedCornerShape(12.dp))
                             .background(
                                 when (detail.status) {
                                     DoseStatus.TAKEN -> colors.accent
@@ -647,7 +651,7 @@ private fun DayCell(
     Box(
         modifier = modifier
             .aspectRatio(1f)
-            .clip(RectangleShape)
+            .clip(RoundedCornerShape(12.dp))
             .background(fill)
             .then(
                 if (isToday && !isSelected) {
@@ -668,7 +672,7 @@ private fun DayCell(
                 Box(
                     modifier = Modifier
                         .size(3.dp)
-                        .clip(RectangleShape)
+                        .clip(RoundedCornerShape(12.dp))
                         .background(if (isSelected) colors.onAccent else colors.accent)
                 )
             }

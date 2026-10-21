@@ -1,5 +1,7 @@
 package com.havn.app.ui.navigation
 
+import com.havn.app.ui.components.HavnBackdropScreen
+
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -25,7 +27,6 @@ import com.havn.app.ui.screens.addmed.AddMedicationScreen
 import com.havn.app.ui.screens.home.HomeScreen
 import com.havn.app.ui.screens.managemeds.ManageMedicationsScreen
 import com.havn.app.ui.screens.onboarding.OnboardingScreen
-import com.havn.app.ui.screens.organizer.OrganizerScreen
 import com.havn.app.ui.screens.progress.ProgressScreen
 import com.havn.app.ui.screens.reminders.RemindersScreen
 import com.havn.app.ui.screens.settings.SettingsScreen
@@ -35,7 +36,6 @@ import com.havn.app.ui.theme.HavnTheme
 sealed class Screen(val route: String) {
     data object Onboarding : Screen("onboarding")
     data object Home : Screen("home")
-    data object Organizer : Screen("organizer")
     data object Progress : Screen("progress")
     data object Reminders : Screen("reminders")
     data object Settings : Screen("settings")
@@ -65,8 +65,8 @@ data class BottomNavItem(
  */
 val bottomNavItems = listOf(
     BottomNavItem(Screen.Home, "Today", "home", "home_fill"),
-    BottomNavItem(Screen.Organizer, "Organizer", "pill", "pill_fill"),
-    BottomNavItem(Screen.Progress, "Progress", "chart", "chart_fill"),
+    BottomNavItem(Screen.Progress, "History", "chart", "chart_fill"),
+    BottomNavItem(Screen.ManageMeds, "Meds", "list", "list_fill"),
     BottomNavItem(Screen.Settings, "Settings", "settings", "settings_fill"),
 )
 
@@ -121,7 +121,9 @@ private fun AuthGraph() {
             // No onDone callback: completing onboarding writes the session,
             // and the session swaps this graph out. Navigation never has to
             // agree with auth state, because it is derived from it.
-            OnboardingScreen()
+            HavnBackdropScreen {
+                OnboardingScreen()
+            }
         }
     }
 }
@@ -154,42 +156,47 @@ private fun MainGraph() {
                 HomeScreen(
                     contentPadding = contentPadding,
                     onAddMedication = { navController.navigate(Screen.AddMed.route) },
-                    onOpenOrganizer = { navController.navigateToTab(Screen.Organizer) },
-                    onManageMedications = { navController.navigate(Screen.ManageMeds.route) },
+                    onManageMedications = { navController.navigateToTab(Screen.ManageMeds) },
                     onOpenProgress = { navController.navigateToTab(Screen.Progress) },
                     onOpenReminders = { navController.navigate(Screen.Reminders.route) },
                 )
             }
 
-            composable(Screen.Organizer.route) {
-                OrganizerScreen(contentPadding = contentPadding)
+            composable(Screen.ManageMeds.route) {
+                HavnBackdropScreen {
+                    ManageMedicationsScreen(
+                        onBack = { navController.navigateToTab(Screen.Home) },
+                        onAddMedication = { navController.navigate(Screen.AddMed.route) },
+                        onEditMedication = { id -> navController.navigate(Screen.EditMed.create(id)) },
+                        contentPadding = contentPadding,
+                    )
+                }
             }
 
             composable(Screen.Progress.route) {
-                ProgressScreen(contentPadding = contentPadding)
+                HavnBackdropScreen {
+                    ProgressScreen(contentPadding = contentPadding)
+                }
             }
 
             composable(Screen.Settings.route) {
-                SettingsScreen(
-                    contentPadding = contentPadding,
-                    onManageMedications = { navController.navigate(Screen.ManageMeds.route) },
-                    onOpenReminders = { navController.navigate(Screen.Reminders.route) },
-                )
+                HavnBackdropScreen {
+                    SettingsScreen(
+                        contentPadding = contentPadding,
+                        onManageMedications = { navController.navigateToTab(Screen.ManageMeds) },
+                        onOpenReminders = { navController.navigate(Screen.Reminders.route) },
+                    )
+                }
             }
 
             // ── Pushed screens ───────────────────────────────────────────────
             // These rise from the bottom: they are modal tasks layered over the
             // tab you were on, and the motion should say so.
-            modalDestination(Screen.ManageMeds.route) {
-                ManageMedicationsScreen(
-                    onBack = { navController.popBackStack() },
-                    onAddMedication = { navController.navigate(Screen.AddMed.route) },
-                    onEditMedication = { id -> navController.navigate(Screen.EditMed.create(id)) },
-                )
-            }
 
             modalDestination(Screen.AddMed.route) {
-                AddMedicationScreen(onBack = { navController.popBackStack() })
+                HavnBackdropScreen {
+                    AddMedicationScreen(onBack = { navController.popBackStack() })
+                }
             }
 
             modalDestination(
@@ -200,15 +207,19 @@ private fun MainGraph() {
                     }
                 ),
             ) {
-                AddMedicationScreen(onBack = { navController.popBackStack() })
+                HavnBackdropScreen {
+                    AddMedicationScreen(onBack = { navController.popBackStack() })
+                }
             }
 
             modalDestination(Screen.Reminders.route) {
-                RemindersScreen(
-                    onBack = { navController.popBackStack() },
-                    onAddMedication = { navController.navigate(Screen.AddMed.route) },
-                    onEditMedication = { id -> navController.navigate(Screen.EditMed.create(id)) },
-                )
+                HavnBackdropScreen {
+                    RemindersScreen(
+                        onBack = { navController.popBackStack() },
+                        onAddMedication = { navController.navigate(Screen.AddMed.route) },
+                        onEditMedication = { id -> navController.navigate(Screen.EditMed.create(id)) },
+                    )
+                }
             }
         }
     }

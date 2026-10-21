@@ -70,12 +70,12 @@ class LaunchSmokeTest {
         seed()
 
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
-            waitFor("TODAY")
+            waitFor("Today")
             waitFor("Metformin")
             snap(scenario, "02-today")
 
-            tab("Organizer"); waitFor("MODEL H.01"); snap(scenario, "03-organizer")
-            tab("Progress"); pump(1500); snap(scenario, "04-progress")
+            tab("Meds"); pump(1500); snap(scenario, "03-meds")
+            tab("History"); pump(1500); snap(scenario, "04-progress")
             tab("Settings"); pump(1500); snap(scenario, "05-settings")
             tab("Today"); waitFor("Metformin")
 

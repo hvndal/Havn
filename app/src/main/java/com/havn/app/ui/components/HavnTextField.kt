@@ -1,5 +1,9 @@
 package com.havn.app.ui.components
 
+import androidx.compose.foundation.shape.CircleShape
+
+import androidx.compose.foundation.shape.RoundedCornerShape
+
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -87,12 +91,12 @@ fun HavnTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = minHeight)
-                .clip(RectangleShape)
+                .clip(RoundedCornerShape(14.dp))
                 .background(colors.surfaceSunken)
                 .border(
                     width = if (focused || error != null) 1.5.dp else 1.dp,
                     color = borderColor,
-                    shape = RectangleShape,
+                    shape = RoundedCornerShape(14.dp),
                 )
                 .padding(horizontal = HavnTheme.spacing.lg, vertical = HavnTheme.spacing.md),
             verticalAlignment = Alignment.CenterVertically,

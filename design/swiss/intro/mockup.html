@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hävn Intro and Today</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{--bg:#E6E5DF;--fg:#14140E;--p:#F2F1EC;--r:#FBFAF7;--su:#EAE9E3;--i:#14140E;--i2:#5A5B50;--i3:#8E8F85;--ru:#D3D2C9;--sg:#C23A05;--sgs:#F5E2D7}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0B0B0A;--fg:#EDECE4}}
+:root[data-theme="dark"]{--bg:#0B0B0A;--fg:#EDECE4}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font-family:Archivo,system-ui,sans-serif;padding:32px 16px}
+.wrap{display:flex;gap:32px;flex-wrap:wrap;justify-content:center}
+figure{margin:0}.k{display:block;font:500 11px "IBM Plex Mono",monospace;letter-spacing:.08em;text-transform:uppercase;opacity:.7;margin:0 0 8px}
+.ph{width:360px;height:760px;position:relative;overflow:hidden;background:var(--p);color:var(--i);border-radius:28px;max-width:100%}
+.D{--p:#121210;--r:#1A1A17;--su:#0C0C0A;--i:#EDECE4;--i2:#9C9D93;--i3:#6A6B62;--ru:#2A2A26;--sg:#FF5A1F;--sgs:#2A1A12}
+/* intro */
+.media{position:absolute;inset:0;overflow:hidden;background:#000}
+.media img,.media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.14);transition:opacity 2.4s cubic-bezier(.2,0,0,1),transform 14s cubic-bezier(.2,0,0,1)}
+.in .media img,.in .media video{opacity:1;transform:scale(1.02)}
+.panel{position:absolute;left:0;right:0;bottom:0;padding:120px 20px 28px;color:#F2F1EC;background:linear-gradient(to top,rgba(12,12,10,.92) 0%,rgba(12,12,10,.7) 55%,rgba(12,12,10,0) 100%);opacity:0;transition:opacity 1.4s cubic-bezier(.2,0,0,1) 1.2s}
+.in .panel{opacity:1}
+.panel .brand,.panel .sub{color:rgba(242,241,236,.78)}
+.panel .btn{background:#F2F1EC;color:#14140E}
+.brand{font:500 12px "IBM Plex Mono",monospace;letter-spacing:.16em;color:var(--i2)}
+.h1{font-weight:700;font-size:44px;line-height:.95;letter-spacing:-.045em;margin:14px 0 10px}
+.w{display:inline-block;overflow:hidden;vertical-align:bottom}.w>span{display:inline-block;transform:translateY(105%);transition:transform .7s cubic-bezier(.2,0,0,1)}
+.in .w>span{transform:none}
+.sub{font-size:15px;line-height:1.4;color:var(--i2);margin:0 0 20px;opacity:0;transition:opacity .8s 2.6s}.in .sub{opacity:1}
+.btn{display:flex;align-items:center;justify-content:center;height:52px;border-radius:14px;background:var(--i);color:var(--p);font:600 16px Archivo;border:0;width:100%;cursor:pointer}
+.tag{position:absolute;top:18px;left:20px;font:500 10px "IBM Plex Mono",monospace;letter-spacing:.14em;color:#EDECE4;opacity:.8}
+/* today */
+.today{position:absolute;inset:0;padding:0 16px;opacity:1}
+.cover{position:absolute;inset:0;background:var(--p);z-index:5;pointer-events:none;opacity:0}
+.sb{height:44px}
+.date{font-size:13px;color:var(--i2);margin:6px 4px 2px;font-weight:500}
+.lt{font-size:34px;font-weight:700;letter-spacing:-.03em;margin:0 4px 14px;display:flex;justify-content:space-between;align-items:center}
+.av{width:34px;height:34px;border-radius:50%;background:var(--su);display:grid;place-items:center;font-size:14px;font-weight:600}
+.card{background:var(--r);border-radius:18px;padding:16px;border:1px solid var(--ru)}
+.D .card{border-color:var(--ru)}
+.lab{font-size:12px;font-weight:600;color:var(--i2);letter-spacing:.01em}
+.next{display:flex;align-items:flex-end;justify-content:space-between;margin-top:8px}
+.big{font-size:44px;font-weight:700;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
+.big small{font-size:18px;font-weight:600;letter-spacing:-.01em;margin-left:4px}
+.pill{background:var(--sg);color:var(--p);font-size:13px;font-weight:600;padding:8px 12px;border-radius:999px}
+.what{font-size:15px;margin-top:6px;color:var(--i)}.what b{font-weight:600}
+.bar{height:6px;border-radius:3px;background:var(--su);margin:14px 0 8px;overflow:hidden}.bar i{display:block;height:100%;width:40%;background:var(--i);border-radius:3px}
+.meta{display:flex;justify-content:space-between;font-size:12px;color:var(--i2)}
+.sec{font-size:13px;font-weight:600;color:var(--i2);margin:20px 4px 8px;display:flex;justify-content:space-between}
+.sec span:last-child{font:500 11px "IBM Plex Mono",monospace;letter-spacing:.04em}
+.list{background:var(--r);border-radius:16px;border:1px solid var(--ru);overflow:hidden}
+.row{display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:60px}
+.row+.row{border-top:1px solid var(--ru)}
+.ic{width:36px;height:36px;border-radius:10px;background:var(--su);display:grid;place-items:center}
+.ic i{width:16px;height:8px;border-radius:4px;background:var(--i2)}
+.tx{flex:1;min-width:0}.nm{font-size:16px;font-weight:600;letter-spacing:-.01em}.ds{font-size:13px;color:var(--i2);margin-top:2px}
+.tm{font:500 13px "IBM Plex Mono",monospace;color:var(--i2)}
+.ck{width:26px;height:26px;border-radius:50%;border:2px solid var(--i3);flex:none}
+.ck.on{background:var(--i);border-color:var(--i);position:relative}.ck.on:after{content:"";position:absolute;left:8px;top:5px;width:6px;height:11px;border:solid var(--p);border-width:0 2px 2px 0;transform:rotate(45deg)}
+.row.done .nm,.row.done .ds,.row.done .tm{color:var(--i3)}
+.row.nx{background:var(--sgs)}.row.nx .tm{color:var(--sg);font-weight:500}.row.nx .ck{border-color:var(--sg)}
+/* today hero */
+.today{padding:0}
+.hero{position:relative;height:330px;overflow:hidden;color:#F2F1EC;background:#0C0C0A}
+.hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 35%;transform:scale(1.12);animation:drift 18s cubic-bezier(.2,0,0,1) forwards;opacity:.85}
+@keyframes drift{to{transform:scale(1.0)}}
+.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,rgba(12,12,10,.55),rgba(12,12,10,.15) 40%,rgba(12,12,10,.85))}
+.hz{position:relative;z-index:1;padding:0 20px}
+.hero .date{color:rgba(242,241,236,.75)}
+.hero .lt{margin:0}
+.hero .av{background:rgba(242,241,236,.18);color:#F2F1EC}
+.hl{font:500 10px "IBM Plex Mono",monospace;letter-spacing:.16em;color:rgba(242,241,236,.7);margin-top:44px}
+.hbig{font-size:84px;font-weight:700;letter-spacing:-.055em;line-height:.85;margin-top:8px;font-variant-numeric:tabular-nums}
+.hbig small{font-size:22px;letter-spacing:-.01em;margin-left:6px;font-weight:600}
+.hrow{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.hrow .what{color:#F2F1EC;margin:0}
+.seg{display:flex;gap:4px;margin-top:14px}.seg i{flex:1;height:3px;background:rgba(242,241,236,.25);border-radius:2px;overflow:hidden;position:relative}
+.seg i.f:after{content:"";position:absolute;inset:0;background:#F2F1EC;transform:scaleX(0);transform-origin:left;animation:fill .8s cubic-bezier(.2,0,0,1) .2s forwards}
+.seg i.f+i.f:after{animation-delay:.4s}
+@keyframes fill{to{transform:none}}
+.sheet{position:relative;margin-top:-18px;background:var(--p);border-radius:22px 22px 0 0;padding:4px 16px 90px;z-index:2}
+.sheet>*{opacity:0;transform:translateY(10px);animation:rise .7s cubic-bezier(.2,0,0,1) forwards}
+.sheet>*:nth-child(1){animation-delay:.3s}.sheet>*:nth-child(2){animation-delay:.36s}.sheet>*:nth-child(3){animation-delay:.42s}.sheet>*:nth-child(4){animation-delay:.48s}.sheet>*:nth-child(5){animation-delay:.54s}.sheet>*:nth-child(6){animation-delay:.6s}
+@keyframes rise{to{opacity:1;transform:none}}
+.row.nx .ck{animation:pulse 2.4s cubic-bezier(.2,0,0,1) infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(194,58,5,.35)}70%{box-shadow:0 0 0 8px rgba(194,58,5,0)}100%{box-shadow:0 0 0 0 rgba(194,58,5,0)}}
+@media (prefers-reduced-motion:reduce){.hero img,.seg i:after,.sheet>*,.row.nx .ck{animation:none!important;opacity:1;transform:none}}
+.tab{z-index:3;position:absolute;left:0;right:0;bottom:0;height:78px;background:var(--p);border-top:1px solid var(--ru);display:grid;grid-template-columns:repeat(4,1fr);padding-top:8px}
+.tab div{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10px;font-weight:500;color:var(--i3)}
+.tab div b{width:22px;height:22px;border-radius:6px;border:1.8px solid currentColor}
+.tab div.on{color:var(--i)}.tab div.on b{background:var(--i)}
+.note{max-width:360px;font-size:13px;line-height:1.5;opacity:.75;margin-top:10px}
+.ctl{display:flex;gap:8px;justify-content:center;margin:0 0 24px}.ctl button{font:500 12px "IBM Plex Mono",monospace;padding:8px 12px;border:1px solid currentColor;background:transparent;color:inherit;border-radius:8px;cursor:pointer}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head><body>
+<div class="ctl"><button id="replay">Replay intro</button><button id="swap">Swap photo / video</button></div>
+<div class="wrap">
+<figure><span class="k">01 Intro · tap Get started</span>
+ <div class="ph" id="flow">
+  <div id="intro">
+   <div class="media" id="media"></div>
+   <div class="tag">HÄVN · NO. 01</div>
+   <div class="panel">
+    <div class="brand">HÄVN</div>
+    <div class="h1"><span class="w"><span style="transition-delay:1.6s">Take</span></span> <span class="w"><span style="transition-delay:1.7s">it</span></span> <span class="w"><span style="transition-delay:1.8s">daily.</span></span><br><span class="w"><span style="transition-delay:1.9s">Quietly.</span></span></div>
+    <p class="sub">A medication reminder that stays on your phone. No account, no network.</p>
+    <button class="btn" id="go">Get started</button>
+   </div>
+  </div>
+ </div>
+ <p class="note">A random photo or video plays full-bleed in monochrome and slowly zooms in. The text sits on the image over a soft dark fade, the headline rises word by word, then "Get started" fades the whole screen into the app.</p>
+</figure>
+
+<figure><span class="k">02 Today · light</span><div class="ph" id="todayL"></div>
+ <p class="note">Same mood as the intro: the next dose sits big on a slowly drifting monochrome photo, the day's list rises on a paper sheet over it, and the next check gently pulses. Still a standard layout: sections in rounded cards, round checks and a tab bar with icons. The Swiss touches are the paper and ink colours, Archivo, mono times and one orange for the next dose.</p></figure>
+<figure><span class="k">03 Today · dark</span><div class="ph D" id="todayD"></div></figure>
+</div>
+<template id="today"><div class="today">
+ <div class="hero"><img src="intro-photo.jpg" alt="">
+  <div class="hz"><div class="sb"></div>
+   <div class="date">Wednesday, 21 October</div>
+   <div class="lt">Today <span class="av">E</span></div>
+   <div class="hl">NEXT DOSE IN</div>
+   <div class="hbig">42<small>min</small></div>
+   <div class="hrow"><div class="what"><b>Iron</b> 65 mg · 13:00</div><div class="pill">Take now</div></div>
+   <div class="seg"><i class="f"></i><i class="f"></i><i></i><i></i><i></i></div>
+  </div></div>
+ <div class="sheet">
+ <div class="sec"><span>Morning</span><span>2/2</span></div>
+ <div class="list">
+  <div class="row done"><div class="ic"><i></i></div><div class="tx"><div class="nm">Metformin</div><div class="ds">500 mg · with food</div></div><span class="tm">08:00</span><div class="ck on"></div></div>
+  <div class="row done"><div class="ic"><i></i></div><div class="tx"><div class="nm">Vitamin D3</div><div class="ds">2,000 IU</div></div><span class="tm">08:00</span><div class="ck on"></div></div>
+ </div>
+ <div class="sec"><span>Afternoon</span><span>0/1</span></div>
+ <div class="list"><div class="row nx"><div class="ic"><i></i></div><div class="tx"><div class="nm">Iron</div><div class="ds">65 mg</div></div><span class="tm">13:00</span><div class="ck"></div></div></div>
+ <div class="sec"><span>Evening</span><span>0/2</span></div>
+ <div class="list">
+  <div class="row"><div class="ic"><i></i></div><div class="tx"><div class="nm">Metformin</div><div class="ds">500 mg</div></div><span class="tm">19:00</span><div class="ck"></div></div>
+  </div>
+ </div>
+ <div class="tab"><div class="on"><b></b>Today</div><div><b></b>History</div><div><b></b>Meds</div><div><b></b>Settings</div></div>
+</div></template>
+<script>
+const T=document.getElementById('today');
+for(const id of ['todayL','todayD'])document.getElementById(id).appendChild(T.content.cloneNode(true));
+const flow=document.getElementById('flow'),media=document.getElementById('media');
+let useVideo=Math.random()<.5;
+function start(){
+ flow.querySelector('.today')?.remove();flow.querySelector('.cover')?.remove();
+ const intro=document.getElementById('intro');intro.style.display='';intro.classList.remove('in');
+ media.innerHTML=useVideo?'<video src="intro-video.mp4" muted autoplay loop playsinline></video>':'<img src="intro-photo.jpg" alt="Hands tipping a pill from a jar">';
+ requestAnimationFrame(()=>requestAnimationFrame(()=>intro.classList.add('in')));
+}
+document.getElementById('go').onclick=()=>{
+ const cover=document.createElement('div');cover.className='cover';flow.appendChild(cover);
+ cover.animate([{opacity:0},{opacity:1}],{duration:900,easing:'cubic-bezier(.2,0,0,1)',fill:'forwards'}).onfinish=()=>{
+  document.getElementById('intro').style.display='none';
+  flow.appendChild(T.content.cloneNode(true));
+  const t=flow.querySelector('.today');t.animate([{opacity:0,transform:'translateY(16px)'},{opacity:1,transform:'none'}],{duration:1200,easing:'cubic-bezier(.2,0,0,1)'});
+  cover.animate([{opacity:1},{opacity:0}],{duration:1200,fill:'forwards'});
+ };
+};
+document.getElementById('replay').onclick=start;
+document.getElementById('swap').onclick=()=>{useVideo=!useVideo;start()};
+start();
+</script></body></html>

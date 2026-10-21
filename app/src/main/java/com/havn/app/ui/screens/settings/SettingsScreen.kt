@@ -1,5 +1,12 @@
 package com.havn.app.ui.screens.settings
 
+import com.havn.app.ui.components.HavnGroup
+import com.havn.app.ui.components.HavnGroupHeader
+
+import androidx.compose.foundation.shape.CircleShape
+
+import androidx.compose.foundation.shape.RoundedCornerShape
+
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -165,8 +172,7 @@ fun SettingsScreen(
             // ── Appearance ───────────────────────────────────────────────────
             item(key = "appearance") {
                 Column(Modifier.padding(horizontal = gutter)) {
-                    Text("APPEARANCE", style = HavnType.Eyebrow, color = colors.textTertiary)
-                    Spacer(Modifier.height(HavnTheme.spacing.lg))
+                    HavnGroupHeader("Appearance")
                     // A three-way control rather than a row that cycles through
                     // Light → Dark → System on tap. Cycling hid two of the three
                     // options and gave no sense of what came next.
@@ -188,12 +194,15 @@ fun SettingsScreen(
                         },
                     )
                     Spacer(Modifier.height(HavnTheme.spacing.md))
-                    HavnSwitchRow(
-                        title = "Interface sounds",
-                        subtitle = "Soft feedback when you log a dose",
-                        checked = uiState.interfaceSound,
-                        onCheckedChange = viewModel::setInterfaceSound,
-                    )
+                    HavnGroup {
+                        HavnSwitchRow(
+                            title = "Interface sounds",
+                            subtitle = "Soft feedback when you log a dose",
+                            checked = uiState.interfaceSound,
+                            onCheckedChange = viewModel::setInterfaceSound,
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                        )
+                    }
                 }
                 Spacer(Modifier.height(HavnTheme.spacing.section))
             }
@@ -201,19 +210,22 @@ fun SettingsScreen(
             // ── Medications & reminders ──────────────────────────────────────
             item(key = "meds") {
                 Column(Modifier.padding(horizontal = gutter)) {
-                    Text("YOUR ROUTINE", style = HavnType.Eyebrow, color = colors.textTertiary)
-                    Spacer(Modifier.height(HavnTheme.spacing.sm))
-                    HavnListRow(
-                        title = "Medications",
-                        subtitle = "Add, edit, pause or remove",
-                        onClick = onManageMedications,
-                    )
-                    HavnDivider()
-                    HavnListRow(
-                        title = "Reminders",
-                        subtitle = "Schedule, permissions and alert style",
-                        onClick = onOpenReminders,
-                    )
+                    HavnGroupHeader("Your routine")
+                    HavnGroup {
+                        Column(Modifier.padding(horizontal = 16.dp)) {
+                            HavnListRow(
+                                title = "Medications",
+                                subtitle = "Add, edit, pause or remove",
+                                onClick = onManageMedications,
+                            )
+                            HavnDivider()
+                            HavnListRow(
+                                title = "Reminders",
+                                subtitle = "Schedule, permissions and alert style",
+                                onClick = onOpenReminders,
+                            )
+                        }
+                    }
                 }
                 Spacer(Modifier.height(HavnTheme.spacing.section))
             }
@@ -221,8 +233,7 @@ fun SettingsScreen(
             // ── Profiles ─────────────────────────────────────────────────────
             item(key = "profiles-header") {
                 Column(Modifier.padding(horizontal = gutter)) {
-                    Text("PROFILES", style = HavnType.Eyebrow, color = colors.textTertiary)
-                    Spacer(Modifier.height(HavnTheme.spacing.sm))
+                    HavnGroupHeader("Profiles")
                     Text(
                         text = "Each profile keeps its own medications and history, " +
                             "all on this device.",
@@ -234,13 +245,15 @@ fun SettingsScreen(
             }
 
             items(uiState.profiles, key = { it.id }) { profile ->
-                ProfileRow(
-                    profile = profile,
-                    isActive = profile.id == uiState.activeUser?.id,
-                    onSelect = { viewModel.switchProfile(profile.id) },
-                    onDelete = { pendingDelete = profile },
-                    modifier = Modifier.padding(horizontal = gutter),
-                )
+                HavnGroup(Modifier.padding(horizontal = gutter).padding(bottom = HavnTheme.spacing.sm)) {
+                    ProfileRow(
+                        profile = profile,
+                        isActive = profile.id == uiState.activeUser?.id,
+                        onSelect = { viewModel.switchProfile(profile.id) },
+                        onDelete = { pendingDelete = profile },
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                    )
+                }
             }
 
             item(key = "add-profile") {
@@ -266,8 +279,7 @@ fun SettingsScreen(
             // ── Data ─────────────────────────────────────────────────────────
             item(key = "data") {
                 Column(Modifier.padding(horizontal = gutter)) {
-                    Text("YOUR DATA", style = HavnType.Eyebrow, color = colors.textTertiary)
-                    Spacer(Modifier.height(HavnTheme.spacing.sm))
+                    HavnGroupHeader("Your data")
                     Text(
                         text = "Hävn has no account and no servers — it doesn't ask for " +
                             "internet access at all. Nothing is copied off this phone, so " +
@@ -277,46 +289,53 @@ fun SettingsScreen(
                     )
                     Spacer(Modifier.height(HavnTheme.spacing.lg))
 
-                    HavnListRow(
-                        title = "Back up to Drive, Files or email",
-                        subtitle = "Sends a single backup file to whichever app you choose",
-                        onClick = viewModel::exportBackup,
-                    )
-                    HavnDivider()
-                    HavnListRow(
-                        title = "Save a copy to this device",
-                        subtitle = "Pick a folder and write the backup straight there",
-                        onClick = { saveLauncher.launch(viewModel.suggestedFileName()) },
-                    )
-                    HavnDivider()
-                    HavnListRow(
-                        title = "Restore from a backup",
-                        subtitle = "Adds the backup's profiles alongside what's already here",
-                        onClick = { openLauncher.launch(BackupManager.IMPORT_MIME_TYPES) },
-                    )
+                    HavnGroup {
+                        Column(Modifier.padding(horizontal = 16.dp)) {
+                            HavnListRow(
+                                title = "Back up to Drive, Files or email",
+                                subtitle = "Sends a single backup file to whichever app you choose",
+                                onClick = viewModel::exportBackup,
+                            )
+                            HavnDivider()
+                            HavnListRow(
+                                title = "Save a copy to this device",
+                                subtitle = "Pick a folder and write the backup straight there",
+                                onClick = { saveLauncher.launch(viewModel.suggestedFileName()) },
+                            )
+                            HavnDivider()
+                            HavnListRow(
+                                title = "Restore from a backup",
+                                subtitle = "Adds the backup's profiles alongside what's already here",
+                                onClick = { openLauncher.launch(BackupManager.IMPORT_MIME_TYPES) },
+                            )
+                        }
+                    }
                 }
                 Spacer(Modifier.height(HavnTheme.spacing.section))
             }
 
             item(key = "maintenance") {
                 Column(Modifier.padding(horizontal = gutter)) {
-                    Text("MAINTENANCE", style = HavnType.Eyebrow, color = colors.textTertiary)
-                    Spacer(Modifier.height(HavnTheme.spacing.sm))
-                    if (BuildConfig.DEBUG) {
-                        HavnListRow(
-                            title = "Fill in sample history",
-                            subtitle = "Writes 30 days of example doses so Progress has " +
-                                "something to show",
-                            onClick = viewModel::seedSampleData,
-                        )
-                        HavnDivider()
+                    HavnGroupHeader("Maintenance")
+                    HavnGroup {
+                        Column(Modifier.padding(horizontal = 16.dp)) {
+                            if (BuildConfig.DEBUG) {
+                                HavnListRow(
+                                    title = "Fill in sample history",
+                                    subtitle = "Writes 30 days of example doses so Progress has " +
+                                        "something to show",
+                                    onClick = viewModel::seedSampleData,
+                                )
+                                HavnDivider()
+                            }
+                            HavnListRow(
+                                title = "Clear dose history",
+                                subtitle = "Keeps your medications, removes every recorded dose",
+                                destructive = true,
+                                onClick = { confirmClearHistory = true },
+                            )
+                        }
                     }
-                    HavnListRow(
-                        title = "Clear dose history",
-                        subtitle = "Keeps your medications, removes every recorded dose",
-                        destructive = true,
-                        onClick = { confirmClearHistory = true },
-                    )
                 }
                 Spacer(Modifier.height(HavnTheme.spacing.section))
             }
@@ -324,24 +343,27 @@ fun SettingsScreen(
             // ── About ────────────────────────────────────────────────────────
             item(key = "about") {
                 Column(Modifier.padding(horizontal = gutter)) {
-                    Text("ABOUT", style = HavnType.Eyebrow, color = colors.textTertiary)
-                    Spacer(Modifier.height(HavnTheme.spacing.sm))
+                    HavnGroupHeader("About")
                     SupportCard(
                         onClick = {
                             runCatching { uriHandler.openUri("https://buymeacoffee.com/hermanify") }
                         },
                     )
                     Spacer(Modifier.height(HavnTheme.spacing.lg))
-                    HavnListRow(
-                        title = "Need an app or website?",
-                        subtitle = "Hävn is made by Mander — web design, apps and projects",
-                        value = "mander.tech",
-                        onClick = {
-                            runCatching { uriHandler.openUri("https://mander.tech") }
-                        },
-                    )
-                    HavnDivider()
-                    HavnListRow(title = "Version", value = BuildConfig.VERSION_NAME)
+                    HavnGroup {
+                        Column(Modifier.padding(horizontal = 16.dp)) {
+                            HavnListRow(
+                                title = "Need an app or website?",
+                                subtitle = "Hävn is made by Mander — web design, apps and projects",
+                                value = "mander.tech",
+                                onClick = {
+                                    runCatching { uriHandler.openUri("https://mander.tech") }
+                                },
+                            )
+                            HavnDivider()
+                            HavnListRow(title = "Version", value = BuildConfig.VERSION_NAME)
+                        }
+                    }
                 }
 
                 Spacer(Modifier.height(HavnTheme.spacing.section))
@@ -381,7 +403,7 @@ fun SettingsScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RectangleShape)
+                    .clip(RoundedCornerShape(12.dp))
                     .background(
                         when {
                             message?.isError == true -> colors.dangerSoft
@@ -507,7 +529,7 @@ private fun ProfileRow(
         Box(
             modifier = Modifier
                 .size(40.dp)
-                .clip(RectangleShape)
+                .clip(CircleShape)
                 .background(tint.copy(alpha = if (colors.isDark) 0.3f else 0.16f)),
             contentAlignment = Alignment.Center,
         ) {
@@ -559,7 +581,7 @@ private fun AddProfileDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = colors.surfaceRaised,
-        shape = RectangleShape,
+        shape = RoundedCornerShape(12.dp),
         title = {
             Text(
                 text = "Add a profile",
@@ -594,7 +616,7 @@ private fun AddProfileDialog(
                         Box(
                             modifier = Modifier
                                 .size(if (hex == color) 34.dp else 28.dp)
-                                .clip(RectangleShape)
+                                .clip(RoundedCornerShape(12.dp))
                                 .background(tint)
                                 .havnPress(scaleDown = 0.9f) { color = hex }
                         )
@@ -635,9 +657,9 @@ private fun SupportCard(onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RectangleShape)
+            .clip(RoundedCornerShape(12.dp))
             .background(colors.surfaceRaised)
-            .border(1.dp, colors.hairline, RectangleShape)
+            .border(1.dp, colors.hairline, RoundedCornerShape(12.dp))
             .havnPress(onClickLabel = "Open Buy Me a Coffee", onClick = onClick)
             .padding(HavnTheme.spacing.lg),
         verticalAlignment = Alignment.CenterVertically,

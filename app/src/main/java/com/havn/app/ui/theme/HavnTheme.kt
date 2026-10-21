@@ -47,15 +47,14 @@ object HavnTheme {
         @Composable @ReadOnlyComposable get() = LocalHavnElevation.current
 }
 
-/** Square everywhere, including stock M3 components (sheets, dialogs, chips). */
-private val Square = RoundedCornerShape(0.dp) // Shapes() needs a CornerBasedShape
+/** Rounded, so stock M3 components (sheets, dialogs, chips) match Today. */
 
 val HavnShapes = Shapes(
-    extraSmall = Square,
-    small = Square,
-    medium = Square,
-    large = Square,
-    extraLarge = Square,
+    extraSmall = RoundedCornerShape(6.dp),
+    small = RoundedCornerShape(10.dp),
+    medium = RoundedCornerShape(14.dp),
+    large = RoundedCornerShape(20.dp),
+    extraLarge = RoundedCornerShape(28.dp),
 )
 
 @Composable

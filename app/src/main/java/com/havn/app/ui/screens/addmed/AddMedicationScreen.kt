@@ -1,5 +1,9 @@
 package com.havn.app.ui.screens.addmed
 
+import androidx.compose.foundation.shape.CircleShape
+
+import androidx.compose.foundation.shape.RoundedCornerShape
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
@@ -137,13 +141,6 @@ fun AddMedicationScreen(
                         color = colors.textPrimary,
                     )
                 }
-                Spacer(Modifier.width(HavnTheme.spacing.lg))
-                // The dose itself, live: form and colour update as they're picked.
-                com.havn.app.ui.components.HavnPillSpecimen(
-                    type = uiState.iconType,
-                    colorTag = uiState.colorTag,
-                    modifier = Modifier.size(84.dp),
-                )
             }
 
             Spacer(Modifier.height(HavnTheme.spacing.section))
@@ -344,7 +341,7 @@ private fun TimeRow(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = HavnTheme.spacing.sm)
-            .clip(RectangleShape)
+            .clip(RoundedCornerShape(12.dp))
             .background(colors.surfaceSunken)
             .havnPress(scaleDown = 0.99f, onClickLabel = "Change time", onClick = onEdit)
             .padding(horizontal = HavnTheme.spacing.lg, vertical = HavnTheme.spacing.md),
@@ -362,7 +359,7 @@ private fun TimeRow(
                 style = MaterialTheme.typography.labelMedium,
                 color = colors.textTertiary,
                 modifier = Modifier
-                    .clip(RectangleShape)
+                    .clip(RoundedCornerShape(12.dp))
                     .havnPress(scaleDown = 0.95f, onClick = onRemove)
                     .padding(horizontal = HavnTheme.spacing.sm, vertical = HavnTheme.spacing.xs),
             )
@@ -394,9 +391,9 @@ private fun IconChoice(
     Box(
         modifier = modifier
             .aspectRatio(1f)
-            .clip(RectangleShape)
+            .clip(RoundedCornerShape(12.dp))
             .background(background)
-            .border(borderWidth, if (selected) accent else Color.Transparent, RectangleShape)
+            .border(borderWidth, if (selected) accent else Color.Transparent, RoundedCornerShape(12.dp))
             .havnPress(
                 scaleDown = 0.92f,
                 onClickLabel = type.name.lowercase(),
@@ -436,13 +433,13 @@ private fun ColourChoice(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .clip(RectangleShape)
+                .clip(RoundedCornerShape(12.dp))
                 .background(tint)
-                .border(ring, colors.canvas, RectangleShape)
+                .border(ring, colors.canvas, RoundedCornerShape(12.dp))
                 .border(
                     width = if (selected) 1.5.dp else 0.dp,
                     color = if (selected) colors.textPrimary else Color.Transparent,
-                    shape = RectangleShape,
+                    shape = RoundedCornerShape(12.dp),
                 )
         )
     }

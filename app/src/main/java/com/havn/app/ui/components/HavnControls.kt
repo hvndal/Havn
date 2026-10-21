@@ -1,5 +1,9 @@
 package com.havn.app.ui.components
 
+import androidx.compose.foundation.shape.CircleShape
+
+import androidx.compose.foundation.shape.RoundedCornerShape
+
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
@@ -63,7 +67,7 @@ fun HavnSwitchRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RectangleShape)
+            .clip(RoundedCornerShape(12.dp))
             .then(
                 if (onRowClick != null && enabled) {
                     Modifier.havnPress(scaleDown = 0.995f, role = null, onClick = onRowClick)
@@ -118,21 +122,21 @@ fun HavnSwitch(
         targetValue = when {
             !enabled -> colors.surfaceSunken
             checked -> colors.accent
-            else -> colors.hairlineStrong
+            else -> colors.surfacePressed
         },
         animationSpec = HavnMotion.standard(),
         label = "switchTrack",
     )
     val thumbOffset by animateDpAsState(
-        targetValue = if (checked) 20.dp else 2.dp,
+        targetValue = if (checked) 22.dp else 3.dp,
         animationSpec = HavnMotion.settle(),
         label = "switchThumb",
     )
 
     Box(
         modifier = modifier
-            .size(width = 44.dp, height = 26.dp)
-            .clip(RectangleShape)
+            .size(width = 50.dp, height = 30.dp)
+            .clip(CircleShape)
             .background(track)
             .havnPress(
                 scaleDown = 0.94f,
@@ -146,8 +150,8 @@ fun HavnSwitch(
         Box(
             modifier = Modifier
                 .padding(start = thumbOffset)
-                .size(22.dp)
-                .clip(RectangleShape)
+                .size(24.dp)
+                .clip(CircleShape)
                 .background(if (checked) colors.onAccent else colors.surfaceRaised)
         )
     }
@@ -181,7 +185,7 @@ fun HavnTimePickerDialog(
         containerColor = colors.surfaceRaised,
         titleContentColor = colors.textPrimary,
         textContentColor = colors.textSecondary,
-        shape = RectangleShape,
+        shape = CircleShape,
         title = {
             Text(
                 text = title,
@@ -244,7 +248,7 @@ fun HavnConfirmDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = colors.surfaceRaised,
-        shape = RectangleShape,
+        shape = RoundedCornerShape(12.dp),
         title = {
             Text(
                 text = title,
@@ -294,7 +298,7 @@ fun HavnListRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RectangleShape)
+            .clip(RoundedCornerShape(12.dp))
             .then(
                 if (onClick != null) {
                     Modifier.havnPress(scaleDown = 0.995f, onClick = onClick)
@@ -363,9 +367,9 @@ fun HavnSectionHeading(
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Text(
-            text = text.uppercase(),
-            style = com.havn.app.ui.theme.HavnType.Eyebrow,
-            color = HavnTheme.colors.textTertiary,
+            text = text.lowercase().replaceFirstChar { it.uppercase() },
+            style = MaterialTheme.typography.labelLarge,
+            color = HavnTheme.colors.textSecondary,
         )
         trailing?.invoke()
     }

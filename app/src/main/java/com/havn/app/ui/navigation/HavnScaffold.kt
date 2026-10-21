@@ -1,5 +1,9 @@
 package com.havn.app.ui.navigation
 
+import androidx.compose.foundation.shape.CircleShape
+
+import androidx.compose.foundation.shape.RoundedCornerShape
+
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
@@ -159,7 +163,7 @@ private fun HavnNavItem(
 
     Column(
         modifier = modifier
-            .clip(RectangleShape)
+            .clip(RoundedCornerShape(12.dp))
             .selectable(
                 selected = selected,
                 interactionSource = interaction,
@@ -200,7 +204,7 @@ private fun HavnNavItem(
                     scaleY = dotScale
                     alpha = dotScale
                 }
-                .clip(RectangleShape)
+                .clip(RoundedCornerShape(12.dp))
                 .background(colors.accent)
         )
     }
@@ -209,8 +213,8 @@ private fun HavnNavItem(
 private fun iconRes(name: String): Int = when (name) {
     "home" -> R.drawable.ic_home
     "home_fill" -> R.drawable.ic_home_fill
-    "pill" -> R.drawable.ic_pill
-    "pill_fill" -> R.drawable.ic_pill_fill
+    "list" -> R.drawable.ic_list
+    "list_fill" -> R.drawable.ic_list_fill
     "chart" -> R.drawable.ic_chart
     "chart_fill" -> R.drawable.ic_chart_fill
     "calendar_today" -> R.drawable.ic_calendar

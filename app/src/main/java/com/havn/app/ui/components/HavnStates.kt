@@ -1,5 +1,9 @@
 package com.havn.app.ui.components
 
+import androidx.compose.foundation.shape.CircleShape
+
+import androidx.compose.foundation.shape.RoundedCornerShape
+
 import com.havn.app.ui.theme.rememberReduceMotion
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.InfiniteRepeatableSpec
@@ -122,13 +126,13 @@ fun HavnBreathingMark(
         Box(
             modifier = Modifier
                 .size(size * (0.72f + phase * 0.28f))
-                .clip(RectangleShape)
+                .clip(RoundedCornerShape(10.dp))
                 .background(colors.accent.copy(alpha = 0.06f + phase * 0.05f))
         )
         Box(
             modifier = Modifier
                 .size(size * 0.34f)
-                .clip(RectangleShape)
+                .clip(RoundedCornerShape(10.dp))
                 .background(colors.accent.copy(alpha = 0.45f + phase * 0.25f))
         )
     }
@@ -155,14 +159,14 @@ fun HavnErrorState(
         Box(
             modifier = Modifier
                 .size(44.dp)
-                .clip(RectangleShape)
+                .clip(RoundedCornerShape(10.dp))
                 .background(colors.dangerSoft),
             contentAlignment = Alignment.Center,
         ) {
             Box(
                 modifier = Modifier
                     .size(6.dp)
-                    .clip(RectangleShape)
+                    .clip(RoundedCornerShape(10.dp))
                     .background(colors.danger)
             )
         }
@@ -236,7 +240,7 @@ fun HavnSkeleton(
         modifier = modifier
             .fillMaxWidth(widthFraction)
             .height(height)
-            .clip(RectangleShape)
+            .clip(RoundedCornerShape(10.dp))
             .background(base)
             .drawBehind {
                 drawRect(
@@ -260,7 +264,7 @@ fun HavnDoseRowSkeleton(modifier: Modifier = Modifier) {
         Box(
             modifier = Modifier
                 .size(44.dp)
-                .clip(RectangleShape)
+                .clip(RoundedCornerShape(10.dp))
                 .background(HavnTheme.colors.surfaceSunken)
         )
         Spacer(Modifier.width(HavnTheme.spacing.lg))
@@ -307,7 +311,7 @@ fun HavnPulseDots(
             Box(
                 modifier = Modifier
                     .size(dotSize)
-                    .clip(RectangleShape)
+                    .clip(RoundedCornerShape(10.dp))
                     .background(color.copy(alpha = alpha))
             )
         }

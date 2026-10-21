@@ -7,7 +7,7 @@ data class User(
     val id: Long = 0,
     val name: String,
     val age: Int,
-    val avatarColor: String = "#516351",
+    val avatarColor: String = "#14140E",
     val createdAt: Long = System.currentTimeMillis(),
 )
 

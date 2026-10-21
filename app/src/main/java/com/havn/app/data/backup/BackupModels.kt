@@ -31,7 +31,7 @@ data class HavnBackup(
 data class BackupProfile(
     val name: String,
     val age: Int = 0,
-    @SerialName("avatar_color") val avatarColor: String = "#516351",
+    @SerialName("avatar_color") val avatarColor: String = "#14140E",
     @SerialName("created_at") val createdAt: Long = 0L,
     val medications: List<BackupMedication> = emptyList(),
     @SerialName("dose_logs") val doseLogs: List<BackupDoseLog> = emptyList(),

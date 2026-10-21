@@ -1,5 +1,9 @@
 package com.havn.app.ui.components
 
+import androidx.compose.foundation.shape.CircleShape
+
+import androidx.compose.foundation.shape.RoundedCornerShape
+
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
@@ -49,7 +53,7 @@ fun HavnSegmented(
     if (options.isEmpty()) return
     val colors = HavnTheme.colors
     val haptics = rememberHavnHaptics()
-    val shape = RectangleShape
+    val shape = CircleShape
 
     BoxWithConstraints(
         modifier = modifier

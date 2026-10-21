@@ -1,5 +1,9 @@
 package com.havn.app.ui.components
 
+import androidx.compose.foundation.shape.CircleShape
+
+import androidx.compose.foundation.shape.RoundedCornerShape
+
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
@@ -130,7 +134,7 @@ fun HavnButton(
         label = "btnScale",
     )
 
-    val shape: Shape = RectangleShape
+    val shape: Shape = CircleShape
 
     Row(
         modifier = modifier
@@ -230,7 +234,7 @@ fun HavnIconButton(
                 scaleX = scale
                 scaleY = scale
             }
-            .clip(RectangleShape)
+            .clip(CircleShape)
             .background(animatedContainer)
             .clickable(
                 interactionSource = interaction,
@@ -277,7 +281,7 @@ fun HavnTextAction(
     Row(
         modifier = modifier
             .graphicsLayer { this.alpha = alpha }
-            .clip(RectangleShape)
+            .clip(CircleShape)
             .clickable(
                 interactionSource = interaction,
                 indication = null,

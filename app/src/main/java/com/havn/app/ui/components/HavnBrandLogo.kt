@@ -1,5 +1,11 @@
 package com.havn.app.ui.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.unit.sp
+
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -45,139 +51,32 @@ fun HavnBrandLogo(
     showWordmark: Boolean = true,
     showTagline: Boolean = true,
 ) {
+    // A typographic mark, not a pill box: a heavy "H" with the one orange
+    // square beside it, then the wordmark in tracked mono.
     val colors = HavnTheme.colors
-
-    val shell = colors.surfaceRaised
-    val shellAlt = colors.linen
-    val stroke = colors.hairlineStrong
-    val letterColor = colors.textPrimary
-    val tabletFill = colors.surfaceSunken
-    val tabletStroke = colors.hairline
-    val tabletScore = colors.accentMuted
-    val ovalFill = colors.accent
-    val ovalStroke = colors.accent
-    val capsuleTint = colors.accent
-    val capsuleLight = colors.surfaceRaised
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier.semantics { contentDescription = "Hävn" },
-    ) {
-        Canvas(
-            modifier = Modifier
-                .size(iconSize)
-                .clearAndSetSemantics { },
-        ) {
-            val w = size.width
-            val h = size.height
-            val strokeW = w * 0.035f
-
-            val outerPath = Path().apply { addRect(Rect(0f, 0f, w, h)) }
-            drawPath(outerPath, shell)
-
-            clipPath(outerPath) {
-                drawPath(Path().apply { addRect(Rect(w * 0.5f, 0f, w, h)) }, shellAlt)
-            }
-
-            // Divider + compartment rules
-            drawLine(stroke, Offset(w * 0.5f, 0f), Offset(w * 0.5f, h), strokeW)
-            drawLine(stroke, Offset(0f, h * 0.333f), Offset(w * 0.5f, h * 0.333f), strokeW)
-            drawLine(stroke, Offset(0f, h * 0.666f), Offset(w * 0.5f, h * 0.666f), strokeW)
-
-            // 1 — capsule, top-left compartment
-            val capCx = w * 0.25f
-            val capCy = h * 0.166f
-            val capW = w * 0.18f
-            val capH = capW * 0.45f
-            rotate(degrees = -35f, pivot = Offset(capCx, capCy)) {
-                val capPath = Path().apply {
-                    addRoundRect(
-                        RoundRect(
-                            rect = Rect(capCx - capW, capCy - capH, capCx + capW, capCy + capH),
-                            cornerRadius = CornerRadius(capH, capH),
-                        )
-                    )
-                }
-                clipPath(capPath) {
-                    drawRect(capsuleTint, Offset(capCx - capW, capCy - capH), Size(capW, capH * 2))
-                    drawRect(capsuleLight, Offset(capCx, capCy - capH), Size(capW, capH * 2))
-                }
-                drawPath(capPath, stroke, style = Stroke(width = strokeW * 0.6f))
-            }
-
-            // 2 — scored tablet, middle compartment
-            val tabCx = w * 0.25f
-            val tabCy = h * 0.5f
-            val tabR = w * 0.085f
-            drawCircle(tabletFill, tabR, Offset(tabCx, tabCy))
-            drawCircle(tabletStroke, tabR, Offset(tabCx, tabCy), style = Stroke(width = strokeW * 0.5f))
-            drawLine(
-                tabletScore,
-                Offset(tabCx - tabR * 0.6f, tabCy - tabR * 0.6f),
-                Offset(tabCx + tabR * 0.6f, tabCy + tabR * 0.6f),
-                strokeW * 0.5f,
-            )
-
-            // 3 — oval, bottom compartment
-            val ovCx = w * 0.25f
-            val ovCy = h * 0.833f
-            val ovW = w * 0.16f
-            val ovH = ovW * 0.55f
-            rotate(degrees = -15f, pivot = Offset(ovCx, ovCy)) {
-                val ovPath = Path().apply {
-                    addRoundRect(
-                        RoundRect(
-                            rect = Rect(ovCx - ovW, ovCy - ovH, ovCx + ovW, ovCy + ovH),
-                            cornerRadius = CornerRadius(ovH, ovH),
-                        )
-                    )
-                }
-                drawPath(ovPath, ovalFill)
-                drawPath(ovPath, ovalStroke, style = Stroke(width = strokeW * 0.5f))
-            }
-
-            // The H
-            val hCx = w * 0.75f
-            val hCy = h * 0.5f
-            val hH = h * 0.36f
-            val hW = h * 0.18f
-            val hStroke = strokeW * 0.8f
-            drawLine(letterColor, Offset(hCx - hW / 2, hCy - hH / 2), Offset(hCx - hW / 2, hCy + hH / 2), hStroke)
-            drawLine(letterColor, Offset(hCx + hW / 2, hCy - hH / 2), Offset(hCx + hW / 2, hCy + hH / 2), hStroke)
-            drawLine(letterColor, Offset(hCx - hW / 2, hCy), Offset(hCx + hW / 2, hCy), hStroke)
-
-            drawRect(
-                color = stroke,
-                topLeft = Offset(0f, 0f),
-                size = Size(w, h),
-                style = Stroke(width = strokeW),
-            )
-        }
-
-        if (showWordmark) {
-            Spacer(Modifier.height(iconSize * 0.22f))
-            Text(
-                text = "HÄVN",
-                // Tracking now comes from the type scale rather than literal
-                // spaces in the string, so screen readers announce the brand
-                // name instead of spelling it out letter by letter.
-                style = HavnType.Wordmark.copy(
-                    fontSize = (iconSize.value * 0.26f).sp,
-                    letterSpacing = (iconSize.value * 0.055f).sp,
+    androidx.compose.foundation.layout.Column(modifier = modifier) {
+        androidx.compose.foundation.layout.Row(verticalAlignment = androidx.compose.ui.Alignment.Bottom) {
+            androidx.compose.material3.Text(
+                text = "H",
+                style = com.havn.app.ui.theme.HavnType.Poster.copy(
+                    fontSize = (iconSize.value * 0.9f).sp,
+                    lineHeight = (iconSize.value * 0.82f).sp,
                 ),
                 color = colors.textPrimary,
             )
-        }
-
-        if (showTagline) {
-            Spacer(Modifier.height(iconSize * 0.11f))
-            Text(
-                text = "REMEMBER. LIVE BETTER.",
-                style = HavnType.Eyebrow.copy(
-                    fontSize = (iconSize.value * 0.085f).coerceIn(9f, 12f).sp,
-                ),
-                color = colors.textTertiary,
+            androidx.compose.foundation.layout.Box(
+                Modifier
+                    .padding(start = (iconSize.value * 0.06f).dp, bottom = (iconSize.value * 0.08f).dp)
+                    .size((iconSize.value * 0.16f).dp)
+                    .background(colors.signal)
             )
+        }
+        if (showWordmark) {
+            androidx.compose.foundation.layout.Spacer(Modifier.height(8.dp))
+            androidx.compose.material3.Text("HÄVN", style = com.havn.app.ui.theme.HavnType.Wordmark, color = colors.textPrimary)
+        }
+        if (showTagline) {
+            androidx.compose.material3.Text("Medication, quietly.", style = androidx.compose.material3.MaterialTheme.typography.bodySmall, color = colors.textSecondary)
         }
     }
 }

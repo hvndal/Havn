@@ -226,18 +226,18 @@ data class HavnSpacing(
 )
 
 /**
- * Swiss: every corner is square. The ladder is kept so call sites keep their
- * intent, but every step resolves to 0 dp.
+ * Soft, standard corners: rounded groups and pill controls, the language set
+ * by Today. Swiss stays in the type, the palette and the single orange.
  */
 @Immutable
 data class HavnRadius(
-    val xs: Dp = 0.dp,
-    val sm: Dp = 0.dp,
-    val md: Dp = 0.dp,
-    val lg: Dp = 0.dp,
-    val xl: Dp = 0.dp,
-    val xxl: Dp = 0.dp,
-    val pill: Dp = 0.dp,
+    val xs: Dp = 6.dp,
+    val sm: Dp = 10.dp,
+    val md: Dp = 14.dp,
+    val lg: Dp = 16.dp,
+    val xl: Dp = 20.dp,
+    val xxl: Dp = 28.dp,
+    val pill: Dp = 999.dp,
 )
 
 /**

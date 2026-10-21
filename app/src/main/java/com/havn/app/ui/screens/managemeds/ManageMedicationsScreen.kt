@@ -1,5 +1,9 @@
 package com.havn.app.ui.screens.managemeds
 
+import androidx.compose.foundation.shape.CircleShape
+
+import androidx.compose.foundation.shape.RoundedCornerShape
+
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -72,6 +76,9 @@ fun ManageMedicationsScreen(
     onBack: () -> Unit,
     onAddMedication: () -> Unit,
     onEditMedication: (Long) -> Unit,
+    // Set when Meds is shown as a tab: no back button, and the bottom
+    // button clears the tab bar instead of the system navigation bar.
+    contentPadding: PaddingValues? = null,
     viewModel: ManageMedicationsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -87,7 +94,7 @@ fun ManageMedicationsScreen(
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = HavnTheme.spacing.huge * 2),
+            contentPadding = PaddingValues(bottom = HavnTheme.spacing.huge * 2 + (contentPadding?.calculateBottomPadding() ?: 0.dp)),
         ) {
             item(key = "header") {
                 Row(
@@ -98,13 +105,15 @@ fun ManageMedicationsScreen(
                         .padding(top = HavnTheme.spacing.md),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    HavnIconButton(
-                        icon = painterResource(R.drawable.ic_back),
-                        contentDescription = "Back",
-                        onClick = onBack,
-                        size = 40.dp,
-                        iconSize = 18.dp,
-                    )
+                    if (contentPadding == null) {
+                        HavnIconButton(
+                            icon = painterResource(R.drawable.ic_back),
+                            contentDescription = "Back",
+                            onClick = onBack,
+                            size = 40.dp,
+                            iconSize = 18.dp,
+                        )
+                    }
                 }
                 Spacer(Modifier.height(HavnTheme.spacing.xl))
                 Column(Modifier.padding(horizontal = gutter)) {
@@ -215,7 +224,10 @@ fun ManageMedicationsScreen(
                 onClick = onAddMedication,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .navigationBarsPadding()
+                    .then(
+                        if (contentPadding == null) Modifier.navigationBarsPadding()
+                        else Modifier.padding(bottom = contentPadding.calculateBottomPadding())
+                    )
                     .padding(horizontal = gutter, vertical = HavnTheme.spacing.xl),
             )
         }
@@ -246,7 +258,7 @@ private fun FilterChip(
     val colors = HavnTheme.colors
     Box(
         modifier = Modifier
-            .clip(RectangleShape)
+            .clip(RoundedCornerShape(12.dp))
             .background(if (selected) colors.accent else colors.surfaceSunken)
             .havnPress(scaleDown = 0.94f, onClick = onClick)
             .padding(horizontal = HavnTheme.spacing.lg, vertical = HavnTheme.spacing.sm),
@@ -280,40 +292,45 @@ private fun MedicationRow(
         label = "medAlpha",
     )
 
-    Column(modifier = modifier.havnReveal(reveal)) {
+    com.havn.app.ui.components.HavnGroup(
+        modifier = modifier
+            .padding(bottom = HavnTheme.spacing.md)
+            .havnReveal(reveal),
+    ) {
+        val card = HavnTheme.colors
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .havnPress(scaleDown = 0.99f, onClickLabel = "Edit ${medication.name}", onClick = onClick)
-                .padding(vertical = HavnTheme.spacing.lg),
+                .padding(start = 14.dp, end = 14.dp, top = 14.dp, bottom = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
                 modifier = Modifier
-                    .size(42.dp)
+                    .size(40.dp)
                     .graphicsLayer { alpha = contentAlpha }
-                    .clip(RectangleShape)
-                    .background(accent.copy(alpha = if (colors.isDark) 0.18f else 0.12f)),
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(card.surfaceSunken),
                 contentAlignment = Alignment.Center,
             ) {
-                MedIcon(type = medication.iconType, size = 21.dp, tint = accent)
+                MedIcon(type = medication.iconType, size = 20.dp, tint = card.textSecondary)
             }
 
-            Spacer(Modifier.width(HavnTheme.spacing.lg))
+            Spacer(Modifier.width(HavnTheme.spacing.md))
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = medication.name,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = colors.textPrimary.copy(alpha = contentAlpha),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = card.textPrimary.copy(alpha = contentAlpha),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                Spacer(Modifier.height(1.dp))
+                Spacer(Modifier.height(2.dp))
                 Text(
-                    text = scheduleSummary(medication),
+                    text = if (medication.isActive) scheduleSummary(medication) else "Paused",
                     style = MaterialTheme.typography.bodySmall,
-                    color = colors.textTertiary.copy(alpha = contentAlpha),
+                    color = card.textSecondary.copy(alpha = contentAlpha),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -331,28 +348,39 @@ private fun MedicationRow(
                 },
             )
         }
-
-        Row(
-            modifier = Modifier.padding(bottom = HavnTheme.spacing.md),
-            horizontalArrangement = Arrangement.spacedBy(HavnTheme.spacing.md),
-        ) {
-            HavnButton(
-                text = "Delete",
-                onClick = onDelete,
-                tone = HavnButtonTone.Ghost,
-                size = HavnButtonSize.Small,
-                fillWidth = false,
-            )
-        }
-
         Box(
-            modifier = Modifier
+            Modifier
+                .padding(start = 68.dp)
                 .fillMaxWidth()
                 .height(1.dp)
-                .background(colors.hairline)
+                .background(card.hairline)
         )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 68.dp, end = 14.dp),
+            horizontalArrangement = Arrangement.spacedBy(HavnTheme.spacing.lg),
+        ) {
+            Text(
+                text = "Edit",
+                style = MaterialTheme.typography.labelLarge,
+                color = card.textPrimary,
+                modifier = Modifier
+                    .havnPress(onClickLabel = "Edit ${medication.name}", onClick = onClick)
+                    .padding(vertical = 12.dp),
+            )
+            Text(
+                text = "Delete",
+                style = MaterialTheme.typography.labelLarge,
+                color = card.danger,
+                modifier = Modifier
+                    .havnPress(onClickLabel = "Delete ${medication.name}", onClick = onDelete)
+                    .padding(vertical = 12.dp),
+            )
+        }
     }
 }
+
 
 private fun scheduleSummary(med: Medication): String {
     if (!med.isActive) return "Paused"

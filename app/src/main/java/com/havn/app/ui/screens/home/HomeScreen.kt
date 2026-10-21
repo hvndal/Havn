@@ -3,6 +3,20 @@ package com.havn.app.ui.screens.home
 import com.havn.app.ui.theme.rememberReduceMotion
 import androidx.compose.runtime.produceState
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
@@ -82,7 +96,6 @@ import com.havn.app.ui.components.HavnProgressRing
 import com.havn.app.ui.components.HavnEmptyState
 import com.havn.app.ui.components.HavnIconButton
 import com.havn.app.ui.components.HavnOdometerCounter
-import com.havn.app.ui.components.HavnOrganizerView
 import com.havn.app.ui.components.HavnSwipeToLogRow
 import com.havn.app.ui.components.HavnTextAction
 import com.havn.app.ui.components.MedIcon
@@ -117,7 +130,6 @@ import java.time.format.DateTimeFormatter
 fun HomeScreen(
     contentPadding: PaddingValues,
     onAddMedication: () -> Unit,
-    onOpenOrganizer: () -> Unit,
     onManageMedications: () -> Unit,
     onOpenProgress: () -> Unit,
     onOpenReminders: () -> Unit,
@@ -149,8 +161,9 @@ fun HomeScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(colors.canvas)
+            .background(Color(0xFF0C0C0A))
     ) {
+        com.havn.app.ui.components.HavnBackdrop(progress = uiState.progress)
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
@@ -158,9 +171,10 @@ fun HomeScreen(
             ),
         ) {
             item(key = "top") {
-                SwissTopLine(
+                TodayTitle(
                     date = uiState.selectedDate,
                     isToday = uiState.isTodaySelected,
+                    user = uiState.user,
                     onReturnToToday = { viewModel.selectDate(LocalDate.now()) },
                     onOpenProfiles = { showProfiles = true },
                     modifier = Modifier.padding(horizontal = gutter),
@@ -169,19 +183,15 @@ fun HomeScreen(
 
             item(key = "hero") {
                 if (!uiState.isLoading && uiState.total > 0) {
-                    NextDoseHero(
+                    val reveal = rememberRevealProgress()
+                    NextDoseCard(
                         state = uiState,
-                        modifier = Modifier.padding(horizontal = gutter),
+                        onTakeNext = { uiState.nextDose?.let { viewModel.setStatus(it, DoseStatus.TAKEN) } },
+                        modifier = Modifier
+                            .padding(horizontal = gutter)
+                            .havnReveal(reveal),
                     )
                 }
-                Spacer(Modifier.height(HavnTheme.spacing.xxl))
-                Box(
-                    Modifier
-                        .padding(horizontal = gutter)
-                        .fillMaxWidth()
-                        .height(2.dp)
-                        .background(colors.hairlineStrong)
-                )
             }
 
             when {
@@ -202,79 +212,75 @@ fun HomeScreen(
                 }
 
                 else -> {
-                    val sorted = uiState.doses.sortedBy { it.sortKey }
-                    val nextKey = uiState.nextDose?.let { "${it.medication.id}_${it.slot}" }
-                    items(
-                        items = sorted,
-                        key = { dose -> "${dose.medication.id}_${dose.slot}" },
-                    ) { dose ->
-                        HavnSwipeToLogRow(
-                            isTaken = dose.isTaken,
-                            isSkipped = dose.isSkipped,
-                            onTake = { viewModel.setStatus(dose, DoseStatus.TAKEN) },
-                            onSkip = { viewModel.setStatus(dose, DoseStatus.SKIPPED) },
-                            onUndo = { viewModel.setStatus(dose, DoseStatus.PENDING) },
-                        ) {
-                            SwissDoseRow(
-                                dose = dose,
-                                isNext = uiState.isTodaySelected && "${dose.medication.id}_${dose.slot}" == nextKey,
-                                onToggle = { viewModel.toggleDose(dose) },
-                                onOpenDetail = { detailDose = dose },
+                    val nextKey = uiState.nextDose
+                        ?.takeIf { uiState.isTodaySelected }
+                        ?.let { "${it.medication.id}_${it.slot}" }
+                    val groups = uiState.doses.sortedBy { it.sortKey }.groupBy { it.period }
+                    groups.entries.forEachIndexed { index, (period, doses) ->
+                        item(key = "period-${period.name}") {
+                            val reveal = rememberRevealProgress(delayMs = HavnMotion.staggerDelay(index + 1, step = 60))
+                            PeriodGroup(
+                                period = period,
+                                doses = doses,
+                                nextKey = nextKey,
+                                onToggle = { viewModel.toggleDose(it) },
+                                onSetStatus = { dose, status -> viewModel.setStatus(dose, status) },
+                                onOpenDetail = { detailDose = it },
+                                modifier = Modifier
+                                    .padding(horizontal = gutter)
+                                    .havnReveal(reveal),
                             )
                         }
                     }
                     item(key = "hint") {
                         Text(
-                            text = "TAP A ROW FOR DETAILS · SWIPE TO SKIP",
-                            style = HavnType.Eyebrow,
-                            color = colors.textSecondary,
-                            modifier = Modifier.padding(horizontal = gutter, vertical = HavnTheme.spacing.md),
+                            text = "Tap a dose for details. Swipe to skip.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = OnPhotoDim,
+                            modifier = Modifier.padding(horizontal = gutter + 4.dp, vertical = HavnTheme.spacing.md),
                         )
                     }
 
                     if (uiState.asNeededMeds.isNotEmpty()) {
-                        item(key = "as-needed-header") {
-                            Spacer(Modifier.height(HavnTheme.spacing.section))
-                            Text(
-                                text = "AS NEEDED",
-                                style = HavnType.Eyebrow,
-                                color = HavnTheme.colors.textSecondary,
-                                modifier = Modifier.padding(horizontal = gutter).padding(bottom = HavnTheme.spacing.sm),
-                            )
-                        }
-                        
-                        items(
-                            items = uiState.asNeededMeds,
-                            key = { med -> "as-needed-${med.id}" }
-                        ) { med ->
-                            Column {
-                                Row(
-                                    modifier = Modifier
+                        item(key = "as-needed") {
+                            Column(Modifier.padding(horizontal = gutter).padding(top = HavnTheme.spacing.xl)) {
+                                GroupHeader(title = "As needed", count = null)
+                                Column(
+                                    Modifier
                                         .fillMaxWidth()
-                                        .height(56.dp)
-                                        .padding(horizontal = gutter),
-                                    verticalAlignment = Alignment.CenterVertically,
+                                        .clip(GroupShape)
+                                        .background(groupColor())
                                 ) {
-                                    Text("ANY", style = HavnType.Clock, color = colors.textSecondary, modifier = Modifier.width(52.dp))
-                                    Spacer(Modifier.width(HavnTheme.spacing.md))
-                                    Text(
-                                        text = med.name + if (med.dosage.isNotBlank()) "  " + med.dosage else "",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = colors.textPrimary,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        modifier = Modifier.weight(1f),
-                                    )
-                                    Text(
-                                        text = "LOG DOSE",
-                                        style = HavnType.Eyebrow,
-                                        color = colors.textPrimary,
-                                        modifier = Modifier
-                                            .havnPress(onClickLabel = "Log ${med.name}") { viewModel.logAsNeeded(med) }
-                                            .padding(vertical = HavnTheme.spacing.md),
-                                    )
+                                    uiState.asNeededMeds.forEachIndexed { i, med ->
+                                        if (i > 0) RowDivider()
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .heightIn(min = 64.dp)
+                                                .padding(start = 14.dp, end = 14.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
+                                            MedTile(med.iconType)
+                                            Spacer(Modifier.width(HavnTheme.spacing.md))
+                                            Column(Modifier.weight(1f)) {
+                                                Text(med.name, style = MaterialTheme.typography.titleMedium, color = colors.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                                if (med.dosage.isNotBlank()) {
+                                                    Text(med.dosage, style = MaterialTheme.typography.bodySmall, color = colors.textSecondary, maxLines = 1)
+                                                }
+                                            }
+                                            Text(
+                                                text = "Log dose",
+                                                style = MaterialTheme.typography.labelLarge,
+                                                color = colors.textPrimary,
+                                                modifier = Modifier
+                                                    .clip(CircleShape)
+                                                    .havnPress(onClickLabel = "Log ${med.name}") { viewModel.logAsNeeded(med) }
+                                                    .background(colors.surfaceSunken)
+                                                    .padding(horizontal = 14.dp, vertical = 8.dp),
+                                            )
+                                        }
+                                    }
                                 }
-                                Box(Modifier.fillMaxWidth().height(1.dp).background(colors.hairline))
                             }
                         }
                     }
@@ -322,44 +328,146 @@ fun HomeScreen(
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Mono top line: "TODAY" and the date, the way a timetable is headed. */
+/** Large title, the date above it, the profile avatar at the right. */
 @Composable
-private fun SwissTopLine(
+private fun TodayTitle(
     date: LocalDate,
     isToday: Boolean,
+    user: User?,
     onReturnToToday: () -> Unit,
     onOpenProfiles: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = HavnTheme.colors
-    Row(
+    Column(
         modifier = modifier
             .fillMaxWidth()
             .statusBarsPadding()
-            .padding(top = HavnTheme.spacing.lg),
-        verticalAlignment = Alignment.CenterVertically,
+            .padding(top = HavnTheme.spacing.lg, bottom = HavnTheme.spacing.lg),
     ) {
         Text(
-            text = if (isToday) "TODAY" else "BACK TO TODAY",
-            style = HavnType.Eyebrow,
-            color = colors.textPrimary,
-            modifier = Modifier
-                .weight(1f)
-                .havnPress(enabled = !isToday, onClick = onReturnToToday),
+            text = date.format(DateTimeFormatter.ofPattern("EEEE, d MMMM")),
+            style = MaterialTheme.typography.bodyMedium,
+            color = OnPhotoDim,
         )
-        Text(
-            text = date.format(DateTimeFormatter.ofPattern("EEE dd.MM")).uppercase(),
-            style = HavnType.Eyebrow,
-            color = colors.textPrimary,
-            modifier = Modifier.havnPress(onClickLabel = "Profiles", onClick = onOpenProfiles),
-        )
+        Spacer(Modifier.height(HavnTheme.spacing.xs))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = if (isToday) "Today" else date.format(DateTimeFormatter.ofPattern("EEEE")),
+                style = MaterialTheme.typography.headlineLarge,
+                color = OnPhoto,
+                modifier = Modifier.weight(1f),
+            )
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .havnPress(onClickLabel = "Profiles", onClick = onOpenProfiles)
+                    .background(OnPhoto.copy(alpha = 0.16f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = user?.name?.firstOrNull()?.uppercase() ?: "",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = OnPhoto,
+                )
+            }
+        }
+        if (!isToday) {
+            Text(
+                text = "Back to today",
+                style = MaterialTheme.typography.labelLarge,
+                color = colors.signal,
+                modifier = Modifier
+                    .padding(top = HavnTheme.spacing.sm)
+                    .havnPress(onClick = onReturnToToday),
+            )
+        }
     }
 }
 
-/** The one giant element on Today: how long until the next dose. */
+
+private val OnPhoto = Color(0xFFF2F1EC)
+private val OnPhotoDim = Color(0xFFF2F1EC).copy(alpha = 0.72f)
+
+/** Groups float on the backdrop: paper in light mode, night paper in dark. */
 @Composable
-private fun NextDoseHero(state: HomeUiState, modifier: Modifier = Modifier) {
+private fun groupColor(): Color =
+    HavnTheme.colors.surfaceRaised.copy(alpha = if (HavnTheme.colors.isDark) 0.9f else 0.96f)
+
+@Composable
+private fun GroupHeader(title: String, count: String?) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 4.dp)
+            .padding(bottom = HavnTheme.spacing.sm),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.labelLarge,
+            color = OnPhotoDim,
+            modifier = Modifier.weight(1f),
+        )
+        if (count != null) Text(text = count, style = HavnType.Clock, color = OnPhotoDim)
+    }
+}
+
+@Composable
+private fun RowDivider() {
+    Box(
+        Modifier
+            .padding(start = 64.dp)
+            .fillMaxWidth()
+            .height(1.dp)
+            .background(HavnTheme.colors.hairline)
+    )
+}
+
+@Composable
+private fun MedTile(type: com.havn.app.domain.model.MedIconType) {
+    Box(
+        Modifier
+            .size(36.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(HavnTheme.colors.surfaceSunken),
+        contentAlignment = Alignment.Center,
+    ) {
+        MedIcon(type = type, size = 18.dp, tint = HavnTheme.colors.textSecondary)
+    }
+}
+
+/** Small pill tag beside a name: "Next" in orange, "Skipped" in grey. */
+@Composable
+private fun StatusTag(text: String, background: Color, content: Color) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+        color = content,
+        modifier = Modifier
+            .padding(start = 8.dp)
+            .clip(CircleShape)
+            .background(background)
+            .padding(horizontal = 7.dp, vertical = 3.dp),
+    )
+}
+
+private val CardShape = RoundedCornerShape(20.dp)
+private val GroupShape = RoundedCornerShape(16.dp)
+
+/**
+ * The one dark card on Today: how long until the next dose, what it is, a
+ * "Take now" for it, and the day's progress as one segment per dose.
+ */
+@Composable
+private fun NextDoseCard(
+    state: HomeUiState,
+    onTakeNext: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val colors = HavnTheme.colors
+    val haptics = rememberHavnHaptics()
     val now by produceState(LocalTime.now()) {
         while (true) {
             delay(30_000)
@@ -370,141 +478,349 @@ private fun NextDoseHero(state: HomeUiState, modifier: Modifier = Modifier) {
     val minutes = next?.time?.let { java.time.Duration.between(now, it).toMinutes() }
 
     val (label, big, unit) = when {
-        state.allDone -> Triple("${state.taken} OF ${state.total} TAKEN", "Done.", "")
-        next == null -> Triple("${state.taken} OF ${state.total} TAKEN", "${state.remaining}", " left")
+        state.allDone -> Triple("ALL DONE TODAY", "Done.", "")
+        next == null -> Triple("LEFT ON THIS DAY", "${state.remaining}", " doses")
         minutes == null -> Triple("NEXT DOSE", "Any", " time")
         minutes < 0 -> Triple("DUE SINCE", next.slot, "")
         minutes < 60 -> Triple("NEXT DOSE IN", "$minutes", " min")
         else -> Triple("NEXT DOSE AT", next.slot, "")
     }
 
-    Column(modifier = modifier.padding(top = HavnTheme.spacing.xxxl)) {
-        Text(label, style = HavnType.Eyebrow, color = colors.textSecondary)
-        Spacer(Modifier.height(HavnTheme.spacing.md))
+    val onCard = OnPhoto
+    val onCardDim = OnPhotoDim
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = 72.dp, start = 4.dp, end = 4.dp, bottom = 4.dp),
+    ) {
+        Text(label, style = HavnType.Eyebrow, color = onCardDim)
+        Spacer(Modifier.height(HavnTheme.spacing.sm))
         Row(verticalAlignment = Alignment.Bottom) {
-            Text(
-                text = big,
-                style = HavnType.Poster.copy(fontSize = 96.sp, lineHeight = 84.sp),
-                color = colors.textPrimary,
-                maxLines = 1,
-            )
+            AnimatedContent(
+                targetState = big,
+                transitionSpec = {
+                    (fadeIn(HavnMotion.standard()) + slideInVertically(HavnMotion.standard()) { it / 3 })
+                        .togetherWith(fadeOut(HavnMotion.quick()) + slideOutVertically(HavnMotion.quick()) { -it / 3 })
+                },
+                label = "next-dose-number",
+            ) { value ->
+                Text(
+                    text = value,
+                    style = HavnType.Poster.copy(fontSize = 96.sp, lineHeight = 86.sp),
+                    color = onCard,
+                    maxLines = 1,
+                )
+            }
             if (unit.isNotEmpty()) {
                 Text(
                     text = unit,
-                    style = MaterialTheme.typography.headlineLarge,
-                    color = colors.textPrimary,
-                    modifier = Modifier.padding(bottom = 10.dp),
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = onCard,
+                    modifier = Modifier.padding(bottom = 8.dp),
+                )
+            }
+        }
+        Spacer(Modifier.height(HavnTheme.spacing.md))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = next?.let { listOf(it.medication.name, it.medication.dosage).filter { s -> s.isNotBlank() }.joinToString(" · ") }
+                    ?: "${state.taken} of ${state.total} taken",
+                style = MaterialTheme.typography.bodyLarge,
+                color = onCard,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f),
+            )
+            if (next != null) {
+                Spacer(Modifier.width(HavnTheme.spacing.md))
+                Text(
+                    text = "Take now",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = colors.onSignal,
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .havnPress(onClickLabel = "Take ${next.medication.name} now") {
+                            haptics.latch()
+                            onTakeNext()
+                        }
+                        .background(colors.signal)
+                        .padding(horizontal = 16.dp, vertical = 9.dp),
+                )
+            }
+        }
+        Spacer(Modifier.height(HavnTheme.spacing.lg))
+        DoseSegments(
+            total = state.total,
+            taken = state.taken,
+            fill = onCard,
+            track = onCard.copy(alpha = 0.18f),
+        )
+        Spacer(Modifier.height(HavnTheme.spacing.sm))
+        Row {
+            Text(
+                "${state.taken} of ${state.total} taken",
+                style = MaterialTheme.typography.bodySmall,
+                color = onCardDim,
+                modifier = Modifier.weight(1f),
+            )
+            Text(
+                "${state.remaining} left",
+                style = MaterialTheme.typography.bodySmall,
+                color = onCardDim,
+            )
+        }
+    }
+}
+
+/** One segment per dose; taken segments fill left to right, one after another. */
+@Composable
+private fun DoseSegments(total: Int, taken: Int, fill: Color, track: Color) {
+    val reduceMotion = rememberReduceMotion()
+    val count = total.coerceIn(1, 12)
+    val filled = if (total <= 12) taken else (taken * 12f / total).toInt()
+    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        repeat(count) { i ->
+            val target = if (i < filled) 1f else 0f
+            val progress by animateFloatAsState(
+                targetValue = target,
+                animationSpec = if (reduceMotion) HavnMotion.none() else tween(
+                    durationMillis = HavnMotion.Considered,
+                    delayMillis = HavnMotion.staggerDelay(i, step = 60),
+                    easing = HavnMotion.Decisive,
+                ),
+                label = "segment-$i",
+            )
+            Box(
+                Modifier
+                    .weight(1f)
+                    .height(4.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(track)
+            ) {
+                Box(
+                    Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth(progress)
+                        .background(fill)
                 )
             }
         }
     }
 }
 
-/**
- * One dose as a timetable row: mono time, name and dose, a square check.
- * The next dose is the one orange slab on the screen.
- */
+/** A period heading ("Morning  2/2") and its doses in one rounded group. */
 @Composable
-private fun SwissDoseRow(
+private fun PeriodGroup(
+    period: DayPeriod,
+    doses: List<TodayDose>,
+    nextKey: String?,
+    onToggle: (TodayDose) -> Unit,
+    onSetStatus: (TodayDose, DoseStatus) -> Unit,
+    onOpenDetail: (TodayDose) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = HavnTheme.colors
+    Column(modifier.padding(top = HavnTheme.spacing.xl)) {
+        GroupHeader(title = period.label, count = "${doses.count { it.isTaken }}/${doses.size}")
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .clip(GroupShape)
+                .background(groupColor())
+        ) {
+            doses.forEachIndexed { i, dose ->
+                val key = "${dose.medication.id}_${dose.slot}"
+                if (i > 0) RowDivider()
+                androidx.compose.runtime.key(key) {
+                    HavnSwipeToLogRow(
+                        isTaken = dose.isTaken,
+                        isSkipped = dose.isSkipped,
+                        onTake = { onSetStatus(dose, DoseStatus.TAKEN) },
+                        onSkip = { onSetStatus(dose, DoseStatus.SKIPPED) },
+                        onUndo = { onSetStatus(dose, DoseStatus.PENDING) },
+                    ) {
+                        TodayDoseRow(
+                            dose = dose,
+                            isNext = key == nextKey,
+                            onToggle = { onToggle(dose) },
+                            onOpenDetail = { onOpenDetail(dose) },
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** Icon tile, name and dose, mono time, round check. The next dose is tinted. */
+@Composable
+private fun TodayDoseRow(
     dose: TodayDose,
     isNext: Boolean,
     onToggle: () -> Unit,
     onOpenDetail: () -> Unit,
 ) {
     val colors = HavnTheme.colors
-    val background = if (isNext) colors.signal else colors.canvas
-    val ink = when {
-        isNext -> colors.onSignal
-        dose.isPending -> colors.textPrimary
-        else -> colors.textTertiary
-    }
-    val secondary = if (isNext) colors.onSignal else if (dose.isPending) colors.textSecondary else colors.textTertiary
+    val background by animateColorAsState(
+        if (isNext) colors.signalSoft else groupColor(),
+        HavnMotion.standard(),
+        label = "row-bg",
+    )
+    val nameColor by animateColorAsState(
+        if (dose.isPending) colors.textPrimary else colors.textTertiary,
+        HavnMotion.standard(),
+        label = "row-name",
+    )
+    val detail = listOfNotNull(
+        dose.medication.dosage.takeIf { it.isNotBlank() },
+    ).joinToString(" · ")
 
-    Column(Modifier.background(background)) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-                .havnPress(scaleDown = 1f, onClickLabel = "Open ${dose.medication.name}", onClick = onOpenDetail)
-                .padding(horizontal = HavnTheme.spacing.gutter),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = dose.slot.ifEmpty { "ANY" },
-                style = HavnType.Clock,
-                color = ink,
-                modifier = Modifier.width(52.dp),
-            )
-            Spacer(Modifier.width(HavnTheme.spacing.md))
-            Row(Modifier.weight(1f), verticalAlignment = Alignment.Bottom) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(background)
+            .heightIn(min = 64.dp)
+            .havnPress(scaleDown = 0.99f, onClickLabel = "Open ${dose.medication.name}", onClick = onOpenDetail)
+            .padding(start = 14.dp, end = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        MedTile(dose.medication.iconType)
+        Spacer(Modifier.width(HavnTheme.spacing.md))
+        Column(Modifier.weight(1f)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = dose.medication.name,
                     style = MaterialTheme.typography.titleMedium,
-                    color = ink,
+                    color = nameColor,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f, fill = false),
                 )
-                if (dose.medication.dosage.isNotBlank()) {
-                    Text(
-                        text = "  " + dose.medication.dosage + if (dose.isSkipped) " · skipped" else "",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = secondary,
-                        maxLines = 1,
-                    )
+                when {
+                    isNext -> StatusTag("Next", colors.signal, colors.onSignal)
+                    dose.isSkipped -> StatusTag("Skipped", colors.surfaceSunken, colors.textSecondary)
                 }
             }
-            Spacer(Modifier.width(HavnTheme.spacing.md))
-            SwissCheck(
-                checked = dose.isTaken,
-                color = ink,
-                fill = if (isNext) colors.onSignal else colors.textPrimary,
-                tick = if (isNext) colors.signal else colors.canvas,
-                onToggle = onToggle,
-                contentDescription = "${dose.medication.name}, ${dose.displayTime()}",
-            )
+            if (detail.isNotEmpty()) {
+                Text(
+                    text = detail,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (dose.isPending) colors.textSecondary else colors.textTertiary,
+                    maxLines = 1,
+                )
+            }
         }
-        if (!isNext) {
-            Box(Modifier.fillMaxWidth().height(1.dp).background(colors.hairline))
-        }
+        Spacer(Modifier.width(HavnTheme.spacing.sm))
+        Text(
+            text = dose.slot.ifEmpty { "Any" },
+            style = HavnType.Clock,
+            color = if (isNext) colors.signal else colors.textSecondary,
+        )
+        RoundCheck(
+            checked = dose.isTaken,
+            isNext = isNext,
+            onToggle = onToggle,
+            contentDescription = "${dose.medication.name}, ${dose.displayTime()}",
+        )
     }
 }
 
-/** 20 dp square, 1.5 dp stroke; taken fills with ink and draws a paper tick. */
+/**
+ * 26 dp round check. Tapping it dips the circle and lets it settle (no
+ * overshoot), the fill and tick fade in on the house curve, and the next
+ * dose's empty check breathes a faint orange ring until it is taken.
+ */
 @Composable
-private fun SwissCheck(
+private fun RoundCheck(
     checked: Boolean,
-    color: Color,
-    fill: Color,
-    tick: Color,
+    isNext: Boolean,
     onToggle: () -> Unit,
     contentDescription: String,
 ) {
+    val colors = HavnTheme.colors
     val haptics = rememberHavnHaptics()
+    val reduceMotion = rememberReduceMotion()
+    val scope = rememberCoroutineScope()
+    val press = remember { Animatable(1f) }
+
+    val fill by animateColorAsState(
+        if (checked) colors.accent else Color.Transparent, HavnMotion.quick(), label = "check-fill",
+    )
+    val ring by animateColorAsState(
+        when {
+            checked -> colors.accent
+            isNext -> colors.signal
+            else -> colors.textTertiary
+        },
+        HavnMotion.quick(),
+        label = "check-ring",
+    )
+    val tick by animateFloatAsState(
+        if (checked) 1f else 0f,
+        if (reduceMotion) HavnMotion.none() else HavnMotion.standard(),
+        label = "check-tick",
+    )
+
     Box(
         modifier = Modifier
             .size(48.dp)
-            .havnPress(onClickLabel = contentDescription, onClick = {
+            .havnPress(scaleDown = 1f, onClickLabel = contentDescription) {
                 if (checked) haptics.release() else haptics.latch()
+                if (!reduceMotion) {
+                    scope.launch {
+                        press.snapTo(0.82f)
+                        press.animateTo(1f, HavnMotion.settle())
+                    }
+                }
                 onToggle()
-            }),
+            },
         contentAlignment = Alignment.Center,
     ) {
+        if (isNext && !checked && !reduceMotion) {
+            val pulse by rememberInfiniteTransition(label = "next-pulse").animateFloat(
+                initialValue = 0f,
+                targetValue = 1f,
+                animationSpec = infiniteRepeatable(tween(2400, easing = HavnMotion.Decisive), RepeatMode.Restart),
+                label = "next-pulse-value",
+            )
+            val ringColor = colors.signal
+            Box(
+                Modifier
+                    .size(26.dp)
+                    .drawBehind {
+                        drawCircle(
+                            color = ringColor.copy(alpha = (1f - pulse) * 0.5f),
+                            radius = size.minDimension / 2f * (1f + pulse * 0.6f),
+                            style = Stroke(width = 2.dp.toPx()),
+                        )
+                    }
+            )
+        }
         Box(
             modifier = Modifier
-                .size(20.dp)
-                .background(if (checked) fill else Color.Transparent)
-                .border(1.5.dp, if (checked) fill else color, RectangleShape),
+                .size(26.dp)
+                .graphicsLayer {
+                    scaleX = press.value
+                    scaleY = press.value
+                }
+                .clip(CircleShape)
+                .background(fill)
+                .border(2.dp, ring, CircleShape),
             contentAlignment = Alignment.Center,
         ) {
-            if (checked) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_check),
-                    contentDescription = null,
-                    tint = tick,
-                    modifier = Modifier.size(14.dp),
-                )
-            }
+            Icon(
+                painter = painterResource(R.drawable.ic_check),
+                contentDescription = null,
+                tint = colors.onAccent,
+                modifier = Modifier
+                    .size(15.dp)
+                    .graphicsLayer {
+                        alpha = tick
+                        scaleX = 0.6f + 0.4f * tick
+                        scaleY = 0.6f + 0.4f * tick
+                    },
+            )
         }
     }
 }
@@ -638,7 +954,7 @@ private fun ProfileAvatar(
     Box(
         modifier = Modifier
             .size(size)
-            .clip(RectangleShape)
+            .clip(CircleShape)
             .background(tint.copy(alpha = if (colors.isDark) 0.28f else 0.16f))
             .then(
                 if (onClick != null) {
@@ -799,14 +1115,14 @@ private fun DayMetric(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(2.dp)
-                .clip(RectangleShape)
+                .clip(RoundedCornerShape(12.dp))
                 .background(colors.hairline)
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth(progress)
                     .height(2.dp)
-                    .clip(RectangleShape)
+                    .clip(RoundedCornerShape(12.dp))
                     .background(colors.accent)
             )
         }
@@ -836,40 +1152,6 @@ private fun DayMetric(
  * period labels, its lids show what is waiting, and the part of the day that
  * is now stands open. Anything more would be chrome around the product.
  */
-@Composable
-private fun OrganizerHero(
-    doses: List<TodayDose>,
-    onOpen: () -> Unit,
-) {
-    // Open the compartment that needs the user: the current part of the day
-    // if anything is waiting there, else the earliest one still holding an
-    // overdue dose, else the next one coming up. An open, empty lid while the
-    // morning's pills sit untaken would show the wrong thing.
-    val currentPeriod = remember(doses) {
-        val now = DayPeriod.current()
-        val pending = doses.filter { it.isPending }.map { it.period }.toSet()
-        when {
-            now in pending -> now
-            pending.any { it < now } -> pending.filter { it < now }.min()
-            pending.isNotEmpty() -> pending.min()
-            else -> now
-        }
-    }
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(1.3f)
-            .havnPress(scaleDown = 0.995f, onClickLabel = "Open organizer", onClick = onOpen),
-    ) {
-        HavnOrganizerView(
-            doses = doses,
-            selectedPeriod = currentPeriod,
-            onSlotTapped = { onOpen() },
-            modifier = Modifier.fillMaxSize(),
-        )
-    }
-}
-
 @Composable
 private fun SectionRule(
     eyebrow: String,
@@ -988,11 +1270,11 @@ private fun DoseRow(
         Box(
             modifier = Modifier
                 .size(42.dp)
-                .clip(RectangleShape)
+                .clip(RoundedCornerShape(12.dp))
                 // Paper square with a hairline: the medication's colour lives in
                 // the glyph alone, so a list of five meds stays calm.
                 .background(colors.surface)
-                .border(1.dp, colors.hairlineStrong, RectangleShape),
+                .border(1.dp, colors.hairlineStrong, RoundedCornerShape(12.dp)),
             contentAlignment = Alignment.Center,
         ) {
             MedIcon(
@@ -1093,7 +1375,7 @@ private fun ProfileSheet(
         contentColor = colors.textPrimary,
         scrimColor = colors.scrim,
         dragHandle = { HavnDragHandle() },
-        shape = RectangleShape,
+        shape = RoundedCornerShape(12.dp),
     ) {
         Column(
             modifier = Modifier
@@ -1113,7 +1395,7 @@ private fun ProfileSheet(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RectangleShape)
+                        .clip(RoundedCornerShape(12.dp))
                         .havnPress(scaleDown = 0.99f) { onSelect(profile.id) }
                         .padding(vertical = HavnTheme.spacing.md),
                     verticalAlignment = Alignment.CenterVertically,
@@ -1171,7 +1453,7 @@ private fun DoseDetailSheet(
         contentColor = colors.textPrimary,
         scrimColor = colors.scrim,
         dragHandle = { HavnDragHandle() },
-        shape = RectangleShape,
+        shape = RoundedCornerShape(12.dp),
     ) {
         Column(
             modifier = Modifier
@@ -1183,7 +1465,7 @@ private fun DoseDetailSheet(
                 Box(
                     modifier = Modifier
                         .size(52.dp)
-                        .clip(RectangleShape)
+                        .clip(RoundedCornerShape(12.dp))
                         .background(accent.copy(alpha = if (colors.isDark) 0.2f else 0.12f)),
                     contentAlignment = Alignment.Center,
                 ) {
@@ -1270,7 +1552,7 @@ fun HavnDragHandle() {
             modifier = Modifier
                 .width(32.dp)
                 .height(4.dp)
-                .clip(RectangleShape)
+                .clip(RoundedCornerShape(12.dp))
                 .background(HavnTheme.colors.hairlineStrong)
         )
     }

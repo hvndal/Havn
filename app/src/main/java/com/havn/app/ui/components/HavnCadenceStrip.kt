@@ -1,5 +1,9 @@
 package com.havn.app.ui.components
 
+import androidx.compose.foundation.shape.CircleShape
+
+import androidx.compose.foundation.shape.RoundedCornerShape
+
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -88,9 +92,9 @@ fun HavnCadenceStrip(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RectangleShape)
+            .clip(RoundedCornerShape(6.dp))
             .background(colors.surface)
-            .border(1.dp, colors.hairline, RectangleShape)
+            .border(1.dp, colors.hairline, RoundedCornerShape(6.dp))
             .padding(vertical = HavnTheme.spacing.sm, horizontal = HavnTheme.spacing.xs),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -162,7 +166,7 @@ private fun CadenceDayCell(
         }
     }
 
-    val cellShape = RectangleShape
+    val cellShape = RoundedCornerShape(6.dp)
 
     Column(
         modifier = modifier
@@ -218,7 +222,7 @@ private fun CadenceDayCell(
             Box(
                 modifier = Modifier
                     .size(2.5.dp)
-                    .clip(RectangleShape)
+                    .clip(RoundedCornerShape(6.dp))
                     .background(colors.accent),
             )
         } else {
@@ -245,7 +249,7 @@ private fun CadenceIndicator(day: CadenceDay) {
                 Box(
                     modifier = Modifier
                         .size(8.dp)
-                        .clip(RectangleShape)
+                        .clip(RoundedCornerShape(6.dp))
                         .background(colors.accent),
                 )
             }
@@ -274,7 +278,7 @@ private fun CadenceIndicator(day: CadenceDay) {
                 Box(
                     modifier = Modifier
                         .size(6.dp)
-                        .clip(RectangleShape)
+                        .clip(RoundedCornerShape(6.dp))
                         .background(colors.warning.copy(alpha = 0.75f)),
                 )
             }
@@ -295,7 +299,7 @@ private fun CadenceIndicator(day: CadenceDay) {
                 Box(
                     modifier = Modifier
                         .size(4.dp)
-                        .clip(RectangleShape)
+                        .clip(RoundedCornerShape(6.dp))
                         .background(colors.hairline),
                 )
             }

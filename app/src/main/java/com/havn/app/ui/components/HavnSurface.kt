@@ -1,5 +1,9 @@
 package com.havn.app.ui.components
 
+import androidx.compose.foundation.shape.CircleShape
+
+import androidx.compose.foundation.shape.RoundedCornerShape
+
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -38,7 +42,7 @@ import com.havn.app.ui.theme.HavnTheme
 fun HavnSurface(
     modifier: Modifier = Modifier,
     color: Color = HavnTheme.colors.surface,
-    shape: Shape = RectangleShape,
+    shape: Shape = RoundedCornerShape(20.dp),
     elevation: Dp = HavnTheme.elevation.rest,
     border: BorderStroke? = BorderStroke(1.dp, HavnTheme.colors.hairline),
     contentPadding: Dp = 0.dp,
@@ -65,7 +69,7 @@ fun HavnInteractiveSurface(
     modifier: Modifier = Modifier,
     color: Color = HavnTheme.colors.surface,
     pressedColor: Color = HavnTheme.colors.surfacePressed,
-    shape: Shape = RectangleShape,
+    shape: Shape = RoundedCornerShape(20.dp),
     elevation: Dp = HavnTheme.elevation.rest,
     border: BorderStroke? = BorderStroke(1.dp, HavnTheme.colors.hairline),
     contentPadding: Dp = 0.dp,
@@ -120,7 +124,7 @@ fun HavnInteractiveSurface(
 @Composable
 fun HavnWell(
     modifier: Modifier = Modifier,
-    shape: Shape = RectangleShape,
+    shape: Shape = RoundedCornerShape(20.dp),
     border: BorderStroke? = null,
     contentPadding: Dp = 0.dp,
     content: @Composable ColumnScope.() -> Unit,
