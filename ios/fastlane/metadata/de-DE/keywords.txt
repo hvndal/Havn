@@ -1,0 +1,1 @@
+Pille,Medizin,Arznei,Dosis,Einnahme,Vitamin,Wecker,Rezept,Gesundheit,Tagebuch,Nahrungsergänzung

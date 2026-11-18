@@ -1,0 +1,24 @@
+Hävn is a calm, private medication reminder for iPhone.
+
+YOUR DAY AS A RING
+Each dose today is one piece of the Day Ring. Log it and it fills in with your medication’s color. By tonight, the ring closes.
+
+BUILT FOR REAL ROUTINES
+• Doses grouped by morning, afternoon, evening and night
+• Log a whole group at once with Log All as Taken
+• Reminders you can answer from the notification: Taken, Skipped or Remind Me in 10 Minutes
+• An optional alarm that rings even on Silent, for doses that can’t wait
+• Pills that look like yours: pick the shape and colors
+• Supply tracking with a refill reminder
+• History by week and month, with a calm summary
+• Several people on one iPhone, each with their own medications
+• Widgets for the Home Screen and Lock Screen
+• Import your medication list from Apple Health
+
+PRIVATE BY DESIGN
+No account, no ads, no analytics and no tracking. Hävn has no servers: your medications stay on your iPhone. Export a backup file whenever you like.
+
+FREE
+Hävn is free, with no in-app purchases.
+
+Hävn is a reminder tool and doesn’t give medical advice. Always follow the instructions from your doctor or pharmacist, and check with them before changing how you take a medication.

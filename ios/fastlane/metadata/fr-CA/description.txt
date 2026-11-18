@@ -1,0 +1,24 @@
+Hävn est un rappel de médicaments calme et privé pour iPhone.
+
+VOTRE JOURNÉE EN ANNEAU
+Chaque prise du jour est un segment de l’anneau. Notez-la et elle se remplit de la couleur de votre médicament. Le soir venu, l’anneau se referme.
+
+PENSÉ POUR LA VRAIE VIE
+• Prises regroupées par matin, après-midi, soir et nuit
+• Tout noter d’un coup avec « Tout marquer comme pris »
+• Rappels auxquels répondre depuis la notification : Pris, Ignoré ou Me rappeler dans 10 minutes
+• Une alarme facultative qui sonne même en mode silencieux, pour les prises qui ne peuvent pas attendre
+• Des comprimés qui ressemblent aux vôtres : choisissez la forme et les couleurs
+• Suivi du stock avec rappel de renouvellement
+• Historique par semaine et par mois, avec un résumé serein
+• Plusieurs personnes sur un même iPhone, chacune avec ses médicaments
+• Widgets pour l’écran d’accueil et l’écran verrouillé
+• Importez votre liste de médicaments depuis l’app Santé
+
+PRIVÉ PAR CONCEPTION
+Sans compte, sans publicité, sans statistiques ni pistage. Hävn n’a pas de serveur : vos médicaments restent sur votre iPhone. Exportez une sauvegarde quand vous le souhaitez.
+
+GRATUIT
+Hävn est gratuit, sans achat intégré.
+
+Hävn est un outil de rappel et ne donne pas d’avis médical. Suivez toujours les instructions de votre médecin ou de votre pharmacien, et demandez-leur conseil avant de modifier la façon dont vous prenez un médicament.

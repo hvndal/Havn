@@ -1,0 +1,1 @@
+pastilla,medicina,recordatorio,dosis,toma,vitamina,suplemento,alarma,tratamiento,receta,salud

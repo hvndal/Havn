@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Hävn privacy manifest. Required by Apple since 1 May 2024 for apps that use "required reason" APIs.
+  Hävn does not track, and collects nothing: every piece of data stays on the device.
+  Before each release, open Xcode › Product › Archive › Generate Privacy Report and check that it
+  lists only the APIs below. Add an entry here for any other required-reason API the app starts using
+  (for example file timestamps or disk space), with the reason code from Apple's list.
+-->
+<plist version="1.0">
+<dict>
+	<key>NSPrivacyTracking</key>
+	<false/>
+	<key>NSPrivacyTrackingDomains</key>
+	<array/>
+	<key>NSPrivacyCollectedDataTypes</key>
+	<array/>
+	<key>NSPrivacyAccessedAPITypes</key>
+	<array>
+		<dict>
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<!-- CA92.1: settings read and written by the app itself -->
+				<string>CA92.1</string>
+				<!-- 1C8F.1: the App Group shared with Hävn's own widgets -->
+				<string>1C8F.1</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>

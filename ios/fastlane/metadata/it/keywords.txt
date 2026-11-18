@@ -1,0 +1,1 @@
+medicina,medicinale,compressa,dose,vitamina,integratore,sveglia,terapia,ricetta,salute,orario

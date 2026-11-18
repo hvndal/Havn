@@ -1,0 +1,294 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "CFBundleDisplayName": {
+      "comment": "App name under the icon",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hävn"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Hävn"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Hävn"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Hävn"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Hävn"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Hävn"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Hävn"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Hävn"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Hävn"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Hävn"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Hävn"
+          }
+        }
+      }
+    },
+    "NSHealthShareUsageDescription": {
+      "comment": "Shown when Hävn asks to read medications from Apple Health",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hävn reads your medication list from Health so you don’t have to type it in. It never writes to Health or sends your data anywhere."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Hävn lit votre liste de médicaments dans Santé pour vous éviter de la saisir. Rien n’est écrit dans Santé ni envoyé ailleurs."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Hävn lee tu lista de medicamentos de Salud para que no tengas que escribirla. No escribe nada en Salud ni envía tus datos a ningún sitio."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "O Hävn lê sua lista de remédios do app Saúde para você não precisar digitá-la. Ele não grava nada no Saúde nem envia seus dados para lugar nenhum."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "O Hävn lê a sua lista de medicamentos da app Saúde para não ter de a escrever. Não grava nada na Saúde nem envia os seus dados para lado nenhum."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "お薬のリストを入力しなくて済むよう、Hävnはヘルスケアからリストを読み込みます。ヘルスケアへの書き込みや、データの送信は行いません。"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Hävn liest deine Medikamentenliste aus Health, damit du sie nicht abtippen musst. Es schreibt nichts in Health und sendet deine Daten nirgendwohin."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Hävn legge l’elenco dei farmaci da Salute così non devi digitarlo. Non scrive nulla in Salute e non invia i tuoi dati da nessuna parte."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Hävn leser medisinlisten din fra Helse, så du slipper å skrive den inn. Appen skriver ingenting til Helse og sender ikke dataene dine noe sted."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Hävn läser din medicinlista från Hälsa så att du slipper skriva in den. Appen skriver ingenting till Hälsa och skickar inte dina data någonstans."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "약 목록을 직접 입력하지 않도록 Hävn이 건강 앱에서 목록을 읽어 옵니다. 건강 앱에 기록하거나 데이터를 외부로 보내지 않습니다."
+          }
+        }
+      }
+    },
+    "NSAlarmKitUsageDescription": {
+      "comment": "Shown when Hävn asks to schedule alarms (AlarmKit)",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lets Hävn ring an alarm for the medications you choose, even when your iPhone is on Silent."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Permet à Hävn de faire sonner une alarme pour les médicaments que vous choisissez, même lorsque votre iPhone est en mode silencieux."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Permite que Hävn haga sonar una alarma para los medicamentos que elijas, incluso con el iPhone en silencio."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Permite que o Hävn toque um alarme para os remédios que você escolher, mesmo com o iPhone no silencioso."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Permite que o Hävn toque um alarme para os medicamentos que escolher, mesmo com o iPhone em silêncio."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "選んだお薬について、iPhoneがサイレントモードでもHävnがアラームを鳴らせるようにします。"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Damit Hävn für ausgewählte Medikamente einen Wecker klingeln lassen kann, auch wenn dein iPhone stumm ist."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Permette a Hävn di far suonare una sveglia per i farmaci che scegli, anche quando l’iPhone è in modalità silenziosa."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Lar Hävn ringe en alarm for medisinene du velger, også når iPhonen er i stillemodus."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Låter Hävn ringa ett alarm för de mediciner du väljer, även när din iPhone är i ljudlöst läge."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "선택한 약에 대해 iPhone이 무음 모드여도 Hävn이 알람을 울릴 수 있게 합니다."
+          }
+        }
+      }
+    },
+    "NSFaceIDUsageDescription": {
+      "comment": "Shown if the person turns on the optional Face ID lock",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use Face ID to unlock Hävn."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Utilisez Face ID pour déverrouiller Hävn."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Usa Face ID para desbloquear Hävn."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Use o Face ID para desbloquear o Hävn."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Use o Face ID para desbloquear o Hävn."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Face IDでHävnのロックを解除します。"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Mit Face ID Hävn entsperren."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Usa Face ID per sbloccare Hävn."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Bruk Face ID for å låse opp Hävn."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Använd Face ID för att låsa upp Hävn."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Face ID로 Hävn 잠금을 해제합니다."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

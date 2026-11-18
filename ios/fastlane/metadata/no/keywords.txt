@@ -1,0 +1,1 @@
+medisin,tablett,pille,dose,vitamin,kosttilskudd,alarm,resept,helse,legemiddel,timeplan
