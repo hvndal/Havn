@@ -40,6 +40,16 @@ rep("""  if(!nx) return `<div class="face">${icon(MEDS[0])}<div class="mid"><div
     """  if(!MEDS.length) return `<div class="face"><div class="mid" style="padding-left:8px"><div class="nm">No doses yet</div><div class="dt">Add a medication to get reminders</div></div><button class="pbtn" data-add="1">Add</button></div>`;
   if(!nx){ const f = MEDS[0]; return `<div class="face">${icon(f)}<div class="mid"><div class="nm">Tomorrow, ${f.t}</div><div class="dt">${MEDS.filter(m => m.t === f.t).map(m => m.n).join(', ')}</div></div></div>`; }""")
 
+# ---------- notes: a note field on the dose sheet, and a pencil on rows that have a note
+rep('<div class="sheet" id="dose" role="dialog" aria-label="Dose" style="height:520px">', '<div class="sheet" id="dose" role="dialog" aria-label="Dose" style="height:600px">')
+rep('<span style="background:var(--fill3);border-radius:10px;padding:5px 10px">13:42</span></div></div>\n          </div></div>',
+    '<span style="background:var(--fill3);border-radius:10px;padding:5px 10px">13:42</span></div></div>\n'
+    '            <div class="card" style="margin:10px 16px 0;padding:8px 14px"><textarea id="doseNote" class="notein" rows="2" placeholder="Add a note" aria-label="Note"></textarea></div>\n          </div></div>')
+rep("const W = 386, H = 520, X = 8, Y = 874 - 8 - H;", "const W = 386, H = 600, X = 8, Y = 874 - 8 - H;")
+rep("$('#doseTaken').disabled = !!taken[id]; $('#doseTaken').textContent = taken[id] ? 'Already Taken' : 'Taken';",
+    "$('#doseTaken').disabled = !!taken[id]; $('#doseTaken').textContent = taken[id] ? 'Already Taken' : 'Taken';\n  $('#doseNote').value = doseNote(id); $('#doseNote').dataset.id = id;")
+rep("const subtitle = m => taken[m.id]", "const subtitle = m => subtitle0(m) + (doseNote(m.id) ? ' ' + PENCIL : '');\nconst subtitle0 = m => taken[m.id]")
+
 # ---------- reset goes back to a known Today, whatever scene or sheet is open
 rep("  initState(); history = []; clearTimeout(accTimer);",
     "  closeAllSheets(); hideOnboarding(); setScene('app', true); notifOff = false; stash = null; $('#app').scrollTop = 0;\n"

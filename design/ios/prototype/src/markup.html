@@ -3,6 +3,15 @@
             <div class="steps" id="addSteps"></div>
             <div class="abottom"><button class="btn2 p" id="addNext">Next</button></div></div></div>
           <div class="sheet" id="daySheet" role="dialog" aria-label="Day"></div>
+          <div class="sheet" id="noteSheet" role="dialog" aria-label="Note"><div class="inner">
+            <div class="ahead"><button class="pill-btn glass" id="noteCancel">Cancel</button><span class="ttl">Note</span><button class="pill-btn" id="noteSave" style="background:var(--accent);color:var(--on-accent);font-weight:600">Save</button></div>
+            <div style="padding:8px 20px 0" class="dt" id="noteDate"></div>
+            <div style="padding:10px 16px 0"><div class="card" style="padding:12px 14px"><textarea id="noteText" class="notein" rows="7" placeholder="How are you feeling? Anything your doctor should know?" aria-label="Note"></textarea></div>
+              <div class="lbl3">Quick Add</div><div class="chips" id="noteChips"></div>
+              <p class="foot">Notes stay on this iPhone. They’re in your backups, and in a report only if you include them.</p></div></div></div>
+          <div class="sheet" id="reportSheet" role="dialog" aria-label="Report"><div class="inner">
+            <div class="ahead"><button class="pill-btn glass" id="reportDone">Done</button><span class="ttl">Report</span><button class="gbtn glass" id="reportShare" aria-label="Share"><svg width="17" height="20" viewBox="0 0 14 16"><path d="M7 1v9M3.8 4.2L7 1l3.2 3.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 7H2.5A1.5 1.5 0 0 0 1 8.5v5A1.5 1.5 0 0 0 2.5 15h9a1.5 1.5 0 0 0 1.5-1.5v-5A1.5 1.5 0 0 0 11.5 7H10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button></div>
+            <div id="reportBody"></div></div></div>
           <div class="adim" id="appDim" hidden style="z-index:77"></div>
           <div class="msheet glass" id="appSheet" role="dialog"></div>
           <div id="applock" hidden><div id="lockBody"></div></div>

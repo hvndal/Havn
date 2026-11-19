@@ -4,6 +4,8 @@ let muted = false;
 { const play0 = Snd.play; Snd.play = (...a) => { if(!muted) play0(...a); }; }   // widgets and the Lock Screen act silently
 function quiet(fn){ muted = true; fn(); setTimeout(() => { muted = false; }, 400); }   // long enough to cover the delayed 'taken' chime
 $('#dim').onclick = () => {
+  if($('#noteSheet').classList.contains('open')) return closeNote();
+  if($('#reportSheet').classList.contains('open')) return closeReport();
   if($('#addSheet').classList.contains('open')) return closeAdd();
   if($('#daySheet').classList.contains('open')) return closeDay();
   if($('#dose').classList.contains('open')) return closeDose();
@@ -20,6 +22,7 @@ $('#app').addEventListener('click', e => {
   if(t.closest('[data-import]')){ setScene('welcome'); setTimeout(() => { obRender(4, true); obStart = 'import'; healthSheet(); }, 60); return; }
   if(t.closest('[data-turnon]')){ showAlert({title:'Turn On Reminders', body:'Notifications for Hävn are off in iPhone Settings. Open Settings › Hävn › Notifications and turn on Allow Notifications.',
       buttons:[{label:'Not Now'}, {label:'Open Settings', style:'def', onTap:() => { notifOff = false; drawBanner(); syncStates(); toast('Reminders on'); }}]}); return; }
+  const wn = t.closest('[data-writenote]'); if(wn){ openNote(+wn.dataset.writenote); return; }
   const dt = t.closest('#scroll [data-detail], #scroll [data-prn]'); if(dt && !t.closest('button')){ openDetail(dt.dataset.detail || dt.dataset.prn); return; }
 });
 $('#appDim').onclick = () => closeAppSheet();

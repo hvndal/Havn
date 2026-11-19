@@ -19,6 +19,7 @@ Open `havn.html` in a browser. It starts at Welcome, like a first launch.
 | `src/30-add.js` | Add Medication in six steps, with schedules |
 | `src/40-history-meds.js` | History (week, month, day, logging a dose later) and Medications (list, detail, archive) |
 | `src/50-settings-scenes.js` | Settings, backups, Face ID lock, Home Screen widgets, Lock Screen, the states panel |
+| `src/60-notes-report.js` | Notes on doses and days, and the PDF report for your doctor |
 | `src/90-init.js` | Wiring and the motion catalogue |
 | `src/markup.html` | The sheets and scenes added inside the phone |
 | `build.py` | Puts it all together: `python3 build.py` writes `havn.html` |

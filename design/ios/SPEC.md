@@ -122,7 +122,9 @@ Every row can be reached in the prototype (scene buttons above the phone, states
 | Today | morning · overdue · all done (ring closed) · empty · reminders off (banner) · another person (Mum) · new person (empty) · as-needed logged · as-needed too soon (alert) · daily limit reached · running low |
 | Add Medication (6 steps) | name required · duplicate name warning · strength required · every day / specific days / every few days / cycle / as needed · several times a day · notification or alarm · ends on a date · shape and colours · review |
 | Dose sheet | due · overdue · already taken |
-| History | week of mini rings · calm summary sentence · month calendar (all / some / skipped) · previous month · day sheet · logging a forgotten dose later · first week (empty) |
+| History | week of mini rings · calm summary sentence · month calendar (all / some / skipped) · previous month · day sheet · logging a forgotten dose later · first week (empty) · notes on doses and on the day · Report for Your Doctor card |
+| Notes | Notes card on Today (empty or showing today's note) · writing sheet with Quick Add phrases · note field on the dose sheet (saves as you type) · pencil on rows that have a note · saved, edited, removed |
+| Report | options (name, 30 or 90 days, include notes, include as-needed doses) · creating · two-page preview · share (Save to Files, Print, Send a Copy) · no history yet · dark mode (the paper stays white) |
 | Medications | list with supply · running low · as needed · archived · edit (archive) · detail with stats · not scheduled today |
 | Settings | people · reminders · follow-up · alarms · names on Lock Screen · sounds and haptics · Health · Face ID lock · iPhone backups · export · restore · erase (confirmation) · privacy policy · about and disclaimer |
 | App lock | locked · Face ID success |
@@ -158,3 +160,30 @@ The layers are in `design/ios/icon/`. Build the icon in Icon Composer (Xcode 26)
 - Every target is at least 44 × 44 pt.
 - Keep the contrast pairs from section 1 if colours change.
 - Check the four states in the panel under the prototype with each release.
+
+## 12. Notes and the report for your doctor
+
+**Notes**
+- **Where:** two kinds of note: one on a dose (the field at the bottom of the dose sheet) and one on a day (the Notes card on Today, and the Note card in a History day).
+- **Limits:** plain text, up to 600 characters, stored with the person's other data.
+- **Quick Add:** phrases for the common cases: Felt dizzy, Upset stomach, Headache, Slept badly, Feeling good, Forgot, Away from home, Ran out.
+- **Today's card:** shows today's note, or "Write a note about today" when there isn't one.
+- **Rows:** a row with a dose note shows a small pencil after its time, so notes are findable without opening anything.
+- **Privacy:** notes never appear on the Lock Screen or in widgets. They are included in backups, and in a report only if Include Notes is on.
+
+**Report for Your Doctor** (History › Create PDF Report)
+- **Options:** name on the report (optional), Last 30 Days or Last 90 Days, Include Notes, Include As-Needed Doses.
+- **The period:** ends yesterday, so today's half-finished day never shows as missed.
+- **Page 1:**
+  - four totals: % taken, doses taken, doses missed, as-needed doses
+  - a medications table with a taken bar per medicine
+  - day by day: one mini ring per day for 30 days, or one coloured square per day for 90
+  - Patterns: at most three plain sentences, such as "Most missed doses were on Saturdays (4 of 7)"
+- **Page 2:**
+  - missed doses, most recent first, with any dose note (12 shown, then "and N earlier")
+  - notes
+  - as-needed doses
+  - a disclaimer that it's a log, not a medical record
+- **Every page:** a footer with the date made and the page number. The paper is always white, A4 in most countries and US Letter in the US, from the region setting.
+- **Build:** lay the pages out in SwiftUI and render each one to PDF with `ImageRenderer` into a PDF `CGContext`. Write the file to the temporary folder as "Hävn Report 18 Nov 2026.pdf", hand it to `ShareLink`, and delete it when the share sheet closes. Nothing is kept or uploaded.
+- **Samples:** `design/ios/report/Havn-report-sample.pdf` (30 days) and `Havn-report-sample-90-days.pdf`. They use Inter because Apple's fonts can't be put in the repo; the app itself uses SF Pro.

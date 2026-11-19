@@ -37,7 +37,7 @@ function drawHistory(){
     <div class="card cal"><div class="hd"><button data-mon="-1" aria-label="Previous month"><svg width="10" height="16" viewBox="0 0 10 16"><path d="M8 2L2 8l6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button><b id="calTitle"></b>
       <button data-mon="1" aria-label="Next month"><svg width="10" height="16" viewBox="0 0 10 16"><path d="M2 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
       <div class="legend"><span><i style="background:var(--green)"></i>All taken</span><span><i style="background:var(--orange)"></i>Some taken</span><span><i style="background:var(--l3)"></i>Skipped</span></div>
-      <div class="calbody" id="calBody">${calGrid(calMonth)}</div></div>`;
+      <div class="calbody" id="calBody">${calGrid(calMonth)}</div></div>${reportCard()}`;
   $('#calTitle').textContent = calMonth === 10 ? 'November 2026' : 'October 2026';
 }
 function calGrid(mon){
@@ -53,6 +53,7 @@ function calGrid(mon){
   return `<div class="grid7">${h}</div>`;
 }
 $('#scrHistory').addEventListener('click', e => {
+  if(e.target.closest('[data-report]')) return openReportOptions();
   const mb = e.target.closest('[data-mon]');
   if(mb){ const to = Math.max(9, Math.min(10, calMonth + +mb.dataset.mon)); if(to === calMonth) { mb.classList.remove('nudge'); mb.offsetWidth; mb.classList.add('nudge'); return; }
     const dir = to > calMonth ? 1 : -1; calMonth = to; const body = $('#calBody'), old = body.firstElementChild;
@@ -70,7 +71,7 @@ function openDay(d){
   const wd = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'][(d + 5) % 7];
   const rows = recs.map((m, i) => { const ok = m.v;
     const when = d === 18 ? (taken[m.id] ? `Taken at ${taken[m.id]}` : m.t < now ? `Due at ${m.t}` : `${m.t} · later today`) : ok ? `Taken at ${m.t.slice(0, 3)}${String(+m.t.slice(3) + 4).padStart(2, '0')}` : 'Not logged';
-    return `<div class="lrow" style="cursor:default">${icon(m)}<div class="mid"><div class="nm">${m.n}</div><div class="dt" ${!ok && d !== 18 ? 'style="color:var(--orange-text)"' : ''}>${m.d} · ${when}</div></div>
+    return `<div class="lrow" style="cursor:default">${icon(m)}<div class="mid"><div class="nm">${m.n}</div><div class="dt" ${!ok && d !== 18 ? 'style="color:var(--orange-text)"' : ''}>${m.d} · ${when}</div>${dnoteLine(m.id, d)}</div>
       ${!ok && d < 18 ? `<button class="pbtn ghost sm" data-late="${i}">Log</button>` : ok ? '<svg width="22" height="22" viewBox="0 0 22 22"><circle cx="11" cy="11" r="11" fill="var(--green)"/><path d="M6.5 11.3l3 3 6-6.6" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}</div>`; }).join('');
   const sh = $('#daySheet');
   sh.innerHTML = `<div class="inner"><div class="grab"></div><div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px 4px">
@@ -78,7 +79,8 @@ function openDay(d){
       <button class="gbtn glass" data-dayclose="1" aria-label="Done" style="background:var(--accent);color:var(--on-accent)"><svg width="18" height="18" viewBox="0 0 18 18"><path d="M3.5 9.5l3.6 3.6L14.5 5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
     <div style="display:grid;place-items:center;padding:6px 0 14px">${miniRing(st, 84, recs.map(r => r.c))}</div>
     <div style="padding:0 16px 26px"><div class="card">${rows || '<div class="lrow">Nothing scheduled.</div>'}</div>
-    ${d < 18 && st.includes(0) ? '<p class="foot">Forgot to log one? Log it here with the time you actually took it.</p>' : ''}</div></div>`;
+    ${d < 18 && st.includes(0) ? '<p class="foot">Forgot to log one? Log it here with the time you actually took it.</p>' : ''}
+    <div class="shead" style="padding-left:20px;margin-top:18px"><span class="t">${PENCIL}Note</span></div><div class="card" id="dayNoteBox">${dayNoteHTML(d)}</div></div></div>`;
   sh.classList.add('open'); $('#dim').classList.add('on');
   if(!reduce) sh.animate([{transform:'translateY(105%)'}, {transform:'none'}], {duration:520, easing:'cubic-bezier(.2,.95,.25,1.02)'});
   sh.onclick = e => {

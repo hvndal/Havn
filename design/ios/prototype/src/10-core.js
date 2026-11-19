@@ -50,6 +50,7 @@ function extraSections(){
   if(PRN.length) h += `<div class="sec rv"><div class="shead"><span class="t">${PRNICON}As Needed</span></div><div class="card">${PRN.map(m => `
     <div class="lrow" data-prn="${m.id}">${icon(m)}<div class="mid"><div class="nm">${m.n}</div><div class="dt swap" data-prndt="${m.id}"><span>${prnSub(m)}</span></div></div>
     <button class="pbtn ghost sm" data-prnlog="${m.id}">Log</button></div>`).join('')}</div></div>`;
+  h += notesSection();
   const low = MEDS.filter(m => m.left < 10);
   if(low.length) h += `<div class="sec rv"><div class="shead"><span class="t">${LOWICON}Running Low</span></div><div class="card">${low.map(m => `
     <div class="lrow" data-detail="${m.id}">${icon(m)}<div class="mid"><div class="nm">${m.n}</div><div class="dt">${m.left} left · about ${m.left} days</div></div>${CHEV}</div>`).join('')}</div></div>`;

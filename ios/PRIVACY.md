@@ -10,7 +10,7 @@ Nothing. Hävn has no account, no servers, no analytics, no ads and no tracking.
 
 ## What stays on your iPhone
 
-The medications, schedules, people and dose history you enter are stored only inside Hävn's own storage on your iPhone. Hävn's widgets read the same information from a storage area that only Hävn and its widgets can open. Nothing is sent to us or anyone else.
+The medications, schedules, people, dose history and notes you enter are stored only inside Hävn’s own storage on your iPhone. Hävn's widgets read the same information from a storage area that only Hävn and its widgets can open. Nothing is sent to us or anyone else.
 
 Hävn does not sync through iCloud.
 
@@ -21,6 +21,14 @@ By default, Hävn's information is left out of your iPhone backups. If you turn 
 ## Files you export
 
 **Export** in Settings creates a file and hands it to the place you choose, such as Files or another app. What happens to that file after that is up to you and that app.
+
+## Notes
+
+Notes you write in Hävn, about a dose or about your day, are stored with the rest of your information on your iPhone. They never appear on the Lock Screen or in widgets.
+
+## Reports for your doctor
+
+**Create PDF Report** makes a PDF on your iPhone from your doses, and from your notes if you choose. It is handed to the place you pick, such as Files, Print or another app, and not kept by Hävn afterwards. Hävn never uploads it.
 
 ## Apple Health
 

@@ -45,7 +45,7 @@ $('#settingsBody').addEventListener('click', e => {
   if(t.closest('[data-export]')) return exportFlow();
   if(t.closest('[data-restore]')) return restoreFlow();
   if(t.closest('[data-policy]')) return appSheet(`<h3>Privacy Policy</h3><p class="sub">The short version</p>
-    <div class="card" style="padding:4px 4px">${[['Nothing collected', 'No account, no servers, no analytics, no ads, no tracking.'], ['Stays on this iPhone', 'Your medications, people and history live only in Hävn’s storage.'], ['Health is read only', 'Hävn reads your medication list if you allow it, and never writes to Health.'], ['You can erase it', 'Erase All Data, or delete the app, removes everything.']].map(([a, b]) => `<div class="feat" style="padding:10px 12px"><div class="mid"><div class="nm">${a}</div><div class="dt">${b}</div></div></div>`).join('')}</div>
+    <div class="card" style="padding:4px 4px">${[['Nothing collected', 'No account, no servers, no analytics, no ads, no tracking.'], ['Stays on this iPhone', 'Your medications, people, history and notes live only in Hävn’s storage. Reports are made on the iPhone and never uploaded.'], ['Health is read only', 'Hävn reads your medication list if you allow it, and never writes to Health.'], ['You can erase it', 'Erase All Data, or delete the app, removes everything.']].map(([a, b]) => `<div class="feat" style="padding:10px 12px"><div class="mid"><div class="nm">${a}</div><div class="dt">${b}</div></div></div>`).join('')}</div>
     <p class="foot" style="text-align:center">Full policy: mander.tech/havn/privacy</p><button class="btn2 p" data-close="1" style="margin-top:12px">Done</button>`);
   if(t.closest('[data-erase]')) return showAlert({title:'Erase All Data?', body:'This removes every medication and dose from this iPhone. It can’t be undone.',
     buttons:[{label:'Cancel'}, {label:'Erase', style:'des', onTap:() => { closeSettings(); setTimeout(() => { haptic($('#phone'), 'warning haptic', 201, 437); setScene('welcome'); }, reduce ? 0 : 420); }}]});
@@ -89,7 +89,7 @@ function restoreFlow(){
             setTimeout(() => closeAppSheet(() => { closeSettings(); resetPeople(); $('#openSettings').innerHTML = avatarHTML(PEOPLE.you); refreshToday(true); }), 700); }); }}]})); }, {once:true});
 }
 function closeAllSheets(){
-  closePeopleMenu(); closeAppSheet(); closeDay();
+  closePeopleMenu(); closeAppSheet(); closeNote(); closeReport(); closeDay();
   if($('#dose').classList.contains('open')) closeDose(); if($('#settings').classList.contains('open')) closeSettings(); closeAdd();
   if($('#navBack')) { const nav = $('#scrMeds .nav2'); while(nav && nav.children.length > 1) nav.lastElementChild.remove(); $('#navBack').remove(); }
 }
@@ -239,7 +239,8 @@ function markScene(){ document.querySelectorAll('.scenes [data-scene]').forEach(
 function setScene(s, instant){
   const was = scene; scene = s;
   if(s === 'welcome'){ $('#homeScene').hidden = true; $('#lockScene').hidden = true; setSceneClass('app'); startOnboarding(); scene = 'app'; markScene(); return; }
-  if(s === 'app'){ if(was === 'home' && !instant) openAppFrom($('#havnIco') || $('#homeScene')); else if(was === 'lock' && !instant) unlockTo(); else { $('#homeScene').hidden = true; $('#lockScene').hidden = true; setSceneClass('app'); } }
+  if(s === 'app'){ if(!$('#ob').hidden){ hideOnboarding(); refreshToday(true); }
+    if(was === 'home' && !instant) openAppFrom($('#havnIco') || $('#homeScene')); else if(was === 'lock' && !instant) unlockTo(); else { $('#homeScene').hidden = true; $('#lockScene').hidden = true; setSceneClass('app'); } }
   if(s === 'home'){ $('#lockScene').hidden = true; hpage = 0; if(!$('#ob').hidden) hideOnboarding(); closeAllSheets(); if(instant){ drawHome(); $('#homeScene').hidden = false; setSceneClass('home'); } else closeAppToHome(); }
   if(s === 'lock'){ drawLock(); const L = $('#lockScene'); L.hidden = false; setSceneClass('lock'); if(!instant && !reduce) L.animate([{opacity:0, transform:'scale(1.06)'}, {opacity:1, transform:'none'}], {duration:420, easing:'cubic-bezier(.2,.9,.25,1)'}); }
   markScene();

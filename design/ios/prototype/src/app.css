@@ -291,3 +291,17 @@
 @media (prefers-color-scheme: dark){#phone.scene-home:not(.force-light) .status{color:#fff}}
 .lrow.chk{cursor:pointer}
 .big .none{display:none}
+
+/* ---------- notes and the report ---------- */
+#noteSheet,#reportSheet{top:46px;height:auto}
+#noteSheet .inner,#reportSheet .inner{height:100%;display:flex;flex-direction:column}
+#reportBody{flex:1;overflow-y:auto;padding:14px 16px 0;scrollbar-width:none}
+#reportBody::-webkit-scrollbar{display:none}
+.rpv{width:354px;margin:0 auto 16px;border-radius:3px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.12),0 8px 24px rgba(0,0,0,.14);background:#fff}
+.rpv .rpt{transform-origin:0 0;width:794px}
+.notein{width:100%;box-sizing:border-box;border:0;background:none;resize:none;font:400 17px/1.4 var(--sys);color:var(--label);outline:none;display:block}
+.chips{display:flex;flex-wrap:wrap;gap:8px;padding:0 2px}
+.chips button{border:0;border-radius:16px;padding:7px 12px;background:var(--fill3);color:var(--label);font:500 14px var(--sys);cursor:pointer}
+.dnote{display:flex;gap:6px;align-items:flex-start;font-size:14px;line-height:19px;color:var(--l2);margin-top:4px}
+.dnote .pen{flex:none;margin-top:3px}
+.pen{vertical-align:-1px;color:var(--l2)}
