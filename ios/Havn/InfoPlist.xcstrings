@@ -74,73 +74,73 @@
       }
     },
     "NSHealthShareUsageDescription": {
-      "comment": "Shown when Hävn asks to read medications from Apple Health",
+      "comment": "Shown when Hävn asks to read medications, and optionally readings, from Apple Health",
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hävn reads your medication list from Health so you don’t have to type it in. It never writes to Health or sends your data anywhere."
+            "value": "Hävn reads your medication list from Health so you don’t have to type it in and, if you allow it, blood pressure, glucose and weight to show next to your doses. It never writes to Health or sends your data anywhere."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Hävn lit votre liste de médicaments dans Santé pour vous éviter de la saisir. Rien n’est écrit dans Santé ni envoyé ailleurs."
+            "value": "Hävn lit votre liste de médicaments dans Santé pour vous éviter de la saisir et, si vous l’autorisez, votre tension, votre glycémie et votre poids pour les afficher à côté de vos prises. Rien n’est écrit dans Santé ni envoyé ailleurs."
           }
         },
         "es": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Hävn lee tu lista de medicamentos de Salud para que no tengas que escribirla. No escribe nada en Salud ni envía tus datos a ningún sitio."
+            "value": "Hävn lee tu lista de medicamentos de Salud para que no tengas que escribirla y, si lo permites, tu tensión arterial, glucosa y peso para mostrarlos junto a tus tomas. No escribe nada en Salud ni envía tus datos a ningún sitio."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "O Hävn lê sua lista de remédios do app Saúde para você não precisar digitá-la. Ele não grava nada no Saúde nem envia seus dados para lugar nenhum."
+            "value": "O Hävn lê sua lista de remédios do app Saúde para você não precisar digitá-la e, se você permitir, sua pressão arterial, glicose e peso para mostrá-los ao lado das doses. Ele não grava nada no Saúde nem envia seus dados para lugar nenhum."
           }
         },
         "pt-PT": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "O Hävn lê a sua lista de medicamentos da app Saúde para não ter de a escrever. Não grava nada na Saúde nem envia os seus dados para lado nenhum."
+            "value": "O Hävn lê a sua lista de medicamentos da app Saúde para não ter de a escrever e, se permitir, a sua tensão arterial, glicose e peso para os mostrar junto às tomas. Não grava nada na Saúde nem envia os seus dados para lado nenhum."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "お薬のリストを入力しなくて済むよう、Hävnはヘルスケアからリストを読み込みます。ヘルスケアへの書き込みや、データの送信は行いません。"
+            "value": "お薬のリストを入力しなくて済むよう、Hävnはヘルスケアからリストを読み込みます。許可した場合は血圧・血糖値・体重も読み込み、服用記録の横に表示します。ヘルスケアへの書き込みや、データの送信は行いません。"
           }
         },
         "de": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Hävn liest deine Medikamentenliste aus Health, damit du sie nicht abtippen musst. Es schreibt nichts in Health und sendet deine Daten nirgendwohin."
+            "value": "Hävn liest deine Medikamentenliste aus Health, damit du sie nicht abtippen musst, und, wenn du es erlaubst, Blutdruck, Blutzucker und Gewicht, um sie neben deinen Einnahmen zu zeigen. Es schreibt nichts in Health und sendet deine Daten nirgendwohin."
           }
         },
         "it": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Hävn legge l’elenco dei farmaci da Salute così non devi digitarlo. Non scrive nulla in Salute e non invia i tuoi dati da nessuna parte."
+            "value": "Hävn legge l’elenco dei farmaci da Salute così non devi digitarlo e, se lo consenti, pressione, glicemia e peso per mostrarli accanto alle tue dosi. Non scrive nulla in Salute e non invia i tuoi dati da nessuna parte."
           }
         },
         "nb": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Hävn leser medisinlisten din fra Helse, så du slipper å skrive den inn. Appen skriver ingenting til Helse og sender ikke dataene dine noe sted."
+            "value": "Hävn leser medisinlisten din fra Helse, så du slipper å skrive den inn, og hvis du tillater det, blodtrykk, blodsukker og vekt for å vise dem ved siden av dosene dine. Appen skriver ingenting til Helse og sender ikke dataene dine noe sted."
           }
         },
         "sv": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Hävn läser din medicinlista från Hälsa så att du slipper skriva in den. Appen skriver ingenting till Hälsa och skickar inte dina data någonstans."
+            "value": "Hävn läser din medicinlista från Hälsa så att du slipper skriva in den och, om du tillåter det, blodtryck, blodsocker och vikt för att visa dem bredvid dina doser. Appen skriver ingenting till Hälsa och skickar inte dina data någonstans."
           }
         },
         "ko": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "약 목록을 직접 입력하지 않도록 Hävn이 건강 앱에서 목록을 읽어 옵니다. 건강 앱에 기록하거나 데이터를 외부로 보내지 않습니다."
+            "value": "약 목록을 직접 입력하지 않도록 Hävn이 건강 앱에서 목록을 읽어 옵니다. 허용하면 혈압, 혈당, 체중도 읽어 복용 기록 옆에 보여 줍니다. 건강 앱에 기록하거나 데이터를 외부로 보내지 않습니다."
           }
         }
       }
@@ -213,6 +213,78 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "선택한 약에 대해 iPhone이 무음 모드여도 Hävn이 알람을 울릴 수 있게 합니다."
+          }
+        }
+      }
+    },
+    "NSCameraUsageDescription": {
+      "comment": "Shown the first time the person scans a pharmacy label or photographs a pill",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hävn uses the camera to read a pharmacy label and to photograph your pill. Reading happens on your iPhone, and label pictures aren’t kept."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Hävn utilise l’appareil photo pour lire l’étiquette de la pharmacie et photographier votre comprimé. La lecture se fait sur votre iPhone et les photos d’étiquette ne sont pas conservées."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Hävn usa la cámara para leer la etiqueta de la farmacia y hacer una foto de tu pastilla. La lectura se hace en tu iPhone y las fotos de la etiqueta no se guardan."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "O Hävn usa a câmera para ler o rótulo da farmácia e fotografar seu comprimido. A leitura acontece no seu iPhone, e as fotos do rótulo não são guardadas."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "O Hävn usa a câmara para ler o rótulo da farmácia e fotografar o seu comprimido. A leitura é feita no seu iPhone e as fotografias do rótulo não são guardadas."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Hävnはカメラで薬局のラベルを読み取り、お薬の写真を撮ります。読み取りはiPhone上で行い、ラベルの画像は保存しません。"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Hävn nutzt die Kamera, um das Apothekenetikett zu lesen und deine Tablette zu fotografieren. Das Lesen passiert auf deinem iPhone, Fotos vom Etikett werden nicht gespeichert."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Hävn usa la fotocamera per leggere l’etichetta della farmacia e fotografare la tua compressa. La lettura avviene sul tuo iPhone e le foto dell’etichetta non vengono conservate."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Hävn bruker kameraet til å lese apoteketiketten og ta bilde av tabletten din. Lesingen skjer på iPhonen din, og bilder av etiketten lagres ikke."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Hävn använder kameran för att läsa apoteksetiketten och fotografera din tablett. Läsningen sker på din iPhone, och bilder på etiketten sparas inte."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Hävn은 카메라로 약국 라벨을 읽고 알약 사진을 찍습니다. 읽기는 iPhone에서 이루어지며, 라벨 사진은 저장하지 않습니다."
           }
         }
       }

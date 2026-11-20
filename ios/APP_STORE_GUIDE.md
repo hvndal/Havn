@@ -52,7 +52,7 @@ Everything stays on the iPhone. There is no server, no account and nothing to si
 |---|---|
 | `Havn/PrivacyInfo.xcprivacy` | The privacy manifest Apple requires. Says: no tracking, no data collected, and gives the reason codes for `UserDefaults` (CA92.1 for the app's own settings, 1C8F.1 for the App Group shared with widgets). Before each release, run Xcode's *Generate Privacy Report* on the archive and add any other "required reason" API it lists. |
 | `Havn/Localizable.xcstrings` | Every piece of text in the app, in 10 languages (section 6) |
-| `Havn/InfoPlist.xcstrings` | The app's name under the icon and the three permission prompts (Health, AlarmKit, Face ID), in 10 languages |
+| `Havn/InfoPlist.xcstrings` | The app's name under the icon and the four permission prompts (Health, AlarmKit, Camera, Face ID), in 10 languages |
 | `PRIVACY.md` | The iOS privacy policy, ready to publish |
 
 ### Info.plist keys
@@ -61,6 +61,7 @@ Everything stays on the iPhone. There is no server, no account and nothing to si
 |---|---|
 | `NSHealthShareUsageDescription` | From `InfoPlist.xcstrings`. Required to read from Health. |
 | `NSAlarmKitUsageDescription` | From `InfoPlist.xcstrings`. Apple: "If the `NSAlarmKitUsageDescription` key is missing or its value is an empty string, apps can't schedule alarms with AlarmKit." Developers have reported that this one string doesn't pick up translations: check the prompt on a device in two languages. |
+| `NSCameraUsageDescription` | From `InfoPlist.xcstrings`. Asked the first time someone scans a pharmacy label or photographs a pill. Choosing a photo with `PhotosPicker` needs no permission. |
 | `NSFaceIDUsageDescription` | From `InfoPlist.xcstrings` |
 | `ITSAppUsesNonExemptEncryption` | `NO`. Hävn uses only the encryption built into iOS, so this skips the export-compliance question on every upload. **(from memory)** |
 | `UIBackgroundModes` | **Absent** (section 1) |

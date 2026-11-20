@@ -55,7 +55,7 @@ function paneHTML(i){
       <div class="lbl3">Remind With</div><div class="seg" id="remSeg">${['Notification','Alarm'].map(r => `<button class="${D.remind === r ? 'on' : ''}" data-rem="${r}">${r}</button>`).join('')}</div>
       <p class="foot">An alarm rings even when your iPhone is on Silent or in a Focus.</p>`)}
     <div class="card" style="margin-top:14px"><div class="srow"><span class="lbl">Ends</span><div class="seg" style="width:180px">${[['0','Never'],['1','On a Date']].map(([v, l]) => `<button class="${(+v === 1) === D.ends ? 'on' : ''}" data-ends="${v}">${l}</button>`).join('')}</div></div>
-      ${more('ends', D.ends, `<div class="srow"><span class="lbl">Last day</span><input type="date" class="timein" value="2026-12-18" aria-label="Last day"></div>`)}</div>`;
+      ${more('ends', D.ends, `<div class="srow"><span class="lbl">Last day</span><input type="date" class="timein" value="${D.endDate || '2026-12-18'}" aria-label="Last day" data-enddate="1"></div>`)}</div>`;
   if(i === 4) return `${kick}<h2>Shape and Colour</h2><p class="q">This helps you tell ${nm} apart from your other medications.</p>
     <div class="preview" id="pv2">${lookPreview()}</div>
     <div class="lbl3">Shape</div><div class="shapes2">${SHAPES8.map(k => `<button class="${D.shape === k ? 'on' : ''}" data-shape="${k}">${pillSVG({k, a:D.a, b:D.b}, 30)}${k[0].toUpperCase() + k.slice(1)}</button>`).join('')}</div>
@@ -73,7 +73,7 @@ function paneHTML(i){
       <div class="srow"><span class="lbl">Supply</span>${stepper('supply', D.supply)}<span class="dt">${unitWord(D.supply)}</span></div></div>
     <p class="foot">You can change any of this later in Medications.</p>`;
 }
-function draftMed(){ return {n:clean(D.n), d:`${D.strength || '–'} ${D.unit}`, c:D.c, p:{k:D.shape, a:D.a, b:D.b}}; }
+function draftMed(){ return {n:clean(D.n), d:`${D.strength || '–'} ${D.unit}`, c:D.c, p:{k:D.shape, a:D.a, b:D.b}, photo:D.photo}; }
 function lookPreview(){ return `<div style="display:grid;place-items:center;gap:6px">${icon(draftMed(), 72)}<div class="nm">${clean(D.n) || 'New Medication'}</div></div>`; }
 function addPane(i, dir){
   const steps = $('#addSteps'), old = steps.querySelector('.pane:not(.leaving)');
@@ -126,14 +126,15 @@ $('#addNext').onclick = () => { if($('#addNext').disabled) return; if(aStep < 5)
 $('#addCancel').onclick = () => { if(aStep === 0) closeAdd(); else addPane(aStep - 1, -1); };
 function commitAdd(){
   const id = 'm' + Date.now().toString(36), n = clean(D.n), d = `${String(D.strength).replace(',', '.')} ${D.unit}`, p = {k:D.shape, a:D.a, b:D.b};
-  const base = {n, d, c:D.c, p, form:D.form, left:D.supply};
+  const base = {n, d, c:D.c, p, form:D.form, left:D.supply, photo:D.photo || null, anchor:D.anchMode === 'routine' ? D.anchor : null, pharm:D.pharm || null, ends:D.ends ? (D.endDate || '2026-12-18') : null};
   let added = [];
   if(D.sched === 'prn'){ PRN.push({...base, id, max:D.max, gap:D.gap, sched:schedText()}); added = [id]; }
   else {
     const today = D.sched !== 'days' || D.days.includes(2);       // today is a Wednesday
-    if(today){ D.times.forEach((t, k) => { const did = id + '_' + k; MEDS.push({...base, id:did, t, g:groupOf(t), sched:schedText(), times:D.times}); added.push(did); });
+    const later = D.times.filter(t => t >= now);          // a new medication starts at its next time: earlier times today aren't missed
+    if(today && later.length){ D.times.forEach((t, k) => { if(t < now) return; const did = id + '_' + k; MEDS.push({...base, id:did, t, g:groupOf(t), sched:schedText(), times:[...D.times]}); added.push(did); });
       MEDS.sort((a, b) => a.t < b.t ? -1 : 1); }
-    else EXTRA.push({...base, id, t:D.times[0], sched:schedText(), note:'Not scheduled today'});
+    else EXTRA.push({...base, id, t:D.times[0], times:[...D.times], sched:schedText(), note:today ? 'Starts tomorrow' : 'Not scheduled today'});
   }
   saveCur();
   closeAdd(() => {

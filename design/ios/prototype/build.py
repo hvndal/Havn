@@ -94,6 +94,15 @@ i = s.find('<h1>Hävn, in motion</h1>'); j = s.find('</p>', i) + 4
 s = s[:i] + '''<h1>Hävn, in motion</h1>
     <p>It starts like a first launch, at Welcome. Use the buttons above the phone to jump to the app, the Home Screen widgets or the Lock Screen, and the panel under it to check accessibility and empty states. Every motion is named on the right with its iOS term.</p>''' + s[j:]
 
+# ---------- round 3: a pill's own photo as its icon, more scenes, the Action Button, Simple mode
+rep('const icon = (m, box) => `<div class="ic"', 'const icon = (m, box) => m.photo ? photoIcon(m, box) : `<div class="ic"')
+rep('<button data-scene="lock">Lock Screen</button></div>',
+    '<button data-scene="lock">Lock Screen</button></div>\n      <div class="scenes more" role="group" aria-label="Show also"><button data-scene="alarm">Alarm</button><button data-scene="watch">Watch</button>'
+    '<button data-scene="standby">StandBy</button><button data-scene="cc">Controls</button><button data-scene="siri">Siri</button></div>')
+rep('<div class="phone" id="phone">', '<button id="actionBtn" aria-label="Action Button: log the next dose" title="Action Button"></button>\n        <div class="phone" id="phone">')
+rep('<button data-state="locked">Face ID Lock</button>', '<button data-state="locked">Face ID Lock</button><button data-state="simple">Simple Mode</button>')
+rep('<button id="bIron" hidden>Log Iron</button>', '<button id="bAction">Press Action Button</button>\n        <button id="bIron" hidden>Log Iron</button>')
+
 # ---------- styles and scripts
 css = open(os.path.join(D, 'src', 'app.css'), encoding='utf-8').read()
 rep('@media (prefers-reduced-motion: reduce){', css + '\n@media (prefers-reduced-motion: reduce){')

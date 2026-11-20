@@ -119,20 +119,31 @@ Every row can be reached in the prototype (scene buttons above the phone, states
 | Screen | States designed |
 |---|---|
 | Welcome (5 steps) | first launch · notifications refused · alarm chosen instead · Health import (permission, searching, found list) · restore from a backup (file picker, progress, done) · add manually (lands in an empty Today with Add Medication open) |
-| Today | morning · overdue · all done (ring closed) · empty · reminders off (banner) · another person (Mum) · new person (empty) · as-needed logged · as-needed too soon (alert) · daily limit reached · running low |
-| Add Medication (6 steps) | name required · duplicate name warning · strength required · every day / specific days / every few days / cycle / as needed · several times a day · notification or alarm · ends on a date · shape and colours · review |
+| Today | morning · overdue · all done (ring closed) · empty · reminders off (banner) · another person (Mum) · new person (empty) · as-needed logged · as-needed too soon (alert) · daily limit reached · running low · a suggestion (moved, or Not Now) · “Did it help?” waiting, answered |
+| Everyone | every person's ring · a person's due doses logged from here · tap through to one person |
+| Add Medication (6 steps) | scan the pharmacy label (framing, reading, found, scan again) · filled in from the label (review banner) · linked to your routine · photo of the pill (camera, from Photos, retake, remove) · name required · duplicate name warning · strength required · every day / specific days / every few days / cycle / as needed · several times a day · notification or alarm · ends on a date · shape and colours · review |
 | Dose sheet | due · overdue · already taken |
-| History | week of mini rings · calm summary sentence · month calendar (all / some / skipped) · previous month · day sheet · logging a forgotten dose later · first week (empty) · notes on doses and on the day · Report for Your Doctor card |
-| Notes | Notes card on Today (empty or showing today's note) · writing sheet with Quick Add phrases · note field on the dose sheet (saves as you type) · pencil on rows that have a note · saved, edited, removed |
-| Report | options (name, 30 or 90 days, include notes, include as-needed doses) · creating · two-page preview · share (Save to Files, Print, Send a Copy) · no history yet · dark mode (the paper stays white) |
-| Medications | list with supply · running low · as needed · archived · edit (archive) · detail with stats · not scheduled today |
-| Settings | people · reminders · follow-up · alarms · names on Lock Screen · sounds and haptics · Health · Face ID lock · iPhone backups · export · restore · erase (confirmation) · privacy policy · about and disclaimer |
+| History | readings (blood sugar, blood pressure, weight; empty; add a reading; out-of-range warning) · the month in rings (recap, share as image) · week of mini rings · calm summary sentence · month calendar (all / some / skipped) · previous month · day sheet · logging a forgotten dose later · first week (empty) · notes on doses and on the day · Report for Your Doctor card |
+| Notes | mood, energy and pain from 1 to 5 · Notes card on Today (empty or showing today's note) · writing sheet with Quick Add phrases · note field on the dose sheet (saves as you type) · pencil on rows that have a note · saved, edited, removed |
+| Report | options (name, 30 or 90 days, include notes, include as-needed doses, include readings and symptoms) · creating · preview of two or three pages · share (Save to Files, Print, Send a Copy) · no history yet · dark mode (the paper stays white) |
+| Medications | Fill Your Pillbox (each medication in turn, not enough left, filled) · routine time and weekend time · I Picked Up a Refill · pharmacy (call, copy number, none yet) · readings next to the medication they're for · list with supply · running low · as needed · archived · edit (archive) · detail with stats · not scheduled today |
+| Settings | Share a Schedule (choose person, with or without history and notes) · Daily Routine (weekdays, weekends, per person) · Simple Mode · Read Names Aloud · Focus Filters · readings from Health · people · reminders · follow-up · alarms · names on Lock Screen · sounds and haptics · Health · Face ID lock · iPhone backups · export · restore · erase (confirmation) · privacy policy · about and disclaimer |
 | App lock | locked · Face ID success |
 | Home Screen widgets | small · medium (Taken button works without opening the app) · large · all done · Clear (glass) look · dark |
-| Lock Screen | ring and next-dose widgets · notification with names hidden · held open with Taken / Remind Me in 10 Minutes / Skipped |
+| Lock Screen | ring and next-dose widgets · notification with names hidden · held open with Taken / Remind Me in 10 Minutes / Skipped · another person's dose (“Time for Mum’s 12:30 dose”) · “Did it help?” held open with three answers · Live Activity with Taken |
+| Simple Mode | next dose with I Took It · just logged · all done · nothing today · leaving (confirmation) |
+| Alarm | ringing · name read aloud · Taken · Snooze |
+| Apple Watch | face with the Hävn complication · app with the ring · Taken · all done |
+| Dynamic Island | Live Activity compact (minutes late or to go) · expanded with Snooze and Taken · logged · Action Button result |
+| Control Center and Action Button | Log Next Dose · logged · not due yet (says when, logs nothing) · all done |
+| Siri | what's next · log my morning doses · did I take one · a dose that isn't due yet (no Log button) · logged |
+| StandBy | day · night (red) · all done |
+| Focus | Caring on (only Mum shown, chip in the status bar) · turning it off |
 | Accessibility | largest text · Reduce Transparency · Reduce Motion · Increase Contrast |
 
-**Still to design before launch** (no prototype yet): Live Activity for a dose window, the Control Center control, StandBy, the Apple Watch app, Siri and Shortcuts phrases, time-zone travel, daylight-saving changes, tapering doses.
+**Still to design before launch** (no prototype yet): time-zone travel, daylight-saving changes, tapering doses, receiving a shared schedule.
+
+**Prototype shortcuts:** the clock stays at 13:42, so a “Did it help?” check-in shows its real time (14:42) on the Lock Screen straight away; the label, the camera and the Watch are drawn, not live.
 
 ## 9. Widgets (WidgetKit)
 
@@ -187,3 +198,95 @@ The layers are in `design/ios/icon/`. Build the icon in Icon Composer (Xcode 26)
 - **Every page:** a footer with the date made and the page number. The paper is always white, A4 in most countries and US Letter in the US, from the region setting.
 - **Build:** lay the pages out in SwiftUI and render each one to PDF with `ImageRenderer` into a PDF `CGContext`. Write the file to the temporary folder as "Hävn Report 18 Nov 2026.pdf", hand it to `ShareLink`, and delete it when the share sheet closes. Nothing is kept or uploaded.
 - **Samples:** `design/ios/report/Havn-report-sample.pdf` (30 days) and `Havn-report-sample-90-days.pdf`. They use Inter because Apple's fonts can't be put in the repo; the app itself uses SF Pro.
+
+## 13. Everyday features
+
+**Scan the pharmacy label** (Add Medication, step 1)
+- **Build:** `DataScannerViewController` (VisionKit) with `.text()` recognition, or a still photo through `VNRecognizeTextRequest`. Both run on the iPhone. The picture is never saved.
+- **What it reads:** name, strength and form; directions (“ONE capsule THREE times a day” becomes 3 times a day, spread over the routine's breakfast, lunch and dinner, or 08:00, 14:00 and 20:00); quantity, which sets the supply and, for a course, the end date; the pharmacy's name and number. The patient's name is ignored.
+- **After:** goes straight to Review with a “Filled in from the label” banner. Nothing is added until the person taps Add Medication.
+- **Motion:** the corner brackets close in on the label (spring), each line that was read lights up in turn with a selection haptic, then the results sheet rises with a success haptic.
+
+**A photo of the pill** (Add Medication, Shape and Colour)
+- Take a Photo opens the camera with a circle to put one pill in; Choose from Photos uses `PhotosPicker`. The photo is cropped square, shrunk to 160 × 160 and stored with the medication. It replaces the drawn pill everywhere, widgets included.
+- Camera access needs `NSCameraUsageDescription`. Photos needs no permission with `PhotosPicker`.
+
+**A new medication starts at its next time.** Times earlier today are not added, so a medication added at 13:42 with an 08:00 dose doesn't show as overdue. If every time has passed, it starts tomorrow.
+
+**Daily Routine** (Settings › Daily Routine; Add Medication › Schedule › With Your Routine)
+- Five anchors per person: Wake Up, Breakfast, Lunch, Dinner, Bedtime, with optional different times at weekends.
+- A medication linked to an anchor moves when the anchor moves, and its reminders are rescheduled. Its page says “With lunch · 13:00”, plus the weekend time.
+- Moving a linked medication's time by hand (or accepting a suggestion) unlinks it.
+
+**I Picked Up a Refill and the pharmacy** (a medication's page)
+- Refill: pack sizes 28, 30, 56, 90 or any number; shows the new total and roughly when it runs out. The supply goes down only when a dose is logged.
+- Pharmacy: name, address and number, kept per person. Call opens the Phone app with `tel:`. Hävn never contacts the pharmacy.
+
+**A gentle suggestion** (Today)
+- When a dose is logged at least 30 minutes late on most of the last 14 days, Today offers once to move it: “Move Iron to 13:45?” Move or Not Now. It disappears once that dose is logged.
+- Worked out on the iPhone from the dose log. Never about the dose, the strength or whether to take it; only the reminder time.
+
+**Fill Your Pillbox** (Medications)
+- A 7-day organiser for the next 7 days, with a row for each part of the day in use. One medication at a time: its compartments light up and the pills drop in (spring, staggered by day).
+- If there isn't enough left for the week, it says how many boxes stay empty. Filling doesn't change the supply.
+- The card then reads “Pillbox Filled · For 19–25 November”.
+
+## 14. Health, family and beyond the app
+
+**Everyone** (people menu › Everyone, when there are two or more people)
+- One card per person: ring, count, and what's due or next. Taken logs that person's due doses without switching. Tapping a card opens that person's Today.
+- Reminders name the person: “Time for Mum’s 12:30 dose”. Another person's due doses get their own Lock Screen notification.
+
+**“Did it help?”** (as-needed doses)
+- An hour after an as-needed dose, a notification asks: Better, About the Same, Worse (notification actions, no need to open the app). It can also be answered on Today straight away.
+- The answers go into the report, next to each as-needed dose.
+
+**Readings** (History; a medication's page)
+- Blood pressure (mmHg), blood sugar (mmol/L, or mg/dL by region) and weight (kg or lb). Typed in, or read from Apple Health with read-only access to `bloodPressureSystolic`, `bloodPressureDiastolic`, `bloodGlucose` and `bodyMass`.
+- Out-of-range entries are refused with a plain message (blood pressure 60–260 / 30–160, with the upper number higher).
+- A medication can show the reading it's for (Amlodipine shows blood pressure). Hävn draws the line and never interprets it.
+
+**How you feel** (a day's note)
+- Mood, energy and pain, 1 to 5, each optional; tap the same number again to clear it. Shown on the day and on Today's Notes card.
+
+**The month in rings** (History)
+- One mini ring per day, the share of doses taken, the longest run of complete days and the hardest day. Share as Image makes a picture with rings only, never medication names. Not a streak: nothing resets and nothing is lost.
+
+**The report, page 3** (when there are readings or ratings in the period, and Include Readings and Symptoms is on)
+- A chart and the last six values for each kind of reading, then a grid of the mood, energy and pain ratings by day.
+
+**Simple Mode** (Settings › Everyday, or Assistive Access)
+- One big next dose with I Took It, the day's doses with large checks, and the count. Leaving asks first.
+- **Assistive Access:** set `UISupportsAssistiveAccess` and add an `AssistiveAccess` scene (iOS 26) that shows the same Simple Mode view, so Hävn is listed as optimised for Assistive Access.
+
+**Read Names Aloud** (Settings › Everyday)
+- When a reminder or alarm rings, it says “Time for your Iron, 65 milligrams.” Hävn renders the sentence to a sound file on the iPhone with `AVSpeechSynthesizer.write(_:toBufferCallback:)` and uses it as that reminder's sound: a CAF or AIFF file under 30 seconds in `Library/Sounds` of the App Group container, set with `UNNotificationSound(named:)`. Re-render when the name, the strength or the language changes. Off by default, because it says the name out loud.
+
+**Alarms** (AlarmKit, iOS 26)
+- The alarm's title is the medication and strength. The stop button is Taken and runs `LogDoseIntent`; the secondary button is Snooze (10 minutes, countdown).
+
+**Apple Watch**
+- Complications: `.accessoryCircular` (ring) and `.accessoryRectangular` (“Iron · due”, count), from the same WidgetKit extension.
+- The app: the ring with the count, the next dose and a green Taken button. Logging on the watch syncs to the iPhone with `WatchConnectivity`, phone to watch and back, never through a server.
+
+**Live Activity and the Dynamic Island** (ActivityKit)
+- Starts 30 minutes before a dose and ends when it's logged. Compact: the ring on the left, minutes to go (teal) or late (orange) on the right. Expanded: the medication, the due time, and Snooze and Taken as App Intent buttons. Lock Screen: the same card, with the name hidden unless Show Names on Lock Screen is on.
+- Started and updated locally; no push updates, so no server.
+
+**Control Center and the Action Button**
+- A `ControlWidgetButton` (iOS 18) running `LogNextDoseIntent`. It logs the next dose only if it's due within the hour or late; otherwise the island says “Next at 22:00” and nothing is logged. The same control can be put on the Action Button.
+
+**Siri and Shortcuts** (App Intents)
+- App Shortcuts phrases include the app's name: “What do I take next in Hävn?”, “Log my morning doses in Hävn”, “Did I take my Iron in Hävn?”.
+- The answer is an interactive snippet (`SnippetIntent`, iOS 26) with Log It (`Button(intent:)`), shown only for a dose that is due. After logging, the snippet updates in place.
+
+**StandBy**
+- The small widget fills the left half (ring and count); the clock and next dose sit on the right. Night mode turns it red automatically in a dark room. The Live Activity can also fill StandBy.
+
+**Focus filters** (`SetFocusFilterIntent`)
+- Per Focus, choose who Hävn shows: everyone, You, or one person (for example Caring shows only Mum). Reminders for everyone still arrive. Set up in iPhone Settings › Focus.
+
+**Share a Schedule** (Settings › People)
+- Exports one person's medications, times and reminders as a `.havn` file, optionally with history and notes. Sent with AirDrop or saved to Files through `ShareLink`. No server, no account; the other iPhone gets a copy and later changes don't sync.
+
+**Not built, on purpose:** interaction warnings or dose advice, cloud sync, streaks and badges.

@@ -8,7 +8,7 @@ const SAMPLE_NOTES = {
 const QUICK = ['Felt dizzy', 'Upset stomach', 'Headache', 'Slept badly', 'Feeling good', 'Forgot', 'Away from home', 'Ran out'];
 const cleanNote = s => (s || '').replace(/[<>]/g, '').slice(0, 600).trim();
 const escNote = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/\n/g, '<br>');
-function notesOf(id = cur){ const P = PEOPLE[id]; if(!P.notes){ const s = SAMPLE_NOTES[id] || {day:{}, dose:{}}; P.notes = {day:{...s.day}, dose:{...s.dose}}; } return P.notes; }
+function notesOf(id = cur){ const P = PEOPLE[id]; if(!P.notes){ const s = SAMPLE_NOTES[id] || {day:{}, dose:{}}; P.notes = {day:{...s.day}, dose:{...s.dose}, scales:JSON.parse(JSON.stringify(s.scales || {}))}; } return P.notes; }
 function doseNote(id, d = 18){ return notesOf().dose[`${d}:${baseId(id)}`] || ''; }
 function setDoseNote(id, text, d = 18){ const N = notesOf(), k = `${d}:${baseId(id)}`, t = cleanNote(text); if(t) N.dose[k] = t; else delete N.dose[k]; }
 function dayNote(d){ return notesOf().day[d] || ''; }
@@ -44,7 +44,8 @@ $('#noteChips').addEventListener('click', e => { const b = e.target.closest('[da
 $('#noteCancel').onclick = closeNote;
 $('#noteSave').onclick = () => {
   const t = cleanNote($('#noteText').value), N = notesOf(); if(t) N.day[noteDay] = t; else delete N.day[noteDay];
-  closeNote(); haptic($('#noteSave'), 'success haptic'); toast(t ? 'Note saved' : 'Note removed');
+  const sc = saveScales(noteDay);
+  closeNote(); haptic($('#noteSave'), 'success haptic'); toast(t ? 'Note saved' : sc ? 'Saved' : 'Note removed');
   if(noteDay === 18){ build(); rebuildRingParts(); drawBanner(); }
   const box = $('#dayNoteBox'); if(box) box.innerHTML = dayNoteHTML(noteDay);
 };
@@ -79,7 +80,7 @@ function reportModel(days){
   withData.forEach(({date}) => { if(date.getMonth() !== 10) return; const d = date.getDate(); const dn = dayNote(d); if(dn) notes.push({date, text:dn});
     Object.entries(notesOf().dose).forEach(([k, v]) => { const [dd, id] = k.split(':'); if(+dd === d){ const r = (hist()[d] || []).find(x => x.id === id); notes.push({date, text:v, med:r ? r.n : ''}); } }); });
   const prn = []; const ph = PRN_HIST[cur] || {};
-  withData.forEach(({date}) => { const n = date.getMonth() === 10 ? ph[date.getDate()] : 0; if(n && PRN[0]) prn.push({date, n:PRN[0].n, d:PRN[0].d, count:n}); });
+  withData.forEach(({date}) => { const n = date.getMonth() === 10 ? ph[date.getDate()] : 0; if(n && PRN[0]) prn.push({date, n:PRN[0].n, d:PRN[0].d, count:n, ans:(PEOPLE[cur].checks || []).filter(c => c.d === date.getDate() && c.n === PRN[0].n && c.ans).map(c => c.ans)}); });
   return {list, withData, meds:Object.values(meds), tot, tk, missed:missed.reverse(), notes:notes.reverse(), prn:prn.reverse(), start:list[0].date, end};
 }
 const fmt = (d, o = {weekday:'short', day:'numeric', month:'short'}) => d.toLocaleDateString('en-GB', o);
@@ -156,7 +157,7 @@ function reportPages({days = 30, name = '', notes = true, prn = true} = {}){
     ${M.missed.length ? `<table><tr><th>Date</th><th>Medication</th><th>Due</th>${notes ? '<th>Note</th>' : ''}</tr>${M.missed.slice(0, 12).map(x => `<tr><td>${fmt(x.date)}</td><td><span class="sw" style="background:${HEX[x.r.c]}"></span>${escNote(x.r.n)}</td><td>${x.r.t}</td>${notes ? `<td>${x.note ? escNote(x.note) : '<span class="muted">–</span>'}</td>` : ''}</tr>`).join('')}</table>
       ${M.missed.length > 12 ? `<p class="muted" style="font-size:12px">and ${M.missed.length - 12} earlier</p>` : ''}` : '<p class="muted">Every dose in this period was taken.</p>'}
     ${notes ? `<h2>Notes<small>written in Hävn</small></h2>${M.notes.length ? M.notes.slice(0, 8).map(n => `<div class="note"><div class="d">${fmt(n.date, {weekday:'long', day:'numeric', month:'long'})}${n.med ? ' · ' + escNote(n.med) : ''}</div><p>${escNote(n.text)}</p></div>`).join('') : '<p class="muted">No notes in this period.</p>'}` : ''}
-    ${prn && M.prn.length ? `<h2>As-needed doses</h2><table><tr><th>Date</th><th>Medication</th><th>Doses</th></tr>${M.prn.map(x => `<tr><td>${fmt(x.date)}</td><td>${escNote(x.n)} <span class="muted">${escNote(x.d)}</span></td><td>${x.count}</td></tr>`).join('')}</table>` : ''}
+    ${prn && M.prn.length ? `<h2>As-needed doses<small>with the answer to “Did it help?”</small></h2><table><tr><th>Date</th><th>Medication</th><th>Doses</th><th>Did it help?</th></tr>${M.prn.map(x => `<tr><td>${fmt(x.date)}</td><td>${escNote(x.n)} <span class="muted">${escNote(x.d)}</span></td><td>${x.count}</td><td>${x.ans && x.ans.length ? x.ans.join(', ') : '<span class="muted">not answered</span>'}</td></tr>`).join('')}</table>` : ''}
     <div class="disc">This report lists doses as they were logged in Hävn by the person using the app. It is not a medical record and Hävn doesn’t give medical advice. It was made on the iPhone and wasn’t uploaded anywhere.</div>
     ${foot(2)}</div>`;
   return [p1, p2];
@@ -170,15 +171,15 @@ function reportCard(){ return `<div class="card" style="margin-top:12px;padding:
   <div class="mid"><div class="nm">Report for Your Doctor</div><div class="dt">A PDF of your doses and notes to show at an appointment.</div></div></div>
   <button class="btn2 p" data-report="1" style="margin-top:14px">Create PDF Report</button></div>`; }
 const T_DOC = '<svg width="14" height="17" viewBox="0 0 14 17"><path d="M2 1h7l4 4v10a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M4 9h6M4 12h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
-let rp = {days:30, notes:true, prn:true, name:''};
+let rp = {days:30, notes:true, prn:true, extras:true, name:''};
 function openReportOptions(){
   const sh = appSheet(`<h3>Report for Your Doctor</h3><p class="sub">Made on this iPhone. Nothing is uploaded; you choose where it goes.</p>
     <div class="field"><input id="rpName" placeholder="Name on the report (optional)" autocomplete="off" value="${escNote(rp.name || (cur === 'you' ? '' : PEOPLE[cur].name))}"></div>
     <div class="lbl3">Period</div><div class="seg" id="rpPeriod"><button class="${rp.days === 30 ? 'on' : ''}" data-rp="30">Last 30 Days</button><button class="${rp.days === 90 ? 'on' : ''}" data-rp="90">Last 90 Days</button></div>
-    <div class="card" style="margin-top:14px"><div class="srow"><span class="lbl">Include Notes</span>${swH('Include Notes', rp.notes)}</div><div class="srow"><span class="lbl">Include As-Needed Doses</span>${swH('Include As-Needed Doses', rp.prn)}</div></div>
+    <div class="card" style="margin-top:14px"><div class="srow"><span class="lbl">Include Notes</span>${swH('Include Notes', rp.notes)}</div><div class="srow"><span class="lbl">Include As-Needed Doses</span>${swH('Include As-Needed Doses', rp.prn)}</div><div class="srow"><span class="lbl">Include Readings and Symptoms</span>${swH('Include Readings and Symptoms', rp.extras)}</div></div>
     <button class="btn2 p" data-mk="1" style="margin-top:16px">Create PDF</button><button class="ob-link" data-close="1">Cancel</button>`);
   sh.querySelectorAll('.sw').forEach(sw => { wireSwitch(sw); sw.addEventListener('pointerup', () => setTimeout(() => { const on = sw.classList.contains('on');
-    if(sw.getAttribute('aria-label') === 'Include Notes') rp.notes = on; else rp.prn = on; }, 0)); });
+    const k = sw.getAttribute('aria-label'); if(k === 'Include Notes') rp.notes = on; else if(k === 'Include As-Needed Doses') rp.prn = on; else rp.extras = on; }, 0)); });
   sh.querySelector('#rpPeriod').onclick = e => { const b = e.target.closest('[data-rp]'); if(!b) return; rp.days = +b.dataset.rp; sh.querySelectorAll('[data-rp]').forEach(x => x.classList.toggle('on', x === b)); };
   sh.querySelector('[data-mk]').onclick = e => { rp.name = sh.querySelector('#rpName').value; const b = e.currentTarget;
     b.innerHTML = '<span class="spin" style="width:18px;height:18px;border-color:rgba(255,255,255,.35);border-top-color:#fff"></span>';
@@ -198,7 +199,7 @@ function closeReport(){ const sh = $('#reportSheet'); if(!sh.classList.contains(
   sh.animate([{transform:'none'}, {transform:'translateY(105%)'}], {duration:420, easing:'cubic-bezier(.4,0,.2,1)'}).onfinish = () => sh.classList.remove('open'); }
 $('#reportDone').onclick = closeReport;
 $('#reportShare').onclick = () => {
-  const s = appSheet(`<div class="card" style="margin-top:12px"><div class="file" style="cursor:default"><div class="fic" style="color:#C93400">${T_DOC}</div><div class="mid"><div class="nm" style="font-size:16px">Hävn Report 18 Nov 2026.pdf</div><div class="dt" style="font-size:13px">2 pages · A4 · made on this iPhone</div></div></div></div>
+  const s = appSheet(`<div class="card" style="margin-top:12px"><div class="file" style="cursor:default"><div class="fic" style="color:#C93400">${T_DOC}</div><div class="mid"><div class="nm" style="font-size:16px">Hävn Report 18 Nov 2026.pdf</div><div class="dt" style="font-size:13px">${reportPages(rp).length} pages · A4 · made on this iPhone</div></div></div></div>
     <div class="card" style="margin-top:12px">${[['files','Save to Files'], ['print','Print'], ['send','Send a Copy…']].map(([k, l]) => `<div class="navrow" data-act="${k}"><span class="lbl">${l}</span>${CHEV}</div>`).join('')}</div>
     <p class="foot">Sending a copy uses the app you pick. Hävn itself never uploads it.</p><button class="ob-link" data-close="1">Cancel</button>`);
   s.style.zIndex = 79; $('#appDim').style.zIndex = 78;

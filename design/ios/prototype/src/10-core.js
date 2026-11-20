@@ -73,6 +73,7 @@ function logPrn(id, btn){
     Snd.play('tap'); setTimeout(() => Snd.play('taken'), 140); haptic(btn, 'success haptic');
     swap(document.querySelector(`[data-prndt="${id}"]`), prnSub(m));
     btn.textContent = 'Logged'; setTimeout(() => { btn.textContent = 'Log'; }, 1600);
+    afterPrn(m);
   };
   if(last && addHours(last, m.gap) > now)
     showAlert({title:`Log ${m.n} again?`, body:`Your last dose was at ${last}. The usual gap is ${m.gap} hours, so the next one is due after ${addHours(last, m.gap)}.`,

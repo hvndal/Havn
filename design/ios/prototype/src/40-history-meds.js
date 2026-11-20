@@ -107,8 +107,8 @@ let medsEditing = false;
 const baseId = id => id.replace(/_\d+$/, '');
 function medList(){
   const seen = {}, out = [];
-  MEDS.forEach(m => { const b = baseId(m.id); if(seen[b]){ seen[b].times.push(m.t); return; } seen[b] = {...m, id:b, times:[m.t]}; out.push(seen[b]); });
-  return [...out, ...EXTRA.map(m => ({...m, times:[m.t]}))];
+  MEDS.forEach(m => { const b = baseId(m.id); if(seen[b]){ if(!m.times) seen[b].times.push(m.t); return; } seen[b] = {...m, id:b, times:m.times ? [...m.times] : [m.t]}; out.push(seen[b]); });
+  return [...out, ...EXTRA.map(m => ({...m, times:m.times || [m.t]}))];
 }
 function medRow(m, prn){
   const sub = prn ? `${m.d} · As needed` : `${m.d} · ${m.sched}${m.note ? '' : ', ' + m.times.join(', ')}`;

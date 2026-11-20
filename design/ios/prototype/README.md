@@ -4,8 +4,9 @@ A browser prototype of the whole iPhone app: the motion, sounds and every screen
 
 Open `havn.html` in a browser. It starts at Welcome, like a first launch.
 
-- **Buttons above the phone:** jump to the app, the Home Screen widgets or the Lock Screen.
-- **Panel below the phone:** largest text, Reduce Transparency, Reduce Motion, Increase Contrast, reminders off, no medications and the Face ID lock.
+- **Buttons above the phone:** jump to the app, the Home Screen widgets or the Lock Screen. The second row shows the Hävn alarm, the Apple Watch app, StandBy, Control Center and Siri.
+- **Side of the phone:** the Action Button logs the next due dose (or press **Press Action Button** under the phone).
+- **Panel below the phone:** largest text, Reduce Transparency, Reduce Motion, Increase Contrast, reminders off, no medications, the Face ID lock and Simple Mode.
 - **Right-hand column:** names every motion with its iOS term, each with a Play button.
 
 ## Files
@@ -20,6 +21,9 @@ Open `havn.html` in a browser. It starts at Welcome, like a first launch.
 | `src/40-history-meds.js` | History (week, month, day, logging a dose later) and Medications (list, detail, archive) |
 | `src/50-settings-scenes.js` | Settings, backups, Face ID lock, Home Screen widgets, Lock Screen, the states panel |
 | `src/60-notes-report.js` | Notes on doses and days, and the PDF report for your doctor |
+| `src/70-everyday.js` | Scanning a pharmacy label, a photo of the pill, the daily routine, refills and the pharmacy, the gentle suggestion, Fill Your Pillbox |
+| `src/75-health.js` | Everyone, “Did it help?”, readings, mood/energy/pain, the month in rings, page 3 of the report, reminders that name the person |
+| `src/80-surfaces.js` | Simple Mode, the alarm read aloud, Apple Watch, the Dynamic Island and Lock Screen Live Activity, Control Center and the Action Button, Siri, StandBy, Focus filters, Share a Schedule |
 | `src/90-init.js` | Wiring and the motion catalogue |
 | `src/markup.html` | The sheets and scenes added inside the phone |
 | `build.py` | Puts it all together: `python3 build.py` writes `havn.html` |
