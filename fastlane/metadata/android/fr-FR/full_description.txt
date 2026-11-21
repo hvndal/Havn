@@ -1,0 +1,18 @@
+Hävn est un rappel de prise de médicaments calme et confidentiel.
+
+• Vue Aujourd'hui : voyez chaque dose regroupée par matin, après-midi, soir et nuit
+• Armoire à pharmacie : quotidien, cycle 21/7, paliers, intervalles horaires et si besoin
+• Rappels avec « Marquer pris » et « Dans 15 min » directement depuis la notification
+• Historique : vue 7/30/90 jours, tampons mensuels, carte PNG et bilan PDF A4
+• Profils : 2 profils gratuits sur un téléphone (Supporter en ajoute d'autres)
+• Thèmes clair et sombre
+• Widget d'écran d'accueil
+• Sauvegardes .havn chiffrées par phrase secrète sous votre contrôle
+
+Confidentiel par conception : aucun compte, aucun serveur, aucun pistage, aucun envoi en ligne. Votre historique ne quitte jamais votre téléphone.
+
+Les rappels essentiels restent gratuits et sans publicité. Un achat unique optionnel Supporter débloque davantage de profils.
+
+Créé par Mander — mander.tech — webdesign, applications et projets.
+
+Hävn est un outil de rappel et ne fournit aucun avis médical. Suivez toujours les instructions de votre médecin ou de votre pharmacien.

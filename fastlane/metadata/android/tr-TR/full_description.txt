@@ -1,0 +1,18 @@
+Hävn, sakin ve gizliliğe odaklı bir ilaç hatırlatma uygulamasıdır.
+
+• Bugün görünümü: her dozu sabah, öğleden sonra, akşam ve gece olarak görün
+• İlaç rafı: günlük, 21/7 döngü, kademeli azaltma, saatlik aralık ve gerektiğinde
+• Bildirim üzerinden doğrudan «Alındı olarak işaretle» ve «15 dk sonra» seçenekleri
+• Geçmiş: 7/30/90 gün görünümü, aylık mühürler, PNG kartı ve A4 doktor PDF raporu
+• Kişiler: Tek telefonda 2 profil ücretsiz (Supporter ile daha fazlası açılır)
+• Açık ve koyu temalar
+• Ana ekran widget'ı
+• Parolayla şifrelenmiş .havn yedekleri tamamen sizin kontrolünüzde
+
+Tasarımdan gelen gizlilik: hesap yok, sunucu yok, izleme yok, bulut yüklemesi yok. İlaç geçmişiniz telefonunuzdan çıkmaz.
+
+Temel hatırlatıcılar reklamsız ve sonsuza dek ücretsizdir. İsteğe bağlı tek seferlik Supporter satın alımı ek profiller açar.
+
+Mander tarafından geliştirildi — mander.tech — web tasarım, uygulamalar ve projeler.
+
+Hävn bir hatırlatma aracıdır ve tıbbi tavsiye vermez. Her zaman doktorunuzun veya eczacınızın talimatlarına uyun.

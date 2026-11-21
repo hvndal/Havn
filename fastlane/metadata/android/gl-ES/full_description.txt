@@ -1,0 +1,18 @@
+Hävn é un recordatorio de medicación calmo e privado.
+
+• Vista Hoxe: consulta cada dose agrupada por mañá, tarde, noite e madrugada
+• Caixa de fármacos: diario, ciclo 21/7, redución gradual, por horas e se cómpre
+• Recordatorios con «Marcar tomada» e «En 15 min» directamente desde a notificación
+• Historial: 7/30/90 días, selos mensuais, tarxeta PNG e informe médico PDF A4
+• Persoas: 2 perfís de balde nun mesmo teléfono (Supporter engade máis)
+• Temas claro e escuro
+• Widget na pantalla de inicio
+• Copias .havn cifradas con contrasinal baixo o teu control
+
+Privado por deseño: sen conta, sen servidores, sen rastrexo nin envíos á nube. O teu historial non sae nunca do teléfono.
+
+Os recordatorios principais son de balde e sen anuncios. A compra única opcional Supporter desbloquea máis perfís.
+
+Feito por Mander — mander.tech — deseño web, aplicacións e proxectos.
+
+Hävn é unha ferramenta de recordatorio e non ofrece consello médico. Segue sempre as indicacións do teu médico ou farmacéutico.

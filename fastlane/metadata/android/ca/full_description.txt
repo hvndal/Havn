@@ -1,0 +1,18 @@
+Hävn és un recordatori de medicació tranquil i privat.
+
+• Vista Avui: consulta cada dosi agrupada per matí, tarda, vespre i nit
+• Farmaciola: diari, cicle 21/7, pautes graduals, per hores i segons necessitat
+• Recordatoris amb «Marca com a presa» i «D'aquí a 15 min» directament des de la notificació
+• Historial: 7/30/90 dies, segells mensuals, targeta PNG i informe mèdic PDF A4
+• Persones: 2 perfils gratuïts en un sol telèfon (Supporter n'afegeix més)
+• Temes clar i fosc
+• Giny per a la pantalla d'inici
+• Còpies de seguretat .havn xifrades amb contrasenya sota el teu control
+
+Privat per disseny: sense compte, sense servidors, sense seguiment ni enviaments al núvol. El teu historial no surt mai del telèfon.
+
+Els recordatoris bàsics són gratuïts i sense anuncis. La compra única opcional Supporter desbloqueja més perfils.
+
+Fet per Mander — mander.tech — disseny web, aplicacions i projectes.
+
+Hävn és una eina de recordatori i no ofereix consells mèdics. Segueix sempre les instruccions del teu metge o farmacèutic.

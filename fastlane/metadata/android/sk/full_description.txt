@@ -1,0 +1,18 @@
+Hävn je pokojná a súkromná pripomienka užívania liekov.
+
+• Zobrazenie Dnes: každá dávka rozdelená na ráno, popoludnie, večer a noc
+• Polička liekov: denné, cykly 21/7, postupné znižovanie, po hodinách a podľa potreby
+• Pripomienky s možnosťami „Označiť ako užité“ a „O 15 min“ priamo z upozornenia
+• História: 7/30/90 dní, mesačné pečiatky, karta PNG a lekárska správa PDF A4
+• Ľudia: 2 profily zadarmo v jednom telefóne (Supporter odomkne viac)
+• Svetlý a tmavý motív
+• Widget na domovskú obrazovku
+• Zálohy .havn šifrované heslom pod vašou plnou kontrolou
+
+Súkromie od základu: žiadny účet, žiadne servery, žiadne sledovanie ani nahrávanie do cloudu. História liekov zostáva v telefóne.
+
+Základné pripomienky zostávajú navždy bezplatné a bez reklám. Voliteľný jednorazový nákup Supporter pridá ďalšie profily.
+
+Vytvoril Mander — mander.tech — webdizajn, aplikácie a projekty.
+
+Hävn je nástroj na pripomínanie a neposkytuje lekárske rady. Vždy sa riaďte pokynmi svojho lekára alebo lekárnika.

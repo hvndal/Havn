@@ -1,0 +1,18 @@
+Hävn ialah aplikasi peringatan makan ubat yang tenang dan peribadi.
+
+• Paparan Hari Ini: lihat setiap dos disusun mengikut pagi, tengah hari, petang dan malam
+• Rak ubat: harian, kitaran 21/7, penurunan berperingkat, selang jam dan ikut keperluan
+• Peringatan dengan «Tandakan diambil» dan «Dalam 15 minit» terus dari notifikasi
+• Rekod sejarah: paparan 7/30/90 hari, cop bulanan, kad PNG dan laporan doktor PDF A4
+• Profil: 2 orang percuma dalam satu telefon (Supporter buka lebih banyak profil)
+• Tema terang dan gelap
+• Widget skrin utama
+• Fail sandaran .havn disulitkan frasa laluan di bawah kawalan penuh anda
+
+Privasi terjamin sejak awal: tiada akaun, tiada pelayan, tiada penjejakan dan tiada muat naik awan. Rekod ubat kekal di telefon.
+
+Peringatan asas percuma selamanya tanpa iklan. Pembelian sekali sahaja Supporter secara pilihan membuka lebih banyak profil.
+
+Dibangunkan oleh Mander — mander.tech — reka bentuk web, aplikasi dan projek.
+
+Hävn ialah alat peringatan dan tidak memberikan nasihat perubatan. Sentiasa patuhi arahan doktor atau ahli farmasi anda.

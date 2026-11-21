@@ -1,0 +1,18 @@
+Hävn on rauhallinen ja yksityinen lääkemuistuttaja.
+
+• Tänään-näkymä: kaikki annokset ryhmiteltynä aamuun, iltapäivään, iltaan ja yöhön
+• Lääkehylly: päivittäinen, sykli (21/7), annoslasku, tuntivälit ja tarvittaessa
+• Muistutukset, joissa "Merkitse otetuksi" ja "15 min päästä" suoraan ilmoituksesta
+• Historia: 7/30/90 päivää, kuukausileimat, kuukausikortti ja A4-lääkäri-PDF
+• Henkilöt: 2 profiilia ilmaiseksi yhdessä puhelimessa (Supporter avaa lisää)
+• Vaalea ja tumma teema
+• Aloitusnäytön widget
+• Salasanalla suojatut .havn-varmuuskopiot omassa hallinnassasi
+
+Suunniteltu yksityiseksi: ei tiliä, ei palvelimia, ei seurantaa eikä pilvilatauksia. Lääkehistoriasi ei koskaan poistu puhelimestasi.
+
+Perusmuistutukset ovat aina ilmaisia ilman mainoksia. Valinnainen Supporter-kertaostos avaa lisää profiileja.
+
+Tekijä: Mander — mander.tech — verkkosuunnittelu, sovellukset ja projektit.
+
+Hävn on muistutustyökalu eikä anna lääketieteellistä neuvontaa. Noudata aina lääkärisi tai apteekin ohjeita.

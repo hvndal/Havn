@@ -1,0 +1,18 @@
+Hävn là ứng dụng nhắc uống thuốc nhẹ nhàng và bảo mật.
+
+• Chế độ xem Hôm nay: xem từng liều thuốc theo buổi sáng, trưa, tối và đêm
+• Kệ thuốc: hằng ngày, chu kỳ 21/7, giảm liều từng bước, cách giờ và dùng khi cần
+• Thông báo có sẵn nút «Đã uống» và «Sau 15 phút» ngay trên thông báo
+• Lịch sử uống thuốc: xem 7/30/90 ngày, dấu mốc tháng, thẻ PNG và báo cáo PDF A4
+• Hồ sơ: miễn phí 2 người trên một máy (Supporter mở khóa thêm hồ sơ)
+• Giao diện sáng và tối
+• Tiện ích màn hình chính
+• Tệp sao lưu .havn mã hóa bằng cụm mật khẩu do bạn toàn quyền quản lý
+
+Riêng tư ngay từ thiết kế: không tài khoản, không máy chủ, không theo dõi, không tải lên đám mây. Dữ liệu luôn ở lại thiết bị.
+
+Nhắc nhở cốt lõi miễn phí trọn đời và không quảng cáo. Gói Supporter mua một lần tùy chọn giúp mở khóa thêm nhiều người.
+
+Thực hiện bởi Mander — mander.tech — thiết kế web, ứng dụng và dự án.
+
+Hävn là công cụ nhắc nhở và không thay thế lời khuyên y khoa. Luôn tuân theo chỉ dẫn của bác sĩ hoặc dược sĩ.

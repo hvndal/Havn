@@ -1,28 +1,28 @@
 # Hävn Medication Reminder — Privacy Policy
 
-_Last updated: September 15, 2026_
+_Last updated: November 21, 2026_
 
 Hävn is made by Mander (https://mander.tech). This policy explains what the app does with your information.
 
 ## What we collect
 
-Nothing. Hävn has no account, no servers, no analytics, no ads and no tracking. The app does not request internet access.
+Nothing. Hävn has 0 accounts, 0 servers, 0 analytics, 0 ads, and 0 tracking. Your medication data, profiles, and adherence logs stay strictly on your device in local SQLite storage and are never uploaded to us or any third party. (`INTERNET` and `BILLING` permissions are declared solely so Google Play Billing can handle an optional one-time Supporter purchase through Google Play Services.)
 
 ## What stays on your phone
 
-The names, profiles, medications, schedules and dose history you enter are stored only in the app's private storage on your device. They are not sent to us or anyone else. Android backup is turned off for Hävn, so this data is not copied to any cloud account.
+The names, profiles, medications, schedules, day anchors, and dose history you enter are stored only in the app's private storage on your device (`Room` local database). Android cloud backup explicitly excludes Hävn's database and preferences via [`backup_rules.xml`](app/src/main/res/xml/backup_rules.xml) and [`data_extraction_rules.xml`](app/src/main/res/xml/data_extraction_rules.xml) (only local device-to-device migration is permitted).
 
-## Backups you make
+## Backups and reports you export
 
-If you use "Back up" or "Save a copy", Hävn creates a file and hands it to the app or folder you choose (for example Drive, Files or email). What happens to that file after that is controlled by you and that app.
+If you export a `.havn` backup file (optionally encrypted with your own passphrase), a month summary PNG card, or an A4 Doctor PDF report, Hävn writes that file locally and hands it off through Android's system picker/share sheet to whichever destination you choose.
 
-## Links
+## In-app Supporter & external links
 
-The "Buy me a coffee" and "mander.tech" links open in your browser. Those websites have their own privacy policies.
+The optional one-time Supporter unlock (`havn_supporter`) is processed by Google Play Billing directly on Google Play. Any external `mander.tech` links open in your default browser under their own privacy policies.
 
 ## Deleting your data
 
-Delete profiles or history in Settings, or uninstall the app. Uninstalling removes everything.
+Delete individual profiles, medicines, or all local data in Settings (`Delete everything`), or uninstall the app to remove all local storage immediately.
 
 ## Children
 
@@ -30,7 +30,7 @@ Hävn is not directed at children under 13.
 
 ## Medical disclaimer
 
-Hävn is a reminder tool. It does not give medical advice. Always follow your doctor's or pharmacist's instructions.
+Hävn is a reminder and recording tool. It does not provide medical advice or suggest doses. Always follow your doctor's or pharmacist's instructions.
 
 ## Contact
 

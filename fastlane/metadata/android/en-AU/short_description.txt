@@ -1,0 +1,1 @@
+Simple, private pill reminders. No account, works offline.

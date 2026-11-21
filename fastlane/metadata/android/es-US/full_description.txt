@@ -1,0 +1,18 @@
+Hävn es un recordatorio de medicación tranquilo y privado.
+
+• Vista Hoy: consulta cada dosis agrupada por mañana, tarde, noche y madrugada
+• Botiquín: diario, ciclo 21/7, dosis graduales, por horas y según necesidad
+• Recordatorios con «Marcar tomada» y «En 15 min» directo desde la notificación
+• Historial: 7/30/90 días, sellos mensuales, tarjeta PNG y reporte PDF A4
+• Personas: 2 perfiles gratis en un teléfono (Supporter agrega más)
+• Temas claro y oscuro
+• Widget para la pantalla de inicio
+• Copias de seguridad .havn cifradas con clave bajo tu control
+
+Privado por diseño: sin cuenta, sin servidores, sin rastreo ni subidas a la nube. Tu historial nunca sale de tu teléfono.
+
+Los recordatorios básicos son gratis y sin anuncios. La compra única opcional Supporter habilita más perfiles.
+
+Creado por Mander — mander.tech — diseño web, apps y proyectos.
+
+Hävn es una herramienta de recordatorio y no ofrece consejo médico. Sigue siempre las instrucciones de tu médico o farmacéutico.

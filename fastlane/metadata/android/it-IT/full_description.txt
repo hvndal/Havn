@@ -1,0 +1,18 @@
+Hävn è un promemoria per i farmaci discreto e privato.
+
+• Vista Oggi: vedi ogni dose suddivisa per mattina, pomeriggio, sera e notte
+• Armadietto farmaci: quotidiano, ciclo 21/7, scalaggio, a ore e al bisogno
+• Promemoria con «Segna come preso» e «Tra 15 min» direttamente dalla notifica
+• Cronologia: 7/30/90 giorni, timbri mensili, scheda PNG e referto medico PDF A4
+• Persone: 2 profili gratuiti su un telefono (Supporter ne sblocca altri)
+• Temi chiaro e scuro
+• Widget per la schermata Home
+• Backup .havn cifrati con passphrase sempre sotto il tuo controllo
+
+Privato fin dalla progettazione: nessun account, nessun server, nessun tracciamento, nessun caricamento. I tuoi dati restano sul telefono.
+
+I promemoria di base restano gratuiti e senza pubblicità. L'acquisto una tantum opzionale Supporter sblocca più profili.
+
+Creato da Mander — mander.tech — web design, app e progetti.
+
+Hävn è uno strumento di promemoria e non fornisce consigli medici. Segui sempre le indicazioni del tuo medico o farmacista.

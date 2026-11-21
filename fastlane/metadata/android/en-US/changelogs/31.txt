@@ -1,0 +1,3 @@
+• Fixed a crash on the History screen when rendering the kept-days figure card and across month-end date transitions.
+• Hardened Monthly Card PNG export and Doctor Summary PDF sharing against background layout and share-target errors.
+• Performance, stability, and typography refinements across phones, foldables, and tablets.

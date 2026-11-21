@@ -1,0 +1,18 @@
+Ang Hävn ay isang kalmado at pribadong paalala sa pag-inom ng gamot.
+
+• View na Ngayon: makita ang bawat dosis ayon sa umaga, hapon, gabi at hatinggabi
+• Istante ng gamot: araw-araw, cycle 21/7, unti-unting bawas, orasan, at kailangan lang
+• Mga paalala na may "Markahan na nainom" at "Sa 15 min" mula mismo sa notification
+• Kasaysayan: 7/30/90 araw, buwanang tatak, PNG card, at A4 PDF para sa doktor
+• Mga Profile: 2 tao libre sa iisang telepono (may dagdag sa Supporter)
+• Maliwanag at madilim na tema
+• Widget para sa home screen
+• Mga .havn backup na may passphrase encryption sa ilalim ng kontrol mo
+
+Pribado ayon sa disenyo: walang account, walang server, walang tracking, at walang upload. Nanatiling offline sa telepono ang data mo.
+
+Libre magpakailanman ang mga pangunahing paalala at walang ads. Ang opsyonal na Supporter purchase ay nagdaragdag ng profile.
+
+Gawa ng Mander — mander.tech — web design, apps at mga proyekto.
+
+Ang Hävn ay isang paalala lamang at hindi nagbibigay ng medikal na payo. Laging sundin ang tagubilin ng iyong doktor o parmasyutiko.

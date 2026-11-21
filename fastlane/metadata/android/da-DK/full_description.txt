@@ -1,0 +1,18 @@
+Hävn er en rolig og privat medicinpåmindelse.
+
+• I dag-visning: se hver dosis samlet under morgen, eftermiddag, aften og nat
+• Medicinhylde: daglig, cyklus (21/7), nedtrapning, timeintervaller og efter behov
+• Påmindelser med "Marker som taget" og "Om 15 min" direkte i notifikationen
+• Historik: 7/30/90 dage, månedsstempler, delbart månedsbillede og A4-læge-PDF
+• Personer: 2 profiler gratis på samme telefon (Supporter låser op for flere)
+• Lyst og mørkt tema
+• Widget til startskærmen
+• Adgangskodekrypterede .havn-sikkerhedskopier under din egen kontrol
+
+Privat fra grunden: ingen konto, ingen servere, ingen sporing og ingen cloud-upload. Din medicinhistorik forlader aldrig din telefon.
+
+Kernepåmindelser er gratis for altid uden reklamer. Et frivilligt engangskøb som Supporter låser op for flere profiler.
+
+Skabt af Mander — mander.tech — webdesign, apps og projekter.
+
+Hävn er et påmindelsesværktøj og giver ikke lægefaglig rådgivning. Følg altid din læges eller apotekets anvisninger.

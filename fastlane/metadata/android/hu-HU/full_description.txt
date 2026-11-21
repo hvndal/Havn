@@ -1,0 +1,18 @@
+A Hävn egy nyugodt, adatvédelemre épülő gyógyszeremlékeztető.
+
+• Ma nézet: minden adag reggeli, délutáni, esti és éjszakai bontásban
+• Gyógyszerpolc: napi, 21/7-es ciklus, fokozatos adagolás, óránkénti és szükség szerinti
+• Értesítések közvetlen „Bevéve” és „15 perc múlva” gombokkal
+• Előzmények: 7/30/90 nap, havi pecsétek, PNG kártya és A4-es orvosi PDF
+• Személyek: 2 profil ingyenes egy telefonon (a Supporter továbbiakkal bővíti)
+• Világos és sötét téma
+• Kezdőképernyő-widget
+• Jelszóval titkosított .havn biztonsági mentések saját kezelésben
+
+Adatvédelem alapból: nincs fiók, nincsenek szerverek, nincs követés és nincs felhőfeltöltés. A gyógyszertörténeted a telefonodon marad.
+
+Az alapvető emlékeztetők örökre ingyenesek és reklámmentesek. Az opcionális egyszeri Supporter vásárlás további profilokat nyit meg.
+
+Készítette: Mander — mander.tech — webdizájn, appok és projektek.
+
+A Hävn emlékeztető eszköz, nem nyújt orvosi tanácsot. Mindig kövesd orvosod vagy gyógyszerészed utasításait.

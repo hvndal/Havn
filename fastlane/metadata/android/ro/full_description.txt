@@ -1,0 +1,18 @@
+Hävn este o aplicație calmă și privată pentru reamintirea medicamentelor.
+
+• Vizualizare Astăzi: vezi fiecare doză grupată pe dimineață, prânz, seară și noapte
+• Raft medicamente: zilnic, ciclu 21/7, reducere treptată, la ore fixe și la nevoie
+• Mementouri cu «Marchează ca luat» și «În 15 min» direct din notificare
+• Istoric: 7/30/90 de zile, ștampile lunare, card PNG și raport medical PDF A4
+• Persoane: 2 profiluri gratuite pe un telefon (Supporter deblochează mai multe)
+• Teme deschisă și întunecată
+• Widget pentru ecranul principal
+• Copii de rezervă .havn criptate cu parolă sub controlul tău
+
+Privat din proiectare: fără cont, fără servere, fără urmărire și fără încărcări în cloud. Istoricul tău nu părăsește telefonul.
+
+Mementourile de bază rămân gratuite și fără reclame. O achiziție unică opțională Supporter adaugă mai multe profiluri.
+
+Creat de Mander — mander.tech — web design, aplicații și proiecte.
+
+Hävn este un instrument de reamintire și nu oferă sfaturi medicale. Urmează întotdeauna indicațiile medicului sau farmacistului tău.

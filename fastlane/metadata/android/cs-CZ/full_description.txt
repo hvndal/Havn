@@ -1,0 +1,18 @@
+Hävn je klidná a soukromá aplikace pro připomínání léků.
+
+• Přehled Dnes: všechny dávky rozdělené na ráno, odpoledne, večer a noc
+• Lékárnička: denní, cykly 21/7, postupné snižování, po hodinách a dle potřeby
+• Připomínky s volbami „Vzato“ a „Za 15 min“ přímo z oznámení
+• Historie: 7/30/90 dní, měsíční razítka, obrázek PNG a lékařská zpráva PDF A4
+• Lidé: 2 profily zdarma na jednom telefonu (Supporter přidá další)
+• Světlý a tmavý motiv
+• Widget na domovskou obrazovku
+• Zálohy .havn šifrované přístupovým heslem pod vaší kontrolou
+
+Soukromí od základu: žádný účet, žádné servery, žádné sledování ani nahrávání dat. Historie léků nikdy neopustí váš telefon.
+
+Základní připomínky jsou navždy zdarma a bez reklam. Volitelný jednorázový nákup Supporter odemkne více profilů.
+
+Vytvořil Mander — mander.tech — webdesign, aplikace a projekty.
+
+Hävn je připomínkový nástroj a neposkytuje lékařské rady. Vždy se řiďte pokyny svého lékaře nebo lékárníka.

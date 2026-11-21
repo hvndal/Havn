@@ -1,0 +1,18 @@
+Hävn adalah aplikasi pengingat minum obat yang tenang dan privat.
+
+• Tampilan Hari Ini: lihat setiap dosis dikelompokkan untuk pagi, siang, sore, dan malam
+• Rak obat: jadwal harian, siklus 21/7, penurunan bertahap, jeda jam, dan bila perlu
+• Pengingat dengan tombol «Sudah diminum» dan «Dalam 15 menit» langsung dari notifikasi
+• Riwayat kepatuhan: 7/30/90 hari, cap bulanan, kartu PNG, dan laporan dokter PDF A4
+• Profil: 2 orang gratis di satu ponsel (Supporter membuka lebih banyak profil)
+• Tema terang dan gelap
+• Widget layar utama
+• File cadangan .havn terenkripsi frasa sandi yang sepenuhnya Anda kontrol
+
+Privat sejak awal: tanpa akun, tanpa server, tanpa pelacakan, tanpa unggahan cloud. Riwayat obat tetap tersimpan di ponsel Anda.
+
+Pengingat inti gratis selamanya tanpa iklan. Pembelian opsional sekali bayar Supporter membuka profil tambahan.
+
+Dibuat oleh Mander — mander.tech — desain web, aplikasi, dan proyek.
+
+Hävn adalah alat pengingat dan tidak memberikan saran medis. Selalu ikuti petunjuk dokter atau apoteker Anda.

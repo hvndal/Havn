@@ -1,0 +1,54 @@
+name: Publish Store Listing & Graphics to Google Play
+
+on:
+  workflow_dispatch:
+    inputs:
+      upload_graphics:
+        description: 'Upload icon, feature graphic, and phone/7-inch/10-inch screenshots'
+        required: false
+        default: 'true'
+        type: boolean
+      upload_listings:
+        description: 'Upload all 87 localized store listings (fastlane/metadata/android/*)'
+        required: false
+        default: 'true'
+        type: boolean
+
+jobs:
+  publish-listing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Validate all 87 locale character limits
+        run: python3 play-store/listing/sync_play_store_metadata.py --check
+
+      - name: Install Google Play Developer API client
+        run: pip install google-api-python-client google-auth
+
+      - name: Write Play Console Service Account JSON
+        env:
+          PLAY_SA_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          if [ -z "$PLAY_SA_JSON" ]; then
+            echo "::error::Add the PLAY_SERVICE_ACCOUNT_JSON secret in GitHub Settings -> Secrets -> Actions"
+            exit 1
+          fi
+          printf '%s' "$PLAY_SA_JSON" > "$RUNNER_TEMP/play-sa.json"
+
+      - name: Sync 87 Locales & Store Graphics to Google Play Console
+        run: |
+          EXTRA_ARGS=""
+          if [ "${{ inputs.upload_graphics }}" != "true" ]; then
+            EXTRA_ARGS="$EXTRA_ARGS --skip-graphics"
+          fi
+          if [ "${{ inputs.upload_listings }}" != "true" ]; then
+            EXTRA_ARGS="$EXTRA_ARGS --skip-listings"
+          fi
+          python3 play-store/listing/upload_to_play_console.py \
+            --service-account "$RUNNER_TEMP/play-sa.json" \
+            $EXTRA_ARGS

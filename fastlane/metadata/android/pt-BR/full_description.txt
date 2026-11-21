@@ -1,0 +1,18 @@
+Hävn é um lembrete de medicação calmo e privado.
+
+• Visão Hoje: veja cada dose agrupada por manhã, tarde, noite e madrugada
+• Prateleira de remédios: diário, ciclo 21/7, redução gradual, por horas e se preciso
+• Lembretes com «Marcar como tomado» e «Em 15 min» direto na notificação
+• Histórico: 7/30/90 dias, selos mensais, cartão PNG e relatório médico PDF A4
+• Pessoas: 2 perfis grátis no mesmo celular (Supporter libera mais)
+• Temas claro e escuro
+• Widget para a tela inicial
+• Backups .havn criptografados com frase-chave sob seu controle
+
+Privado por design: sem conta, sem servidores, sem rastreamento e sem envio para a nuvem. Seu histórico nunca sai do celular.
+
+Lembretes essenciais são grátis e sem anúncios. Uma compra única opcional Supporter libera mais perfis.
+
+Feito por Mander — mander.tech — web design, apps e projetos.
+
+O Hävn é uma ferramenta de lembrete e não fornece orientação médica. Siga sempre as instruções do seu médico ou farmacêutico.

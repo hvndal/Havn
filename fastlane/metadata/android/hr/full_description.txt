@@ -1,0 +1,18 @@
+Hävn je smiren i privatan podsjetnik za uzimanje lijekova.
+
+• Prikaz Danas: svaka doza razvrstana na jutro, poslijepodne, večer i noć
+• Polica lijekova: dnevni, ciklusi 21/7, postupno smanjenje, po satima i po potrebi
+• Podsjetnici s opcijama „Označi uzeto” i „Za 15 min” izravno iz obavijesti
+• Povijest: 7/30/90 dana, mjesečni pečati, PNG kartica i liječnički PDF A4
+• Osobe: 2 profila besplatno na jednom telefonu (Supporter dodaje više)
+• Svijetla i tamna tema
+• Widget za početni zaslon
+• .havn sigurnosne kopije šifrirane zaporkom pod vašom kontrolom
+
+Privatno u srži: bez računa, bez poslužitelja, bez praćenja i bez učitavanja u oblak. Povijest lijekova ostaje na vašem telefonu.
+
+Osnovni podsjetnici zauvijek ostaju besplatni i bez oglasa. Opcionalna jednokratna kupnja Supporter otključava više profila.
+
+Izradio Mander — mander.tech — web dizajn, aplikacije i projekti.
+
+Hävn je alat za podsjećanje i ne pruža medicinske savjete. Uvijek slijedite upute svog liječnika ili ljekarnika.

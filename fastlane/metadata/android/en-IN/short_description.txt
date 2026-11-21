@@ -1,0 +1,1 @@
+Simple, private medicine reminders. No account, works offline.

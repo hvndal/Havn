@@ -1,0 +1,18 @@
+Hävn ist eine ruhige, private Medikamenten-Erinnerung.
+
+• Tagesansicht: Alle Einnahmen geordnet nach Morgen, Nachmittag, Abend und Nacht
+• Medikamentenregal: täglich, 21/7-Zyklus, Ausschleichen, Stundenabstand & bei Bedarf
+• Erinnerungen mit „Als genommen markieren“ und „In 15 Min.“ direkt in der Benachrichtigung
+• Verlauf: 7/30/90 Tage, Monatsstempel, teilbares PNG-Bild & A4-Arztbericht (PDF)
+• Personen: 2 Profile kostenlos auf einem Gerät (Supporter schaltet mehr frei)
+• Helles und dunkles Design
+• Startbildschirm-Widget
+• Mit Passphrase verschlüsselte .havn-Sicherungen unter deiner Kontrolle
+
+Privat konzipiert: kein Konto, keine Server, kein Tracking, keine Cloud-Uploads. Deine Einnahmehistorie verlässt niemals dein Telefon.
+
+Basis-Erinnerungen bleiben dauerhaft kostenlos und werbefrei. Ein optionaler Einmalkauf als Supporter schaltet weitere Profile frei.
+
+Entwickelt von Mander — mander.tech — Webdesign, Apps und Projekte.
+
+Hävn ist ein Erinnerungswerkzeug und ersetzt keine medizinische Beratung. Befolge immer die Anweisungen deiner Ärztin, deines Arztes oder deiner Apotheke.

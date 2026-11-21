@@ -1,0 +1,86 @@
+{
+  "ja-JP": {
+    "language": "Japanese",
+    "title": "Hävn：服薬リマインダー",
+    "short_description": "シンプルで安心の服薬リマインダー。アカウント不要、オフライン動作。",
+    "full_description": "Hävn は、穏やかでプライバシーを大切にした服薬リマインダーです。\n\n• 今日の予定：朝・昼・夕・夜ごとにすべての服用予定を表示\n• 薬棚管理：毎日・21/7周期・漸減ステップ・時間間隔・頓服に対応\n• 通知からそのまま「服用済み」「15分後」を選択できるリマインダー\n• 服用履歴：7/30/90日表示、月間スタンプ帳、PNGカード、医師向けA4 PDF出力\n• メンバー：1台で2人まで無料（任意のSupporter購入で人数追加可能）\n• ライトテーマとダークテーマに対応\n• ホーム画面ウィジェット\n• パスフレーズ暗号化に対応した自己管理 .havn バックアップ\n\n設計段階からのプライバシー：アカウント不要、サーバーなし、トラッキングなし、クラウド送信なし。履歴は端末内に留まります。\n\n基本のリマインダー機能は広告なしでずっと無料です。任意の買い切りSupporterでプロフィール数を増やせます。\n\n制作：Mander — mander.tech — Webデザイン・アプリ・プロジェクト。\n\nHävn はリマインダーツールであり、医療上の助言を提供するものではありません。必ず医師または薬剤師の指示に従ってください。"
+  },
+  "ko-KR": {
+    "language": "Korean",
+    "title": "Hävn: 복약 알림",
+    "short_description": "간편하고 안전한 복약 알림. 계정 없이 오프라인으로 작동합니다.",
+    "full_description": "Hävn은 차분하고 개인정보를 지키는 복약 알림 앱입니다.\n\n• 오늘 보기: 아침, 점심, 저녁, 밤으로 나뉜 모든 복용 일정 확인\n• 약품 선반: 매일, 21/7 주기, 단계별 감량, 시간 간격 및 필요시 복용 지원\n• 알림에서 바로 ‘복용 완료’와 ‘15분 뒤 다시 알림’ 선택\n• 복용 기록: 7/30/90일 보기, 월간 스탬프 달력, PNG 카드, 의사 제출용 A4 PDF\n• 사용자: 휴대전화 1대에 2명까지 무료 (Supporter로 추가 인원 잠금 해제)\n• 라이트 테마 및 다크 테마\n• 홈 화면 위젯\n• 사용자가 직접 관리하고 암호화할 수 있는 .havn 백업 파일\n\n설계부터 지키는 개인정보: 계정 없음, 서버 없음, 추적 없음, 클라우드 전송 없음. 복약 기록은 기기에만 안전하게 남습니다.\n\n기본 복약 알림은 광고 없이 영구 무료입니다. 선택형 1회성 Supporter 결제로 더 많은 프로필을 추가할 수 있습니다.\n\n제작: Mander — mander.tech — 웹 디자인, 앱 및 프로젝트.\n\nHävn은 복약 알림 도구이며 의학적 조언을 제공하지 않습니다. 항상 의사나 약사의 지시에 따르세요."
+  },
+  "th": {
+    "language": "Thai",
+    "title": "Hävn: เตือนกินยา",
+    "short_description": "แอปเตือนกินยาที่เรียบง่ายและเป็นส่วนตัว ไม่ต้องมีบัญชี ใช้งานออฟไลน์",
+    "full_description": "Hävn คือแอปเตือนการกินยาที่สงบ เรียบง่าย และให้ความสำคัญกับความเป็นส่วนตัว\n\n• มุมมองวันนี้: ดูยาแต่ละมื้อแยกตามช่วงเช้า กลางวัน เย็น และก่อนนอน\n• ชั้นวางยา: รายวัน รอบ 21/7 ลดขนาดยาเป็นขั้น เว้นเป็นชั่วโมง และกินเมื่อมีอาการ\n• การแจ้งเตือนพร้อมปุ่ม \"กินแล้ว\" และ \"เตือนอีก 15 นาที\" จากหน้าจอแจ้งเตือนทันที\n• ประวัติการกินยา: ดู 7/30/90 วัน ตราประทับรายเดือน การ์ด PNG และรายงานแพทย์ A4 PDF\n• ผู้ใช้: ฟรี 2 โปรไฟล์ในเครื่องเดียว (Supporter ปลดล็อกเพิ่มโปรไฟล์ได้)\n• ธีมสว่างและธีมมืด\n• วิดเจ็ตหน้าจอหลัก\n• ไฟล์สำรอง .havn เข้ารหัสด้วยรหัสผ่านภายใต้การควบคุมของคุณเอง\n\nออกแบบมาเพื่อความเป็นส่วนตัว: ไม่มีบัญชี ไม่มีเซิร์ฟเวอร์ ไม่มีการติดตาม และไม่อัปโหลดขึ้นคลาวด์ ข้อมูลอยู่บนเครื่องเท่านั้น\n\nระบบเตือนพื้นฐานฟรีตลอดไปและไม่มีโฆษณา สามารถเลือกซื้อ Supporter ครั้งเดียวเพื่อเพิ่มจำนวนโปรไฟล์ได้\n\nพัฒนาโดย Mander — mander.tech — ออกแบบเว็บ แอป และโปรเจกต์ต่าง ๆ\n\nHävn เป็นเพียงเครื่องมือช่วยเตือนและไม่ได้ให้คำแนะนำทางการแพทย์ โปรดปฏิบัติตามคำแนะนำของแพทย์หรือเภสัชกรเสมอ"
+  },
+  "vi": {
+    "language": "Vietnamese",
+    "title": "Hävn: Nhắc uống thuốc",
+    "short_description": "Nhắc uống thuốc đơn giản, riêng tư. Không tài khoản, dùng ngoại tuyến.",
+    "full_description": "Hävn là ứng dụng nhắc uống thuốc nhẹ nhàng và bảo mật.\n\n• Chế độ xem Hôm nay: xem từng liều thuốc theo buổi sáng, trưa, tối và đêm\n• Kệ thuốc: hằng ngày, chu kỳ 21/7, giảm liều từng bước, cách giờ và dùng khi cần\n• Thông báo có sẵn nút «Đã uống» và «Sau 15 phút» ngay trên thông báo\n• Lịch sử uống thuốc: xem 7/30/90 ngày, dấu mốc tháng, thẻ PNG và báo cáo PDF A4\n• Hồ sơ: miễn phí 2 người trên một máy (Supporter mở khóa thêm hồ sơ)\n• Giao diện sáng và tối\n• Tiện ích màn hình chính\n• Tệp sao lưu .havn mã hóa bằng cụm mật khẩu do bạn toàn quyền quản lý\n\nRiêng tư ngay từ thiết kế: không tài khoản, không máy chủ, không theo dõi, không tải lên đám mây. Dữ liệu luôn ở lại thiết bị.\n\nNhắc nhở cốt lõi miễn phí trọn đời và không quảng cáo. Gói Supporter mua một lần tùy chọn giúp mở khóa thêm nhiều người.\n\nThực hiện bởi Mander — mander.tech — thiết kế web, ứng dụng và dự án.\n\nHävn là công cụ nhắc nhở và không thay thế lời khuyên y khoa. Luôn tuân theo chỉ dẫn của bác sĩ hoặc dược sĩ."
+  },
+  "id": {
+    "language": "Indonesian",
+    "title": "Hävn: Pengingat Obat",
+    "short_description": "Pengingat minum obat yang simpel dan privat. Tanpa akun, bekerja offline.",
+    "full_description": "Hävn adalah aplikasi pengingat minum obat yang tenang dan privat.\n\n• Tampilan Hari Ini: lihat setiap dosis dikelompokkan untuk pagi, siang, sore, dan malam\n• Rak obat: jadwal harian, siklus 21/7, penurunan bertahap, jeda jam, dan bila perlu\n• Pengingat dengan tombol «Sudah diminum» dan «Dalam 15 menit» langsung dari notifikasi\n• Riwayat kepatuhan: 7/30/90 hari, cap bulanan, kartu PNG, dan laporan dokter PDF A4\n• Profil: 2 orang gratis di satu ponsel (Supporter membuka lebih banyak profil)\n• Tema terang dan gelap\n• Widget layar utama\n• File cadangan .havn terenkripsi frasa sandi yang sepenuhnya Anda kontrol\n\nPrivat sejak awal: tanpa akun, tanpa server, tanpa pelacakan, tanpa unggahan cloud. Riwayat obat tetap tersimpan di ponsel Anda.\n\nPengingat inti gratis selamanya tanpa iklan. Pembelian opsional sekali bayar Supporter membuka profil tambahan.\n\nDibuat oleh Mander — mander.tech — desain web, aplikasi, dan proyek.\n\nHävn adalah alat pengingat dan tidak memberikan saran medis. Selalu ikuti petunjuk dokter atau apoteker Anda."
+  },
+  "ms": {
+    "language": "Malay",
+    "title": "Hävn: Peringatan Ubat",
+    "short_description": "Peringatan ubat yang ringkas dan peribadi. Tiada akaun, berfungsi luar talian.",
+    "full_description": "Hävn ialah peringatan pengambilan ubat yang tenang dan peribadi.\n\n• Paparan Hari Ini: lihat setiap dos mengikut pagi, petang, senja dan malam\n• Rak ubat: harian, kitaran 21/7, pengurangan berperingkat, jarak jam dan bila perlu\n• Peringatan dengan butang «Tandakan diambil» dan «Dalam 15 min» terus dari pemberitahuan\n• Rekod sejarah: paparan 7/30/90 hari, cop bulanan, kad PNG dan laporan doktor PDF A4\n• Profil: 2 orang percuma pada satu telefon (Supporter membuka lebih ramai orang)\n• Tema cerah dan gelap\n• Widget skrin utama\n• Fail sandaran .havn disulitkan kata laluan di bawah kawalan penuh anda\n\nPeribadi mengikut reka bentuk: tiada akaun, tiada pelayan, tiada penjejakan dan tiada muat naik awan. Data kekal di telefon.\n\nPeringatan teras percuma selamanya tanpa iklan. Pembelian sekali sahaja Supporter pilihan menambah lebih banyak profil.\n\nDibina oleh Mander — mander.tech — reka bentuk web, aplikasi dan projek.\n\nHävn ialah alat peringatan dan tidak memberikan nasihat perubatan. Sentiasa ikut arahan doktor atau ahli farmasi anda."
+  },
+  "ms-MY": {
+    "language": "Malay (Malaysia)",
+    "title": "Hävn: Peringatan Ubat",
+    "short_description": "Peringatan makan ubat yang ringkas dan peribadi. Tanpa akaun, luar talian.",
+    "full_description": "Hävn ialah aplikasi peringatan makan ubat yang tenang dan peribadi.\n\n• Paparan Hari Ini: lihat setiap dos disusun mengikut pagi, tengah hari, petang dan malam\n• Rak ubat: harian, kitaran 21/7, penurunan berperingkat, selang jam dan ikut keperluan\n• Peringatan dengan «Tandakan diambil» dan «Dalam 15 minit» terus dari notifikasi\n• Rekod sejarah: paparan 7/30/90 hari, cop bulanan, kad PNG dan laporan doktor PDF A4\n• Profil: 2 orang percuma dalam satu telefon (Supporter buka lebih banyak profil)\n• Tema terang dan gelap\n• Widget skrin utama\n• Fail sandaran .havn disulitkan frasa laluan di bawah kawalan penuh anda\n\nPrivasi terjamin sejak awal: tiada akaun, tiada pelayan, tiada penjejakan dan tiada muat naik awan. Rekod ubat kekal di telefon.\n\nPeringatan asas percuma selamanya tanpa iklan. Pembelian sekali sahaja Supporter secara pilihan membuka lebih banyak profil.\n\nDibangunkan oleh Mander — mander.tech — reka bentuk web, aplikasi dan projek.\n\nHävn ialah alat peringatan dan tidak memberikan nasihat perubatan. Sentiasa patuhi arahan doktor atau ahli farmasi anda."
+  },
+  "my-MM": {
+    "language": "Burmese",
+    "title": "Hävn: ဆေးသတိပေး",
+    "short_description": "ရိုးရှင်းပြီး ကိုယ်ရေးလုံခြုံသော ဆေးသတိပေး။ အကောင့်မလို၊ အော့ဖ်လိုင်းသုံးနိုင်။",
+    "full_description": "Hävn သည် တည်ငြိမ်ပြီး ကိုယ်ရေးလုံခြုံမှုကို ဦးစားပေးသော ဆေးသောက်ရန် သတိပေးအက်ပ်ဖြစ်သည်။\n\n• ယနေ့မြင်ကွင်း- မနက်၊ နေ့လယ်၊ ညနေနှင့် ညအလိုက် ဆေးတစ်ကြိမ်စီကို ကြည့်ရှုပါ\n• ဆေးစင်- နေ့စဉ်၊ ၂၁/၇ စက်ဝန်း၊ အဆင့်လိုက်လျှော့ချခြင်း၊ နာရီခြားနှင့် လိုအပ်သည့်အခါ\n• အသိပေးချက်မှနေ၍ «သောက်ပြီး» နှင့် «၁၅ မိနစ်အကြာ» တိုက်ရိုက်ရွေးချယ်နိုင်သော သတိပေးချက်များ\n• မှတ်တမ်း- ၇/၃၀/၉၀ ရက်မြင်ကွင်း၊ လစဉ်တံဆိပ်၊ PNG ကတ်နှင့် ဆရာဝန်ပြ A4 PDF\n• လူများ- ဖုန်းတစ်လုံးတွင် ပရိုဖိုင် ၂ ခု အခမဲ့ (Supporter ဖြင့် ထပ်တိုးနိုင်သည်)\n• အလင်းနှင့် အမှောင် အသွင်အပြင်များ\n• ပင်မစခရင် ဝစ်ဂျက်\n• သင်ကိုယ်တိုင် စကားဝှက်ဖြင့် လုံခြုံစွာ သိမ်းဆည်းနိုင်သော .havn အရန်ဖိုင်\n\nဒီဇိုင်းအရ ကိုယ်ရေးလုံခြုံမှု- အကောင့်မရှိ၊ ဆာဗာမရှိ၊ ခြေရာခံမှုမရှိ၊ cloud သို့ မပို့ပါ။ ဒေတာများ ဖုန်းထဲတွင်သာ ရှိနေပါမည်။\n\nအဓိက သတိပေးချက်များသည် ကြော်ငြာမပါဘဲ အမြဲအခမဲ့ဖြစ်သည်။ Supporter တစ်ကြိမ်ဝယ်ယူမှုဖြင့် ပရိုဖိုင်များ ထပ်ဖွင့်နိုင်သည်။\n\nMander မှ ဖန်တီးသည် — mander.tech — ဝဘ်ဒီဇိုင်း၊ အက်ပ်များနှင့် ပရောဂျက်များ။\n\nHävn သည် သတိပေးကိရိယာသာဖြစ်ပြီး ဆေးဘက်ဆိုင်ရာ အကြံဉာဏ် မပေးပါ။ သင့်ဆရာဝန် သို့မဟုတ် ဆေးဝါးကျွမ်းကျင်သူ၏ ညွှန်ကြားချက်ကို အမြဲလိုက်နာပါ။"
+  },
+  "km-KH": {
+    "language": "Khmer",
+    "title": "Hävn: កម្មវិធីរំលឹកថ្នាំ",
+    "short_description": "ការរំលឹកលេបថ្នាំសាមញ្ញ និងឯកជន។ មិនបាច់គណនី ប្រើក្រៅបណ្ដាញបាន។",
+    "full_description": "Hävn គឺជាកម្មវិធីរំលឹកពេលលេបថ្នាំដែលស្ងប់ស្ងាត់ និងរក្សាភាពឯកជន។\n\n• ទិដ្ឋភាពថ្ងៃនេះ៖ មើលកម្រិតថ្នាំនីមួយៗតាមពេលព្រឹក រសៀល ល្ងាច និងយប់\n• ធ្នើរថ្នាំ៖ ប្រចាំថ្ងៃ វដ្ដ 21/7 បន្ថយដូសជាជំហាន តាមម៉ោង និងពេលត្រូវការ\n• ការរំលឹកដោយមានប៊ូតុង «បានលេប» និង «ក្នុង 15 នាទី» ផ្ទាល់ពីការជូនដំណឹង\n• កំណត់ត្រា៖ មើល 7/30/90 ថ្ងៃ ត្រាប្រចាំខែ កាត PNG និងរបាយការណ៍គ្រូពេទ្យ PDF A4\n• មនុស្ស៖ ឥតគិតថ្លៃ 2 នាក់ក្នុងទូរស័ព្ទតែមួយ (Supporter បើកបន្ថែមទៀត)\n• ផ្ទៃភ្លឺ និងផ្ទៃងងឹត\n• ធាតុក្រាហ្វិកសម្រាប់អេក្រង់ដើម\n• ឯកសារបម្រុងទុក .havn អ៊ិនគ្រីបដោយពាក្យសម្ងាត់ក្រោមការគ្រប់គ្រងរបស់អ្នក\n\nឯកជនតាំងពីការរចនា៖ គ្មានគណនី គ្មានម៉ាស៊ីនមេ គ្មានការតាមដាន និងគ្មានការផ្ទុកឡើង Cloud។ ទិន្នន័យនៅតែក្នុងទូរស័ព្ទ។\n\nការរំលឹកសំខាន់ៗឥតគិតថ្លៃរហូត និងគ្មានពាណិជ្ជកម្ម។ ការទិញ Supporter ម្តងជាជម្រើសអាចបើកទម្រង់ប្រើប្រាស់បន្ថែមបាន។\n\nបង្កើតដោយ Mander — mander.tech — ការរចនាគេហទំព័រ កម្មវិធី និងគម្រោង។\n\nHävn គឺជាឧបករណ៍រំលឹកប៉ុណ្ណោះ ហើយមិនផ្តល់ដំបូន្មានវេជ្ជសាស្ត្រឡើយ។ សូមអនុវត្តតាមការណែនាំរបស់វេជ្ជបណ្ឌិត ឬឱសថការីរបស់អ្នកជានិច្ច។"
+  },
+  "lo-LA": {
+    "language": "Lao",
+    "title": "Hävn: ແຈ້ງເຕືອນກິນຢາ",
+    "short_description": "ແຈ້ງເຕືອນກິນຢາແບບງ່າຍ ແລະ ເປັນສ່ວນຕົວ. ບໍ່ຕ້ອງມີບັນຊີ, ໃຊ້ອອບໄລນ໌ໄດ້.",
+    "full_description": "Hävn ແມ່ນແອັບແຈ້ງເຕືອນການກິນຢາທີ່ງຽບສະຫງົບ ແລະ ເປັນສ່ວນຕົວ.\n\n• ມຸມມອງມື້ນີ້: ເບິ່ງທຸກຂະໜາດຢາແຍກຕາມຕອນເຊົ້າ, ຕອນບ່າຍ, ຕອນແລງ ແລະ ຕອນກາງຄືນ\n• ຊັ້ນວາງຢາ: ທຸກມື້, ຮອບວຽນ 21/7, ຫຼຸດຂະໜາດເປັນຂັ້ນ, ຕາມຊົ່ວໂມງ ແລະ ເມື່ອຈຳເປັນ\n• ການແຈ້ງເຕືອນພ້ອມປຸ່ມ «ກິນແລ້ວ» ແລະ «ອີກ 15 ນາທີ» ໂດຍກົງຈາກການແຈ້ງເຕືອນ\n• ປະຫວັດການກິນຢາ: ເບິ່ງ 7/30/90 ມື້, ກາປະທັບເດືອນ, ບັດ PNG ແລະ ລາຍງານ PDF A4\n• ບຸກຄົນ: ຟຣີ 2 ໂປຣໄຟລ໌ໃນໜຶ່ງເຄື່ອງ (Supporter ເປີດໃຊ້ໄດ້ເພີ່ມເຕີມ)\n• ຮູບແບບສີແຈ້ງ ແລະ ສີມືດ\n• ວິດເຈັດໜ້າຈໍຫຼັກ\n• ໄຟລ໌ສຳຮອງ .havn ເຂົ້າລະຫັດດ້ວຍລະຫັດຜ່ານທີ່ທ່ານຄວບຄຸມເອງ\n\nເປັນສ່ວນຕົວຕັ້ງແຕ່ການອອກແບບ: ບໍ່ມີບັນຊີ, ບໍ່ມີເຊີບເວີ, ບໍ່ມີການຕິດຕາມ ແລະ ບໍ່ອັບໂຫຼດຂຶ້ນຄລາວ. ຂໍ້ມູນຢູ່ໃນເຄື່ອງເທົ່ານັ້ນ.\n\nການແຈ້ງເຕືອນຫຼັກແມ່ນຟຣີຕະຫຼອດໄປ ແລະ ບໍ່ມີໂຄສະນາ. ການຊື້ Supporter ຄັ້ງດຽວແບບເລືອກໄດ້ຈະເປີດໂປຣໄຟລ໌ເພີ່ມເຕີມ.\n\nສ້າງໂດຍ Mander — mander.tech — ອອກແບບເວັບ, ແອັບ ແລະ ໂຄງການ.\n\nHävn ແມ່ນເຄື່ອງມືແຈ້ງເຕືອນ ແລະ ບໍ່ໄດ້ໃຫ້ຄຳແນະນຳທາງການແພດ. ກະລຸນາປະຕິບັດຕາມຄຳແນະນຳຂອງທ່ານໝໍ ຫຼື ເພສັດຊະກອນຂອງທ່ານສະເໝີ."
+  },
+  "af": {
+    "language": "Afrikaans",
+    "title": "Hävn: Medisyne-herinnering",
+    "short_description": "Eenvoudige, private pilherinneringe. Geen rekening, werk vanlyn.",
+    "full_description": "Hävn is 'n kalm, private medisyne-herinnering.\n\n• Vandag-aansig: sien elke dosis gegroepeer volgens oggend, middag, aand en nag\n• Medisynerek: daagliks, 21/7-siklus, geleidelike afbou, per uur en soos nodig\n• Herinneringe met «Merk geneem» en «Oor 15 min» direk uit die kennisgewing\n• Geskiedenis: 7/30/90 dae, maandstempels, PNG-kaart en dokterverslag PDF A4\n• Mense: 2 profiele gratis op een foon (Supporter ontsluit meer mense)\n• Ligte en donker temas\n• Tuisskerm-legstuk\n• Wagwoordsin-geënkripteerde .havn-rugsteune onder jou volle beheer\n\nPrivaat deur ontwerp: geen rekening, geen bedieners, geen opsporing en geen wolk-oplaaie. Jou geskiedenis bly op jou foon.\n\nKernherinneringe bly vir altyd gratis sonder advertensies. Opsionele eenmalige Supporter-aankoop voeg meer profiele by.\n\nGemaak deur Mander — mander.tech — webontwerp, toepassings en projekte.\n\nHävn is 'n herinneringshulpmiddel en gee nie mediese advies nie. Volg altyd jou dokter of apteker se aanwysings."
+  },
+  "am": {
+    "language": "Amharic",
+    "title": "Hävn: የመድኃኒት አስታዋሽ",
+    "short_description": "ቀላል እና የግል የመድኃኒት አስታዋሽ። ያለ መለያ፣ ከመስመር ውጭ ይሠራል።",
+    "full_description": "Hävn የተረጋጋ እና የግል የመድኃኒት መውሰጃ አስታዋሽ መተግበሪያ ነው።\n\n• የዛሬ እይታ፡ እያንዳንዱን መጠን በጠዋት፣ በከሰዓት፣ በምሽት እና በሌሊት ተከፋፍሎ ይመልከቱ\n• የመድኃኒት መደርደሪያ፡ ዕለታዊ፣ 21/7 ዑደት፣ ደረጃ-በደረጃ መቀነስ፣ በሰዓት እና ሲያስፈልግ\n• «ተወስዷል» እና «በ15 ደቂቃ ውስጥ» የሚሉ አማራጮች ያሉት አስታዋሽ በቀጥታ ከማሳወቂያው\n• ታሪክ፡ የ7/30/90 ቀናት እይታ፣ ወርሃዊ ማኅተሞች፣ PNG ካርድ እና የዶክተር PDF A4\n• ሰዎች፡ በአንድ ስልክ 2 መገለጫዎች በነጻ (Supporter ተጨማሪ ሰዎችን ይከፍታል)\n• ብርሃናማ እና ጨለማ ገጽታዎች\n• የመነሻ ማያ ገጽ ዊጀት\n• በይለፍ-ቃል የተመሰጠሩ የ.havn መጠባበቂያ ፋይሎች በእርስዎ ቁጥጥር ሥር\n\nበንድፍ የግል፡ መለያ የለም፣ አገልጋይ የለም፣ ክትትል የለም፣ ወደ ደመና መጫን የለም። መረጃዎ በስልክዎ ላይ ብቻ ይቀመጣል።\n\nዋና ማስታወሻዎች ያለ ማስታወቂያ ሁልጊዜ ነጻ ናቸው። የአንድ ጊዜ Supporter ግዢ ተጨማሪ መገለጫዎችን ይከፍታል።\n\nበMander የተሠራ — mander.tech — የድር ዲዛይን፣ መተግበሪያዎች እና ፕሮጀክቶች።\n\nHävn አስታዋሽ መሣሪያ እንጂ የሕክምና ምክር አይሰጥም። ሁልጊዜ የሐኪምዎን ወይም የፋርማሲስትዎን መመሪያዎች ይከተሉ።"
+  },
+  "sw": {
+    "language": "Swahili",
+    "title": "Hävn: Kikumbusho cha Dawa",
+    "short_description": "Vikumbusho rahisi na vya faragha vya dawa. Bila akaunti, nje ya mtandao.",
+    "full_description": "Hävn ni kikumbusho tulivu na cha faragha cha kunywa dawa.\n\n• Mwonekano wa Leo: tazama kila dozi kulingana na asubuhi, mchana, jioni na usiku\n• Rafu ya dawa: kila siku, mzunguko wa 21/7, kupunguza hatua kwa hatua, kwa saa na inapohitajika\n• Vikumbusho vyenye «Imenywewa» na «Baada ya dak 15» moja kwa moja kwenye arifa\n• Historia: siku 7/30/90, mihuri ya mwezi, kadi ya PNG na ripoti ya daktari PDF A4\n• Watu: wasifu 2 bure kwenye simu moja (Supporter hufungua wengine zaidi)\n• Mandhari ya mwanga na giza\n• Wijeti ya skrini ya nyumbani\n• Nakala rudufu za .havn zilizosimbwa kwa nenosiri chini ya udhibiti wako\n\nFaragha tangu mwanzo: hakuna akaunti, hakuna seva, hakuna ufuatiliaji na hakuna upakiaji mtandaoni. Historia inabaki kwenye simu.\n\nVikumbusho vya msingi vinabaki bure milele bila matangazo. Ununuzi wa hiari wa mara moja wa Supporter hufungua wasifu zaidi.\n\nImetengenezwa na Mander — mander.tech — usanifu wa wavuti, programu na miradi.\n\nHävn ni kifaa cha kukumbusha tu na haitoi ushauri wa kitabibu. Fuata daima maelekezo ya daktari au mfamasia wako."
+  },
+  "zu": {
+    "language": "Zulu",
+    "title": "Hävn: Isikhumbuzo Semithi",
+    "short_description": "Izikhumbuzo zemithi ezilula neziyimfihlo. Akudingi i-akhawunti, offline.",
+    "full_description": "I-Hävn iyisikhumbuzo semithi esizolile futhi esiyimfihlo.\n\n• Ukubuka kwanamuhla: bona umthamo ngamunye uhlelwe ekuseni, ntambama, kusihlwa nasebusuku\n• Ishalofu lemithi: nsuku zonke, umjikelezo we-21/7, ukunciphisa kancane, ngamahora nalapho kudingeka\n• Izikhumbuzo ezino-«Phawula njengokuphuzwe» no-«Ngemizuzu engu-15» khona kanye esazisweni\n• Umlando: izinsuku ezingu-7/30/90, izitembu zenyanga, ikhadi le-PNG nombiko kadokotela we-PDF A4\n• Abantu: amaphrofayela angu-2 mahhala efonini eyodwa (i-Supporter ivula abanye abaningi)\n• Itimu ekhanyayo nemnyama\n• Iwijethi yesikrini sasekhaya\n• Izingqikithi zokwenza ikhophi ye-.havn ebethelwe ngephasikhodi ngaphansi kokulawula kwakho\n\nIyimfihlo ngokwemvelo: ayikho i-akhawunti, azikho iziphakeli, akukho ukulandela umkhondo futhi akukho ukulayisha efwini. Idatha ihlala efonini.\n\nIzikhumbuzo eziyisisekelo zihlala zimahhala phakade futhi azinazo izikhangiso. Ukuthenga kanye okungakhethwa kwe-Supporter kuvula amaphrofayela engeziwe.\n\nYakhiwe ngu-Mander — mander.tech — ukwakhiwa kwamawebhusayithi, izinhlelo zokusebenza namaphrojekthi.\n\nI-Hävn iyithuluzi lokukhumbuza futhi ayinikezi izeluleko zezokwelapha. Landela njalo imiyalelo kadokotela noma yosokhemisi wakho."
+  }
+}

@@ -1,0 +1,18 @@
+Hävn is a calm, private medication reminder.
+
+• Today view: see every dose, grouped by morning, afternoon, evening and night
+• Medicines shelf: daily, cyclic (21/7), step tapers, hourly spacing, and as-needed doses
+• Reminders with "Mark taken" and "In 15 min" directly from the notification
+• History ledger: 7, 30, and 90-day view, monthly stamps, PNG card, and A4 doctor PDF
+• People: 2 profiles free on one phone (optional Supporter unlocks more)
+• Light and dark themes
+• Home-screen widget
+• Passphrase-encrypted .havn backups stored under your control
+
+Private by design: 0 accounts, 0 servers, 0 tracking, 0 uploads. Your medication history never leaves your phone.
+
+Core reminders stay free forever with no ads. Optional one-time Supporter purchase unlocks more people.
+
+Made by Mander — mander.tech — web design, apps and projects.
+
+Hävn is a reminder tool and does not provide medical advice. Always follow your doctor's or pharmacist's instructions.
